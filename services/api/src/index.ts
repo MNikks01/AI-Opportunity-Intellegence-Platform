@@ -1,7 +1,8 @@
 /**
  * @aioi/api
- * Fastify: tRPC (internal) + REST/OpenAPI (public) + WebSocket. Single business-logic layer.
- *
- * Skeleton stub (Phase 17). Implementation begins in Phase 23 per docs/09-process/ROADMAP.md.
+ * Fastify: tRPC (internal) + REST/OpenAPI (public). Single business-logic layer.
  */
-export const PACKAGE_NAME = "@aioi/api" as const;
+export { appRouter, type AppRouter } from "./router";
+export { buildServer } from "./server";
+export { createContext, type Context } from "./trpc";
+// Entrypoint lives in ./main.ts (run: tsx src/main.ts).

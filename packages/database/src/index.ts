@@ -1,7 +1,7 @@
 /**
  * @aioi/database
- * Prisma client + schema + migrations (Postgres + pgvector).
- *
- * Skeleton stub (Phase 17). Implementation begins in Phase 23 per docs/09-process/ROADMAP.md.
+ * Prisma client + data-access layer (Postgres + pgvector). The only place that talks to Prisma.
  */
-export const PACKAGE_NAME = "@aioi/database" as const;
+export { prisma } from "./client";
+export * from "./repositories";
+export { $Enums, Prisma } from "@prisma/client";
