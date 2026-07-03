@@ -21,10 +21,10 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 ## Next (Sprint 2) — read path + UI
 | ID | Item | Epic | SP | Status |
 |---|---|---|---|---|
-| B-010 | `@aioi/api` Fastify + tRPC `trends.list/byId`; REST `/api/v1/trends` | E2 | 5 | ⬜ |
+| B-010 | `@aioi/api` Fastify + tRPC `trends.list/bySlug`; REST `/api/v1/trends` | E2 | 5 | ✅ |
 | B-011 | Redis read-model cache for dashboards | perf | 3 | ⬜ |
-| B-012 | `@aioi/ui` primitives + tokens (Button, Card, ScoreBar, Scorecard, DataTable) | UI | 8 | ⬜ |
-| B-013 | `apps/web` Trend Dashboard + Trend Detail | E2 | 8 | ⬜ |
+| B-012 | `@aioi/ui` tokens + core components (Card, Badge, ScoreBar, Scorecard, TrendCard) | UI | 8 | 🟡 (DataTable/Button pending) |
+| B-013 | `apps/web` Trend Dashboard + Trend Detail (RSC, real data) | E2 | 8 | ✅ |
 | B-014 | `@aioi/auth` Clerk adapter + RBAC guard + tenant guard | E1 | 5 | ⬜ |
 | B-015 | Personal workspace bootstrap on signup | E5 | 3 | ⬜ |
 

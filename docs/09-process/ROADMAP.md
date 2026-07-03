@@ -44,18 +44,19 @@ observability/logging/monitoring, disaster recovery/backup, SEO/content/marketin
 legal templates (privacy/terms/cookie), risk register, changelog.
 
 ## Current position
-**Phases 1–22 complete; Phase 23 first vertical slice done and running.** The critical path is
-proven end-to-end **against a live source**: real Hacker News ingestion → dedupe → `Trend` →
-eval-gated 10-dimension scorecard with a computed composite. Implemented + tested:
-`@aioi/shared`, `@aioi/validation`, `@aioi/logger`, `@aioi/ai-sdk` (LiteLLM + deterministic stub),
-`@aioi/ai-service` (scoring engine), `@aioi/ingestion-service` (HN connector + repo). Prisma
-migrated against real Postgres 16 + pgvector (23 tables, both extensions). **10/10 tests green,
-strict typecheck clean.**
+**Phases 1–22 complete; Phase 23 implementation through Sprint 2 read-path + UI.** The full stack
+now runs end-to-end and **renders in the browser**: ingest (live HN) → score (10-dim + composite) →
+persist (Postgres) → serve (`@aioi/api` tRPC + REST) → render (`apps/web` Next.js RSC + `@aioi/ui`).
+Implemented + verified: `@aioi/shared`, `validation`, `logger`, `ai-sdk` (LiteLLM + stub),
+`ai-service` (scoring), `ingestion-service` (HN connector), `database` (Prisma repos, 23 tables,
+pgvector), `api` (Fastify tRPC+REST), `ui` (tokens + components), `web` (Trends dashboard + detail).
+**13/13 tests green; all packages strict-typecheck clean; Trends dashboard + Trend Detail scorecard
+confirmed rendering real data in-browser.**
 
-Next up: **finish Sprint 1** (real embedding-based clustering B-006; wire `llm-eval-harness` golden
-gate B-009; Langfuse tracing in `ai-sdk`; Prisma-backed `SignalRepository`), then **Sprint 2** —
-`@aioi/api` (Fastify + tRPC read models) + `@aioi/ui` + `apps/web` Trend Dashboard/Detail + auth.
-Cross-cutting docs (TESTING_STRATEGY, CI/CD, security/threat-model, observability) authored alongside.
+Next up: **auth** (`@aioi/auth` Clerk adapter + RBAC + tenant guard, B-014) so the app is gated and
+multi-tenant; then the **retention loop** (watchlists/alerts/daily brief) and remaining Sprint-1
+quality items (real embedding clustering B-006, `llm-eval-harness` golden gate B-009, Langfuse
+tracing). Cross-cutting docs (TESTING_STRATEGY, CI/CD, security/threat-model, observability) alongside.
 
 ## Working agreements (apply every phase)
 1. End each phase with a **review checklist**, **assumptions/decisions log**, and any new **ADRs**.
