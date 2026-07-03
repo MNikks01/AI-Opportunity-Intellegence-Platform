@@ -1,7 +1,5 @@
 /**
  * @aioi/ui
- * Design-system components (tokens, primitives, composite) — see docs/03-design/DESIGN_SYSTEM.md.
- *
- * Skeleton stub (Phase 17). Implementation begins in Phase 23 per docs/09-process/ROADMAP.md.
+ * Design-system components. Import tokens once at the app root: `import "@aioi/ui/tokens.css"`.
  */
-export const PACKAGE_NAME = "@aioi/ui" as const;
+export { Badge, Card, ScoreBar, Scorecard, TrendCard, type TrendSummaryProps } from "./components";

@@ -1,5 +1,8 @@
 {
   "extends": "@aioi/tsconfig/nextjs.json",
-  "include": ["src", "*.ts", "*.tsx"],
-  "exclude": ["node_modules", "dist", ".next"]
+  "compilerOptions": {
+    "paths": { "@/*": ["./*"] }
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next"]
 }
