@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ai-opportunity.platform/schemas/score.json",
+  "title": "Score",
+  "description": "A single AI-generated score for one trend on one dimension.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["dimension", "value", "band", "confidence", "rationale", "evidence", "rubricVersion"],
+  "properties": {
+    "dimension": {
+      "type": "string",
+      "enum": [
+        "opportunity", "business", "developer", "creator", "seo",
+        "competition", "monetization", "risk", "difficulty", "predictedLifetime"
+      ]
+    },
+    "value": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Raw score for sorting. UI displays band, not this."
+    },
+    "band": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "Derived bucket per rubric thresholds."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Model self-reported confidence; low values surfaced differently in UI."
+    },
+    "rationale": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable justification. Must reference the evidence."
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Stable source ids / metrics the score is grounded in. Empty is invalid."
+    },
+    "rubricVersion": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+      "description": "Date-versioned rubric used to produce this score."
+    },
+    "composedFrom": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "For composite scores (e.g. opportunity): the sub-dimensions combined."
+    }
+  }
+}

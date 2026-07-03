@@ -1,0 +1,53 @@
+# LLM Eval config — copy to services/ai-service/eval/<feature>.eval.yaml and edit.
+# Runs provider-agnostically via ai-sdk/LiteLLM. Values are examples; tune per feature.
+
+feature: opportunity-scoring          # id of the prompt/chain under test
+promptVersion: "2026-07-01"           # bump when the prompt changes
+goldenSet: eval/golden/opportunity-scoring/*.json
+baseline: eval/baselines/opportunity-scoring.json
+
+# Models to run the subject against (catches provider lock-in / drift).
+subjects:
+  - claude-opus-4-8
+  - gpt-...            # via LiteLLM alias
+  - gemini-...         # via LiteLLM alias
+
+# LLM-as-judge for fuzzy metrics. Prefer a model different from the subjects.
+judge:
+  model: claude-sonnet-5
+  temperature: 0
+  logRationale: true
+
+run:
+  temperature: 0        # pin low for determinism
+  seeds: 3              # average fuzzy metrics over N seeds
+  minCases: 20          # fail if golden set smaller (guards "green-because-empty")
+  smokeSubset: 8        # cases run on every PR; full set runs nightly
+
+# Metrics + thresholds. `hard: true` => any breach fails immediately.
+# Soft metrics gate on regression vs baseline beyond `tolerance`.
+metrics:
+  - name: schema-validity
+    hard: true
+    min: 1.0                    # 100% must parse against score.schema.json
+  - name: faithfulness         # RAG/summary grounding
+    hard: true
+    min: 0.90
+  - name: relevance
+    tolerance: 0.03            # allowed drop vs baseline
+  - name: band-match           # scoring: predicted band == expected band
+    tolerance: 0.05
+  - name: cost-usd-per-case
+    regressionMax: 1.25        # >25% cost increase fails
+  - name: latency-p95-ms
+    regressionMax: 1.30
+
+# Observability
+langfuse:
+  enabled: true
+  tags: ["eval", "{feature}", "{promptVersion}"]
+
+gate:
+  failOnHardBreach: true
+  failOnRegression: true
+  promoteBaseline: manual      # never auto-promote; explicit reviewed command only
