@@ -55,6 +55,7 @@
 - [ ] Tests (unit + relevant integration/E2E) green; coverage not reduced.
 - [ ] For AI changes: eval harness green. For migrations: migration-auditor pass.
 - [ ] Docs/ADR updated if behavior or a decision changed. Observability (logs/traces) added.
+- [ ] `CHANGELOG.md` `[Unreleased]` updated for any user- or dev-facing change.
 
 ## 10. Review checklist
 - [x] Standards are enforceable by tooling, not just prose.
