@@ -1,0 +1,23 @@
+{
+  "name": "@aioi/admin",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Internal admin panel (users/orgs/audit/flags/source-health) — role-gated.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf .next .turbo"
+  },
+  "dependencies": {
+    "@aioi/ui": "workspace:*",
+    "@aioi/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@aioi/eslint-config": "workspace:*",
+    "@aioi/tsconfig": "workspace:*"
+  }
+}

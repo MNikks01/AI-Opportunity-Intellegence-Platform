@@ -1,0 +1,109 @@
+/**
+ * @aioi/ai-sdk
+ * The only path to LLMs. Provides a provider-agnostic interface (LiteLLM in prod) plus a
+ * deterministic StubProvider used when no gateway/key is configured — so scoring runs, is testable,
+ * and stays reproducible offline. Real calls should be traced (Langfuse) and cost-capped.
+ */
+import { rawModelScoreSchema, type RawModelScore } from "@aioi/validation";
+import type { ScoreDimension } from "@aioi/shared";
+
+export interface ScoreRequest {
+  dimension: ScoreDimension;
+  trendTitle: string;
+  /** Aggregated signal text the score must be grounded in. */
+  context: string;
+  /** Stable ids the model may cite as evidence (must be non-empty). */
+  evidenceIds: string[];
+  /** The 0/50/100 anchor text for this dimension from the rubric. */
+  rubricAnchor: string;
+}
+
+export interface LLMProvider {
+  readonly name: string;
+  scoreDimension(req: ScoreRequest): Promise<RawModelScore>;
+}
+
+/** FNV-1a — small, deterministic, dependency-free hash for the stub. */
+function hash(input: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    h ^= input.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/**
+ * Deterministic offline provider. Produces schema-valid, stable scores from a hash of the input.
+ * NOT a real model — it exists so the pipeline and tests run without keys. Real quality comes from
+ * LiteLLMProvider + the eval harness.
+ */
+export class StubProvider implements LLMProvider {
+  readonly name = "stub";
+
+  scoreDimension(req: ScoreRequest): Promise<RawModelScore> {
+    if (req.evidenceIds.length === 0) {
+      return Promise.reject(new Error("scoreDimension requires at least one evidence id"));
+    }
+    const seed = hash(`${req.dimension}::${req.trendTitle}::${req.context}`);
+    const value = seed % 101; // 0..100
+    const confidence = Number((0.45 + (seed % 40) / 100).toFixed(2)); // 0.45..0.84
+    const result: RawModelScore = {
+      value,
+      confidence,
+      rationale: `Deterministic stub estimate for ${req.dimension} based on ${req.evidenceIds.length} signal(s).`,
+      evidence: req.evidenceIds.slice(0, 3),
+    };
+    return Promise.resolve(rawModelScoreSchema.parse(result));
+  }
+}
+
+/**
+ * Production provider: talks to a LiteLLM gateway (OpenAI-compatible) so any of
+ * OpenAI/Anthropic/Gemini/OpenRouter can serve the request via one interface.
+ */
+export class LiteLLMProvider implements LLMProvider {
+  readonly name = "litellm";
+  constructor(
+    private readonly baseUrl: string,
+    private readonly model = process.env.AIOI_SCORING_MODEL ?? "claude-opus-4-8",
+    private readonly fetchImpl: typeof fetch = fetch,
+  ) {}
+
+  async scoreDimension(req: ScoreRequest): Promise<RawModelScore> {
+    const system =
+      "You are a rigorous market analyst. Score ONE dimension for an AI trend on a 0-100 scale " +
+      "using the provided rubric anchors. Cite evidence ONLY from the provided ids. " +
+      'Return strict JSON: {"value":int,"confidence":number,"rationale":string,"evidence":string[]}.';
+    const user =
+      `Dimension: ${req.dimension}\nRubric anchors: ${req.rubricAnchor}\n` +
+      `Trend: ${req.trendTitle}\nEvidence ids: ${req.evidenceIds.join(", ")}\n\nContext:\n${req.context}`;
+
+    const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: this.model,
+        temperature: 0,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const content = data.choices?.[0]?.message?.content ?? "";
+    // Strict validation; one repair pass could be added here before throwing.
+    return rawModelScoreSchema.parse(JSON.parse(content));
+  }
+}
+
+/** Returns LiteLLM when a gateway is configured, else the deterministic stub. */
+export function getProvider(env: NodeJS.ProcessEnv = process.env): LLMProvider {
+  const base = env.LITELLM_BASE_URL;
+  const hasKey = Boolean(env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY ?? env.GEMINI_API_KEY);
+  if (base && hasKey) return new LiteLLMProvider(base);
+  return new StubProvider();
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@aioi/marketing",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Public landing, pricing, blog, changelog, roadmap (SEO/ISR).",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "clean": "rm -rf .next .turbo"
+  },
+  "dependencies": {
+    "@aioi/ui": "workspace:*",
+    "@aioi/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@aioi/eslint-config": "workspace:*",
+    "@aioi/tsconfig": "workspace:*"
+  }
+}

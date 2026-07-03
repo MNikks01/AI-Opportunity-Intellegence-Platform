@@ -1,0 +1,28 @@
+{
+  "name": "@aioi/ai-service",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Scoring (opportunity-scoring-engine), RAG, and action-plan generation; eval-gated.",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@aioi/shared": "workspace:*",
+    "@aioi/validation": "workspace:*",
+    "@aioi/logger": "workspace:*",
+    "@aioi/ai-sdk": "workspace:*",
+    "@aioi/database": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@aioi/eslint-config": "workspace:*",
+    "@aioi/tsconfig": "workspace:*"
+  }
+}

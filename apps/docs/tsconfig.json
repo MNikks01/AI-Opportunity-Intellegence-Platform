@@ -1,0 +1,5 @@
+{
+  "extends": "@aioi/tsconfig/nextjs.json",
+  "include": ["src", "*.ts", "*.tsx"],
+  "exclude": ["node_modules", "dist", ".next"]
+}

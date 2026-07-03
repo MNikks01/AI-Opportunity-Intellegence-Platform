@@ -1,0 +1,25 @@
+{
+  "name": "@aioi/scheduler",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Cron + BullMQ repeatable jobs that drive ingestion and trend recompute.",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@aioi/shared": "workspace:*",
+    "@aioi/validation": "workspace:*",
+    "@aioi/logger": "workspace:*"
+  },
+  "devDependencies": {
+    "@aioi/eslint-config": "workspace:*",
+    "@aioi/tsconfig": "workspace:*"
+  }
+}
