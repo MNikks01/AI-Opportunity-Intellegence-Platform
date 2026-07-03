@@ -1,0 +1,42 @@
+{
+  "name": "aioi-platform",
+  "version": "0.0.0",
+  "private": true,
+  "description": "AI Opportunity Intelligence Platform — monorepo",
+  "packageManager": "pnpm@9.12.0",
+  "engines": {
+    "node": ">=20 <25"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:e2e": "turbo run test:e2e",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json,yaml,yml}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md,json,yaml,yml}\"",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "prepare": "husky || true"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^19.5.0",
+    "@commitlint/config-conventional": "^19.5.0",
+    "@eslint/js": "^9.12.0",
+    "@types/node": "^22.7.0",
+    "eslint": "^9.12.0",
+    "husky": "^9.1.0",
+    "lint-staged": "^15.2.0",
+    "msw": "^2.4.9",
+    "prettier": "^3.3.0",
+    "tsx": "^4.19.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.6.0",
+    "typescript-eslint": "^8.8.0",
+    "vitest": "^2.1.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": ["eslint --fix", "prettier --write"],
+    "*.{md,json,yaml,yml}": ["prettier --write"]
+  }
+}
