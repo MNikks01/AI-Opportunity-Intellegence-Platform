@@ -1,0 +1,383 @@
+// Canonical Prisma schema — AI Opportunity Intelligence Platform
+// Design source of truth: docs/04-data/DATABASE_DESIGN.md (+ ERD.md).
+// pgvector columns/HNSW indexes are added via a raw SQL migration (not expressible in PSL).
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [pgvector(map: "vector"), pgcrypto]
+}
+
+// ───────────────────────── Tenancy & identity ─────────────────────────
+model Organization {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  slug         String        @unique
+  memberships  Membership[]
+  workspaces   Workspace[]
+  apiKeys      ApiKey[]
+  auditLogs    AuditLog[]
+  briefs       Brief[]
+  subscription Subscription?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  deletedAt    DateTime?
+}
+
+model User {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  clerkId     String       @unique
+  email       String       @unique
+  name        String?
+  memberships Membership[]
+  createdAt   DateTime     @default(now())
+  deletedAt   DateTime?
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  BILLING
+  VIEWER
+}
+
+model Membership {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  userId         String       @db.Uuid
+  role           Role         @default(MEMBER)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+}
+
+enum WorkspaceKind {
+  PERSONAL
+  TEAM
+}
+
+model Workspace {
+  id             String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String        @db.Uuid
+  name           String
+  kind           WorkspaceKind @default(PERSONAL)
+  organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  watchlists     Watchlist[]
+  reports        Report[]
+  createdAt      DateTime      @default(now())
+  deletedAt      DateTime?
+
+  @@index([organizationId])
+}
+
+// ───────────────────────── Intelligence core (global) ─────────────────────────
+enum LegalityTier {
+  OFFICIAL
+  LICENSED
+  GRAY
+  PROHIBITED
+}
+
+model Source {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key          String         @unique
+  legalityTier LegalityTier
+  tosUrl       String?
+  rateConfig   Json
+  enabled      Boolean        @default(true)
+  runs         IngestionRun[]
+  signals      Signal[]
+  createdAt    DateTime       @default(now())
+}
+
+enum IngestionStatus {
+  RUNNING
+  SUCCEEDED
+  FAILED
+}
+
+model IngestionRun {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceId    String          @db.Uuid
+  status      IngestionStatus @default(RUNNING)
+  cursor      String?
+  itemCount   Int             @default(0)
+  error       String?
+  startedAt   DateTime        @default(now())
+  finishedAt  DateTime?
+  source      Source          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId, startedAt])
+}
+
+model Signal {
+  id          String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceId    String        @db.Uuid
+  externalId  String
+  url         String?
+  title       String?
+  raw         Json
+  publishedAt DateTime?
+  fetchedAt   DateTime      @default(now())
+  source      Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  trends      TrendSignal[]
+
+  @@unique([sourceId, externalId])
+  @@index([publishedAt])
+}
+
+enum TrendStatus {
+  EARLY
+  ACTIVE
+  FADING
+  ARCHIVED
+}
+
+model Trend {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  slug         String        @unique
+  title        String
+  summary      String?
+  status       TrendStatus   @default(EARLY)
+  firstSeenAt  DateTime      @default(now())
+  lastSignalAt DateTime?
+  signals      TrendSignal[]
+  entities     TrendEntity[]
+  scores       Score[]
+  actionPlan   ActionPlan?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([status, lastSignalAt])
+}
+
+model TrendSignal {
+  trendId  String @db.Uuid
+  signalId String @db.Uuid
+  weight   Float  @default(1)
+  trend    Trend  @relation(fields: [trendId], references: [id], onDelete: Cascade)
+  signal   Signal @relation(fields: [signalId], references: [id], onDelete: Cascade)
+
+  @@id([trendId, signalId])
+  @@index([signalId])
+}
+
+enum EntityType {
+  COMPANY
+  MODEL
+  REPO
+  TOOL
+  MCP_SERVER
+  PAPER
+  PERSON
+}
+
+model Entity {
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  type         EntityType
+  name         String
+  externalRefs Json
+  trends       TrendEntity[]
+  createdAt    DateTime      @default(now())
+
+  @@index([type, name])
+}
+
+model TrendEntity {
+  trendId  String     @db.Uuid
+  entityId String     @db.Uuid
+  role     String?
+  trend    Trend      @relation(fields: [trendId], references: [id], onDelete: Cascade)
+  entity   Entity     @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@id([trendId, entityId])
+  @@index([entityId])
+}
+
+enum ScoreDimension {
+  OPPORTUNITY
+  BUSINESS
+  DEVELOPER
+  CREATOR
+  SEO
+  COMPETITION
+  MONETIZATION
+  RISK
+  DIFFICULTY
+  PREDICTED_LIFETIME
+}
+
+enum ScoreBand {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Score {
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trendId       String         @db.Uuid
+  dimension     ScoreDimension
+  value         Int            @db.SmallInt
+  band          ScoreBand
+  confidence    Float
+  rationale     String
+  evidence      Json
+  rubricVersion String
+  createdAt     DateTime       @default(now())
+  trend         Trend          @relation(fields: [trendId], references: [id], onDelete: Cascade)
+
+  @@unique([trendId, dimension, rubricVersion])
+  @@index([dimension, value])
+}
+
+model ActionPlan {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trendId       String   @unique @db.Uuid
+  promptVersion String
+  content       Json // saasIdeas, apps, extensions, apis, content, keywords, domains, names, gtm, pricing, techStack, mvp, prd, architecture, ui, dbSchema, marketing, launch
+  createdAt     DateTime @default(now())
+  trend         Trend    @relation(fields: [trendId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────────────── Tenant surfaces ─────────────────────────
+model Watchlist {
+  id             String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String          @db.Uuid
+  workspaceId    String          @db.Uuid
+  name           String
+  workspace      Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  items          WatchlistItem[]
+  alerts         Alert[]
+  createdAt      DateTime        @default(now())
+
+  @@index([workspaceId])
+}
+
+enum WatchTargetType {
+  TREND
+  ENTITY
+  TOPIC
+}
+
+model WatchlistItem {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  watchlistId String          @db.Uuid
+  targetType  WatchTargetType
+  targetId    String // Trend.id | Entity.id | topic slug
+  watchlist   Watchlist       @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  createdAt   DateTime        @default(now())
+
+  @@unique([watchlistId, targetType, targetId])
+}
+
+enum AlertChannel {
+  IN_APP
+  EMAIL
+  SLACK
+  DISCORD
+  TELEGRAM
+}
+
+enum AlertCadence {
+  INSTANT
+  DAILY_DIGEST
+}
+
+model Alert {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  watchlistId String       @db.Uuid
+  trigger     Json // { type: NEW_TREND | SCORE_CROSSES | NEW_FUNDING, params }
+  channel     AlertChannel @default(IN_APP)
+  cadence     AlertCadence @default(INSTANT)
+  enabled     Boolean      @default(true)
+  watchlist   Watchlist    @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+  createdAt   DateTime     @default(now())
+
+  @@index([watchlistId])
+}
+
+model Brief {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  userId         String?      @db.Uuid
+  kind           String // DAILY | WEEKLY
+  content        Json
+  deliveredAt    DateTime?
+  openedAt       DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId, createdAt])
+}
+
+model Report {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  workspaceId String    @db.Uuid
+  title       String
+  content     Json
+  exportUrl   String? // R2 object (PDF/deck)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId])
+}
+
+model ApiKey {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  name           String
+  hashedKey      String       @unique
+  scopes         String[]
+  lastUsedAt     DateTime?
+  revokedAt      DateTime?
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+
+  @@index([organizationId])
+}
+
+model Subscription {
+  id                   String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String       @unique @db.Uuid
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  plan                 String // FREE | PRO | TEAM | BUSINESS
+  status               String
+  entitlements         Json
+  currentPeriodEnd     DateTime?
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  updatedAt            DateTime     @updatedAt
+}
+
+model AuditLog {
+  id             String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String       @db.Uuid
+  actorUserId    String?      @db.Uuid
+  action         String
+  targetType     String?
+  targetId       String?
+  ip             String?
+  metadata       Json?
+  createdAt      DateTime     @default(now())
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, createdAt])
+}
+
+model FeatureFlag {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key         String   @unique
+  description String?
+  enabled     Boolean  @default(false)
+  overrides   Json? // per-org overrides
+  updatedAt   DateTime @updatedAt
+}
