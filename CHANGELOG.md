@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Watchlists web UI** (B-016) — `apps/web` `/watchlists` (list + create + delete) and
+  `/watchlists/[id]` (items + add/remove) as RSC pages driven by Server Actions over the RLS-enforced
+  repository. A request-cached `getDevOrg` (idempotent `bootstrapUser`) stands in for a session until
+  the Clerk verifier lands. Verified end-to-end in the browser (create list → add item).
 - **Watchlists CRUD** (B-016) — first user-facing feature: `@aioi/database` watchlist/item repository
   (all ops via `withOrgContext`), a `watchlists` tRPC router on `protectedProcedure` with RBAC
   (`watchlists:read`/`:write`), and shared Zod input schemas. Adds RLS on `WatchlistItem` (EXISTS policy
