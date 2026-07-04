@@ -1,6 +1,6 @@
 {
   "name": "@aioi/docs",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Product + API documentation and help center.",
   "//": "Stub app — not yet implemented. Build/lint/typecheck scripts are added when work starts (turbo skips packages without them).",
