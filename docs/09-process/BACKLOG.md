@@ -28,7 +28,7 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 | B-012 | `@aioi/ui` tokens + core components (Card, Badge, ScoreBar, Scorecard, TrendCard) | UI   | 8   | 🟡 (DataTable/Button pending)                                                  |
 | B-013 | `apps/web` Trend Dashboard + Trend Detail (RSC, real data)                        | E2   | 8   | ✅                                                                             |
 | B-014 | `@aioi/auth` Clerk adapter + RBAC guard + tenant guard                            | E1   | 5   | 🟡 (adapter+RBAC+guard+ADR-0002 done; Clerk verify/RLS/API-key/bootstrap next) |
-| B-015 | Personal workspace bootstrap on signup                                            | E5   | 3   | ⬜                                                                             |
+| B-015 | Personal workspace bootstrap on signup                                            | E5   | 3   | 🟡 (bootstrapUser + tests done; Clerk-webhook trigger pending)                 |
 
 ## Later (Sprint 3+) — retention + monetization
 
