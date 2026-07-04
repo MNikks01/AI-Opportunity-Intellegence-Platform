@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **API-key authentication** (B-014 cont., ADR-0002 D6) — `@aioi/auth` `ApiKeyAuthProvider`
+  (`Authorization: Bearer aioi_…`), SHA-256 hash-only storage, `generateApiKey`/`hashApiKey`, org-scoped
+  contexts gated by **scopes** (a key never exceeds its scopes), and a `ChainAuthProvider` (API key →
+  session) surfaced via `getAuthProvider`. 11 unit tests. DB-backed lookup + management endpoints follow.
 - **Restricted runtime DB role** (B-027, ADR-0003) — migration creates a `NOSUPERUSER NOBYPASSRLS`
   `aioi_app` role (NOLOGIN; login/password from secrets in prod) with CRUD grants + default privileges;
   the `@aioi/database` client connects via `APP_DATABASE_URL` (falls back to `DATABASE_URL`). This makes
