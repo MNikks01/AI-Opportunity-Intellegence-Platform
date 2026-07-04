@@ -1,5 +1,13 @@
 # @aioi/auth
 
+## 0.2.0
+
+### Minor Changes
+
+- 333ffe7: Add API-key authentication: `ApiKeyAuthProvider` (bearer `aioi_…`, SHA-256 hash-only storage),
+  `generateApiKey`/`hashApiKey`/`extractApiKey`, scope-gated authorization (a key never exceeds its
+  scopes), and `ChainAuthProvider` to try API keys then the session via `getAuthProvider` (ADR-0002 D6).
+
 ## 0.1.0
 
 ### Minor Changes
