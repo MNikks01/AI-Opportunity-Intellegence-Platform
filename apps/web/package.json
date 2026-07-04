@@ -13,10 +13,10 @@
     "clean": "rm -rf .next .turbo"
   },
   "dependencies": {
-    "@aioi/ui": "workspace:*",
-    "@aioi/shared": "workspace:*",
     "@aioi/database": "workspace:*",
-    "next": "^15.0.0",
+    "@aioi/shared": "workspace:*",
+    "@aioi/ui": "workspace:*",
+    "next": "^16.2.10",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

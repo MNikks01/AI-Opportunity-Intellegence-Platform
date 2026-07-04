@@ -14,13 +14,13 @@
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
+    "@aioi/database": "workspace:*",
+    "@aioi/logger": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",
-    "@aioi/logger": "workspace:*",
-    "@aioi/database": "workspace:*",
     "@trpc/server": "^11.0.0",
     "fastify": "^5.0.0",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@aioi/eslint-config": "workspace:*",
