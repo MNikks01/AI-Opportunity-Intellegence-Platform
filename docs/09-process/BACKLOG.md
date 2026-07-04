@@ -32,19 +32,19 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 
 ## Later (Sprint 3+) — retention + monetization
 
-| ID    | Item                                                                                                     | Epic  | SP  | Status |
-| ----- | -------------------------------------------------------------------------------------------------------- | ----- | --- | ------ |
-| B-016 | Watchlists + WatchlistItems CRUD                                                                         | E4    | 5   | ✅     |
-| B-017 | Alerts engine (match rules → in-app/email)                                                               | E4    | 5   | ⬜     |
-| B-018 | Daily Brief generation + delivery + open tracking                                                        | E4    | 8   | ⬜     |
-| B-019 | Search: keyword (FTS) + semantic (pgvector) endpoints                                                    | E2    | 5   | ⬜     |
-| B-020 | Billing Free/Pro via Stripe + entitlements                                                               | E8    | 8   | ⬜     |
-| B-021 | Action-plan generators (SaaS/API/content/GTM/…)                                                          | E3    | 8   | ⬜     |
-| B-022 | Audit logging middleware (all mutations)                                                                 | E9    | 3   | ⬜     |
-| B-023 | GDPR export/delete jobs                                                                                  | E9    | 5   | ⬜     |
-| B-025 | Prisma 5→7 migration (breaking client/generator; ignored in dependabot until done)                       | infra | 5   | ⬜     |
-| B-026 | TypeScript 5→6 migration (fails typecheck; ignored in dependabot until done)                             | infra | 3   | ⬜     |
-| B-027 | Runtime connects as a non-superuser DB role (`aioi_app`) + `APP_DATABASE_URL` so RLS enforces (ADR-0003) | infra | 3   | ✅     |
+| ID    | Item                                                                                                     | Epic  | SP  | Status                                                                                |
+| ----- | -------------------------------------------------------------------------------------------------------- | ----- | --- | ------------------------------------------------------------------------------------- |
+| B-016 | Watchlists + WatchlistItems CRUD                                                                         | E4    | 5   | ✅                                                                                    |
+| B-017 | Alerts engine (match rules → in-app/email)                                                               | E4    | 5   | 🟡 (engine + in-app notifications + API done; pipeline auto-eval, email, web UI next) |
+| B-018 | Daily Brief generation + delivery + open tracking                                                        | E4    | 8   | ⬜                                                                                    |
+| B-019 | Search: keyword (FTS) + semantic (pgvector) endpoints                                                    | E2    | 5   | ⬜                                                                                    |
+| B-020 | Billing Free/Pro via Stripe + entitlements                                                               | E8    | 8   | ⬜                                                                                    |
+| B-021 | Action-plan generators (SaaS/API/content/GTM/…)                                                          | E3    | 8   | ⬜                                                                                    |
+| B-022 | Audit logging middleware (all mutations)                                                                 | E9    | 3   | ⬜                                                                                    |
+| B-023 | GDPR export/delete jobs                                                                                  | E9    | 5   | ⬜                                                                                    |
+| B-025 | Prisma 5→7 migration (breaking client/generator; ignored in dependabot until done)                       | infra | 5   | ⬜                                                                                    |
+| B-026 | TypeScript 5→6 migration (fails typecheck; ignored in dependabot until done)                             | infra | 3   | ⬜                                                                                    |
+| B-027 | Runtime connects as a non-superuser DB role (`aioi_app`) + `APP_DATABASE_URL` so RLS enforces (ADR-0003) | infra | 3   | ✅                                                                                    |
 
 ## R2/R3 epics (not yet decomposed)
 

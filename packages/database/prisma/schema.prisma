@@ -15,18 +15,19 @@ datasource db {
 
 // ───────────────────────── Tenancy & identity ─────────────────────────
 model Organization {
-  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  slug         String        @unique
-  memberships  Membership[]
-  workspaces   Workspace[]
-  apiKeys      ApiKey[]
-  auditLogs    AuditLog[]
-  briefs       Brief[]
-  subscription Subscription?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  deletedAt    DateTime?
+  id            String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String
+  slug          String         @unique
+  memberships   Membership[]
+  workspaces    Workspace[]
+  apiKeys       ApiKey[]
+  auditLogs     AuditLog[]
+  briefs        Brief[]
+  notifications Notification[]
+  subscription  Subscription?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
 }
 
 model User {
@@ -106,15 +107,15 @@ enum IngestionStatus {
 }
 
 model IngestionRun {
-  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  sourceId    String          @db.Uuid
-  status      IngestionStatus @default(RUNNING)
-  cursor      String?
-  itemCount   Int             @default(0)
-  error       String?
-  startedAt   DateTime        @default(now())
-  finishedAt  DateTime?
-  source      Source          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  id         String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceId   String          @db.Uuid
+  status     IngestionStatus @default(RUNNING)
+  cursor     String?
+  itemCount  Int             @default(0)
+  error      String?
+  startedAt  DateTime        @default(now())
+  finishedAt DateTime?
+  source     Source          @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
   @@index([sourceId, startedAt])
 }
@@ -193,11 +194,11 @@ model Entity {
 }
 
 model TrendEntity {
-  trendId  String     @db.Uuid
-  entityId String     @db.Uuid
+  trendId  String  @db.Uuid
+  entityId String  @db.Uuid
   role     String?
-  trend    Trend      @relation(fields: [trendId], references: [id], onDelete: Cascade)
-  entity   Entity     @relation(fields: [entityId], references: [id], onDelete: Cascade)
+  trend    Trend   @relation(fields: [trendId], references: [id], onDelete: Cascade)
+  entity   Entity  @relation(fields: [entityId], references: [id], onDelete: Cascade)
 
   @@id([trendId, entityId])
   @@index([entityId])
@@ -303,6 +304,22 @@ model Alert {
   createdAt   DateTime     @default(now())
 
   @@index([watchlistId])
+}
+
+/// In-app notification produced when an Alert's trigger matches (B-017). Org-scoped (RLS).
+model Notification {
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String           @db.Uuid
+  alertId        String?          @db.Uuid
+  title          String
+  body           String
+  targetType     WatchTargetType?
+  targetId       String?
+  readAt         DateTime?
+  createdAt      DateTime         @default(now())
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, readAt])
 }
 
 model Brief {

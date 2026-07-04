@@ -12,11 +12,20 @@ import {
   addWatchlistItem,
   removeWatchlistItem,
   listWatchlistItems,
+  createAlert,
+  listAlerts,
+  setAlertEnabled,
+  deleteAlert,
+  listNotifications,
+  unreadNotificationCount,
+  markNotificationRead,
+  markAllNotificationsRead,
 } from "@aioi/database";
 import {
   createWatchlistSchema,
   renameWatchlistSchema,
   watchlistItemSchema,
+  createAlertSchema,
 } from "@aioi/validation";
 import { authorize, protectedProcedure, publicProcedure, router, TRPCError } from "./trpc";
 
@@ -92,6 +101,60 @@ export const appRouter = router({
         authorize(ctx.auth, "watchlists:write");
         return removeWatchlistItem(ctx.auth.orgId, input.watchlistId, input.itemId).catch(toTRPC);
       }),
+  }),
+
+  alerts: router({
+    list: protectedProcedure
+      .input(z.object({ watchlistId: z.string().uuid() }))
+      .query(({ ctx, input }) => {
+        authorize(ctx.auth, "alerts:read");
+        return listAlerts(ctx.auth.orgId, input.watchlistId).catch(toTRPC);
+      }),
+
+    create: protectedProcedure.input(createAlertSchema).mutation(({ ctx, input }) => {
+      authorize(ctx.auth, "alerts:write");
+      return createAlert(ctx.auth.orgId, input).catch(toTRPC);
+    }),
+
+    setEnabled: protectedProcedure
+      .input(z.object({ id: z.string().uuid(), enabled: z.boolean() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "alerts:write");
+        return setAlertEnabled(ctx.auth.orgId, input.id, input.enabled).catch(toTRPC);
+      }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "alerts:write");
+        return deleteAlert(ctx.auth.orgId, input.id).catch(toTRPC);
+      }),
+  }),
+
+  notifications: router({
+    list: protectedProcedure
+      .input(z.object({ unreadOnly: z.boolean().default(false) }).optional())
+      .query(({ ctx, input }) => {
+        authorize(ctx.auth, "alerts:read");
+        return listNotifications(ctx.auth.orgId, { unreadOnly: input?.unreadOnly });
+      }),
+
+    unreadCount: protectedProcedure.query(({ ctx }) => {
+      authorize(ctx.auth, "alerts:read");
+      return unreadNotificationCount(ctx.auth.orgId);
+    }),
+
+    markRead: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "alerts:read");
+        return markNotificationRead(ctx.auth.orgId, input.id).catch(toTRPC);
+      }),
+
+    markAllRead: protectedProcedure.mutation(({ ctx }) => {
+      authorize(ctx.auth, "alerts:read");
+      return markAllNotificationsRead(ctx.auth.orgId);
+    }),
   }),
 });
 
