@@ -54,4 +54,27 @@ export const rawModelScoreSchema = z.object({
 });
 export type RawModelScore = z.infer<typeof rawModelScoreSchema>;
 
+// ── Watchlists (B-016) ──────────────────────────────────────────────────────
+export const watchTargetTypeSchema = z.enum(["TREND", "ENTITY", "TOPIC"]);
+export type WatchTargetType = z.infer<typeof watchTargetTypeSchema>;
+
+export const createWatchlistSchema = z.object({
+  workspaceId: z.string().uuid(),
+  name: z.string().min(1).max(120),
+});
+export type CreateWatchlistInput = z.infer<typeof createWatchlistSchema>;
+
+export const renameWatchlistSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(120),
+});
+export type RenameWatchlistInput = z.infer<typeof renameWatchlistSchema>;
+
+export const watchlistItemSchema = z.object({
+  watchlistId: z.string().uuid(),
+  targetType: watchTargetTypeSchema,
+  targetId: z.string().min(1).max(200),
+});
+export type WatchlistItemInput = z.infer<typeof watchlistItemSchema>;
+
 export { z };

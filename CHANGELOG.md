@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Watchlists CRUD** (B-016) — first user-facing feature: `@aioi/database` watchlist/item repository
+  (all ops via `withOrgContext`), a `watchlists` tRPC router on `protectedProcedure` with RBAC
+  (`watchlists:read`/`:write`), and shared Zod input schemas. Adds RLS on `WatchlistItem` (EXISTS policy
+  via its parent watchlist — closes a child-table gap from ADR-0003). Proven end-to-end: 9 integration
+  tests covering CRUD, RBAC deny, unauthenticated, and cross-tenant isolation for both watchlists and items.
 - **Sign-up bootstrap** (B-015) — `@aioi/database` `bootstrapUser({ clerkId, email, name })` idempotently
   provisions a new user's tenant on first sign-in: User (Clerk mirror) + personal Organization + OWNER
   Membership + personal Workspace, in one transaction that sets the org context for the RLS-protected

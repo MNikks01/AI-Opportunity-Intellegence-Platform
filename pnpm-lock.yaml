@@ -196,6 +196,9 @@ importers:
       '@aioi/shared':
         specifier: workspace:*
         version: link:../shared
+      '@aioi/validation':
+        specifier: workspace:*
+        version: link:../validation
       '@prisma/client':
         specifier: ^5.20.0
         version: 5.22.0(prisma@5.22.0)
