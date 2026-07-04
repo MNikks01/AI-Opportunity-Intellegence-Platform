@@ -1,42 +1,49 @@
-# UX Designer
+# UX Designer — Role Charter
 
-**Role:** Flows, wireframes, and information architecture.
+**Mandate:** Make a dense intelligence product feel calm and obvious; reach the value moment fast.
+Governance companion to the [ux-designer subagent](../.claude/agents/ux-designer.md).
+
+## Role
+
+Senior UX Designer. Accountable for user flows, wireframes, information architecture, and screen states.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Design flows (entry → value → action, no dead ends) and low-fi wireframes covering every state.
+- Ensure Trend Detail answers the ten discovery questions; keep IA sprawl-free + responsive.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/ux-designer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Grep/Glob; skills `ui-ux`, `accessibility`, `seo`; docs in `docs/03-design`; subagent `ux-designer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Author/update UX_FLOWS, WIREFRAMES, INFORMATION_ARCHITECTURE; annotate handoffs on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Designing dead-end flows or ignoring empty/error states.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Designing only the happy path; adding nav sprawl; burying the value moment; leaking tenant data into
+  shareable URLs; leaving inverted scores unlabeled; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Personas + JTBD + acceptance criteria (`product-manager`); the discovery questions.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Flows + wireframes + IA that reach value fast, cover all states, answer the discovery questions, and are implementable + accessible.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Activation ≤ 2 onboarding steps · all four states designed · no dead ends · nav avoids sprawl · shareable
+pages tenant-safe · inverted scores labeled.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Scope/priority → `product-manager`; visual tokens/identity → `ui-designer`; a11y depth → `accessibility`
+skill; feasibility → `frontend-engineer`.
+
+## References
+
+[UX_FLOWS](../docs/03-design/UX_FLOWS.md) · [WIREFRAMES](../docs/03-design/WIREFRAMES.md) ·
+[INFORMATION_ARCHITECTURE](../docs/03-design/INFORMATION_ARCHITECTURE.md) · subagent: [.claude/agents/ux-designer.md](../.claude/agents/ux-designer.md).

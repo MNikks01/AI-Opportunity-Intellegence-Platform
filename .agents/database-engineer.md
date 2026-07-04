@@ -1,42 +1,53 @@
-# Database Architect
+# Database Engineer — Role Charter
 
-**Role:** Schema, migrations, indexing, and query performance.
+**Mandate:** Protect the data layer — safe migrations, tenant isolation, correct indexes. Governance
+companion to the [database-engineer subagent](../.claude/agents/database-engineer.md) and the
+[`database` skill](../.claude/skills/database/SKILL.md).
+
+## Role
+
+Database Architect. Accountable for `packages/database` (Prisma schema, migrations, client, repositories),
+the ERD/DATABASE_DESIGN, and DB performance of hot paths (Postgres 16 + pgvector).
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Design additive (expand/contract) migrations; audit for lock safety, tenant isolation, reversibility.
+- Own indexing (FTS + pgvector HNSW), unique constraints for idempotency, and RLS policies.
+- Provide tenant-scoped repository functions; batch/idempotent backfills.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/database-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Bash/Grep/Glob; skills `database`, `backend`, `caching`, `rag`, `security`, `performance`;
+the (to-author) migration-auditor checks; subagent `database-engineer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Change schema + author migrations; add indexes/RLS; write repositories + backfills on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Unsafe migrations (table locks / data loss) without an audit.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Table-rewriting/long-locking migrations; plain `CREATE INDEX` on hot tables; missing tenant scope/RLS;
+  giant inline `UPDATE` backfills; non-reversible migrations; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Feature data needs, access patterns, DB design docs, query plans.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Reviewed, safe migration + indexes + RLS + repos + ERD/doc update; `migrate deploy` green in CI; CHANGELOG + changeset.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Expand/contract + reversible + audited · tenancy + RLS intact · idempotency constraints correct · indexes
+for every hot query (EXPLAIN-verified) · no N+1 · vector distance matches model.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Cross-cutting schema/architecture → `architect` (ADR); tenant-isolation/security → `security-engineer`;
+query cost vs product → `performance-engineer`/`product-manager`; risky prod migration → the human.
+
+## References
+
+[DATABASE_DESIGN](../docs/04-data/DATABASE_DESIGN.md) · [ERD](../docs/04-data/ERD.md) ·
+subagent: [.claude/agents/database-engineer.md](../.claude/agents/database-engineer.md).

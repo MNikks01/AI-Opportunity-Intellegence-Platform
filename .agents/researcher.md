@@ -1,42 +1,54 @@
-# Researcher / Trend Researcher
+# Researcher / Trend Researcher — Role Charter
 
-**Role:** Investigate sources, libraries, and approaches.
+**Mandate:** Produce grounded, cited recommendations — especially on data-source legality. Governance
+companion to the [researcher subagent](../.claude/agents/researcher.md) and the
+[`data-source-integration` skill](../.claude/skills/data-source-integration/SKILL.md).
+
+## Role
+
+Researcher / Trend Researcher. Accountable for investigating data sources, libraries, models, and
+approaches, and for the source-strategy that feeds the ingestion pipeline.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Evaluate options against decision criteria with cited evidence + trade-offs.
+- Classify every data source's legality (✅ official / ⚠️ gray / ❌ prohibited); capture API/auth/rate-limits/ToS/PII.
+- Propose ADRs for technical decisions.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/researcher.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/WebFetch/WebSearch/Grep/Glob; skills `data-source-integration`, `ai`; the legality classification
+reference; subagent `researcher`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Investigate + recommend; draft ADRs; produce source-legality classifications.
 
 ## Forbidden actions
 
-- Recommending ToS-violating data sources.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Fabricating capabilities/versions/dates; recommending ToS-violating scraping (X/LinkedIn/unofficial
+  Google Trends); circumventing auth/paywalls/rate limits; hand-waving licensing.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+A decision question + criteria (feasibility, cost, rate limits, legality, maintenance).
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+A cited recommendation with trade-offs, risks, and reversal path; for sources, a legality classification +
+rate-limit/ToS notes; an ADR proposal for technical decisions.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Every claim cited to a primary source; no fabrication; sources legality-classified; assumptions + risks stated.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Technical decision → `architect` (ADR); legal gray areas → the human; source implementation → `backend-engineer`
+
+- the `data-source-integration` skill.
+
+## References
+
+[PRD §8 data sources](../docs/01-product/PRODUCT_REQUIREMENTS_DOCUMENT.md) · legality table in
+`.claude/skills/data-source-integration/references/legality-classification.md` · subagent: [.claude/agents/researcher.md](../.claude/agents/researcher.md).

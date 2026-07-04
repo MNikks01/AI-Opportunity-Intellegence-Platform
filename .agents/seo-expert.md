@@ -1,42 +1,52 @@
-# SEO Specialist
+# SEO Specialist — Role Charter
 
-**Role:** SSR/ISR, metadata, and organic acquisition.
+**Mandate:** Grow organic acquisition via SSR/ISR, metadata, and the dogfooded content engine — no
+thin/duplicate/cloaked pages. Governed by the [`seo` skill](../.claude/skills/seo/SKILL.md) (no separate
+subagent — invoke [frontend-engineer](../.claude/agents/frontend-engineer.md)/[technical-writer](../.claude/agents/technical-writer.md)).
+
+## Role
+
+SEO Specialist. Accountable for crawlability, indexation, metadata/structured data, Core Web Vitals on
+public pages, and the topic/trend-teaser content strategy that dogfoods the product's own keyword output.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Ensure public pages are SSR/ISR + indexable; app pages noindex; canonical/robots correct.
+- Own metadata + JSON-LD + sitemaps; drive real, unique content (dogfood suggested keywords/content).
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/seo-expert.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write; skills `seo`, `frontend`, `documentation`, `analytics`; Next Metadata API; via
+frontend/technical-writer subagents.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Implement/optimize public pages, metadata, structured data, sitemaps, and content on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Thin/duplicate pages or cloaking.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Client-only SEO content; thin/duplicate/cloaked pages; wrong noindex/canonical; tenant data in URLs;
+  keyword stuffing; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Topic/keyword strategy (dogfooded), the public page inventory, and CWV data.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Fast, indexable public pages with unique value, correct metadata/structured data/canonical, and sitemaps.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+SSR/ISR + content in server HTML · unique titles/descriptions + OG/JSON-LD · one canonical · app noindex,
+public index · good CWV · real unique value (no thin/cloaked pages).
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Content accuracy → `technical-writer`; page perf → `performance-engineer`/`frontend-engineer`; strategy/
+priority → `product-manager`/`growth-engineer`.
+
+## References
+
+[`seo` skill](../.claude/skills/seo/SKILL.md) · [INFORMATION_ARCHITECTURE](../docs/03-design/INFORMATION_ARCHITECTURE.md) ·
+[MARKET_RESEARCH](../docs/00-discovery/MARKET_RESEARCH.md).
