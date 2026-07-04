@@ -34,7 +34,7 @@ describe.skipIf(!hasDb)("api router (integration)", () => {
   });
 
   it("trends.list returns the seeded trend with scores", async () => {
-    const caller = appRouter.createCaller(createContext());
+    const caller = appRouter.createCaller(await createContext());
     const list = await caller.trends.list({ limit: 100 });
     const found = list.find((t) => t.slug === slug);
     expect(found).toBeDefined();
@@ -42,14 +42,14 @@ describe.skipIf(!hasDb)("api router (integration)", () => {
   });
 
   it("trends.bySlug returns the trend detail", async () => {
-    const caller = appRouter.createCaller(createContext());
+    const caller = appRouter.createCaller(await createContext());
     const detail = await caller.trends.bySlug({ slug });
     expect(detail.title).toBe("Router test trend");
     expect(detail.scores[0]?.rubricVersion).toBe("2026-07-01");
   });
 
   it("trends.bySlug throws NOT_FOUND for a missing slug", async () => {
-    const caller = appRouter.createCaller(createContext());
+    const caller = appRouter.createCaller(await createContext());
     await expect(caller.trends.bySlug({ slug: "does-not-exist-xyz" })).rejects.toThrow();
   });
 });
