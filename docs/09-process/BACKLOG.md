@@ -34,7 +34,7 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 
 | ID    | Item                                                                                                     | Epic  | SP  | Status |
 | ----- | -------------------------------------------------------------------------------------------------------- | ----- | --- | ------ |
-| B-016 | Watchlists + WatchlistItems CRUD                                                                         | E4    | 5   | ⬜     |
+| B-016 | Watchlists + WatchlistItems CRUD                                                                         | E4    | 5   | ✅     |
 | B-017 | Alerts engine (match rules → in-app/email)                                                               | E4    | 5   | ⬜     |
 | B-018 | Daily Brief generation + delivery + open tracking                                                        | E4    | 8   | ⬜     |
 | B-019 | Search: keyword (FTS) + semantic (pgvector) endpoints                                                    | E2    | 5   | ⬜     |
