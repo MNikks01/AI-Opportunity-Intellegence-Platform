@@ -7,11 +7,22 @@ updates:
     open-pull-requests-limit: 10
     target-branch: development
     versioning-strategy: increase
+    # Group only minor+patch so auto-PRs stay green; majors are breaking and come as individual PRs
+    # to be reviewed/adopted deliberately.
     groups:
       dev-dependencies:
         dependency-type: development
+        update-types: ["minor", "patch"]
       production-dependencies:
         dependency-type: production
+        update-types: ["minor", "patch"]
+    ignore:
+      # Prisma 7 is a major migration (breaking client/generator changes) — adopt deliberately
+      # via a dedicated task (BACKLOG B-025), not through Dependabot.
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
