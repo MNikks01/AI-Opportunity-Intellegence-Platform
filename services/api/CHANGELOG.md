@@ -1,5 +1,15 @@
 # @aioi/api
 
+## 0.0.3
+
+### Patch Changes
+
+- Updated dependencies [333ffe7]
+- Updated dependencies [c2a8c88]
+- Updated dependencies [8a43b68]
+  - @aioi/auth@0.2.0
+  - @aioi/database@0.2.0
+
 ## 0.0.2
 
 ### Patch Changes
