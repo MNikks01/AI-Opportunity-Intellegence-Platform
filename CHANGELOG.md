@@ -16,6 +16,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Alerts engine** (B-017) — a new `Notification` model + org-scoped alert/notification repositories,
+  a pure trigger matcher (`NEW_TREND`, `SCORE_CROSSES`), and `evaluateTrendForOrg` that writes in-app
+  notifications for matched alerts. `alerts` + `notifications` tRPC routers (protected + RBAC
+  `alerts:read`/`:write`). RLS on `Alert` (EXISTS-via-parent) and `Notification` (direct-org). 6 tests
+  (matcher unit + engine/CRUD/mark-read + cross-tenant isolation). Pipeline auto-eval + email delivery
+  + web UI are follow-ups.
 - **Watchlists web UI** (B-016) — `apps/web` `/watchlists` (list + create + delete) and
   `/watchlists/[id]` (items + add/remove) as RSC pages driven by Server Actions over the RLS-enforced
   repository. A request-cached `getDevOrg` (idempotent `bootstrapUser`) stands in for a session until
