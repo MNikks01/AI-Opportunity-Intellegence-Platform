@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Row-Level Security** (B-014 cont., ADR-0003) — `FORCE` RLS + `tenant_isolation` policies on
+  org-scoped tables (Workspace/Watchlist/ApiKey/AuditLog/Brief/Subscription), a per-transaction org GUC
+  via `@aioi/database` `withOrgContext(orgId, fn)`, fail-closed by default. Proven with 4 integration
+  tests through a restricted (non-superuser) role. Note: the runtime must connect as a non-superuser
+  role for RLS to enforce (superusers bypass it) — wiring tracked as B-027.
 - **`@aioi/auth`** (B-014) — provider-neutral auth adapter (Clerk behind `ClerkAuthProvider`, a
   deterministic `StubAuthProvider` for dev/test), RBAC (5 roles → permission catalog, deny-by-default
   `can`/`requirePermission`), and a tenant guard. Wired into `@aioi/api` context + a `protectedProcedure`.
