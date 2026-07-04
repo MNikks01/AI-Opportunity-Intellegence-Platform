@@ -1,6 +1,6 @@
 {
   "name": "@aioi/ai-service",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "type": "module",
   "description": "Scoring (opportunity-scoring-engine), RAG, and action-plan generation; eval-gated.",
