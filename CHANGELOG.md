@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **`@aioi/auth`** (B-014) — provider-neutral auth adapter (Clerk behind `ClerkAuthProvider`, a
+  deterministic `StubAuthProvider` for dev/test), RBAC (5 roles → permission catalog, deny-by-default
+  `can`/`requirePermission`), and a tenant guard. Wired into `@aioi/api` context + a `protectedProcedure`.
+  Decision recorded in ADR-0002. (Clerk verification, RLS wiring, API-key auth, and sign-up bootstrap
+  are follow-on slices.)
 - **Foundation & docs** — Discovery, market research, personas, competitive analysis, vision,
   PRD, TRD, ADR-0001 (core stack), user stories, feature prioritization, UX flows, wireframes,
   design system, information architecture, DB design + ERD, API design + OpenAPI, system design
