@@ -64,6 +64,20 @@ Fly staging preview. Main adds: E2E (Playwright) → full llm-eval → prod depl
 Private networking between services; secrets in platform secret managers (rotation policy); WAF +
 per-IP/per-key rate limits at edge; TLS everywhere; least-privilege IAM via OIDC; secret scanning in CI.
 
+### Database roles (RLS enforcement — ADR-0003 / B-027)
+
+Two Postgres roles:
+
+- **Owner** (`DATABASE_URL`) — runs **migrations** (schema changes). Superuser/owner in dev.
+- **Restricted app role `aioi_app`** (`APP_DATABASE_URL`) — the **runtime** connects as this
+  `NOSUPERUSER NOBYPASSRLS` role so Row-Level Security actually enforces (superusers bypass RLS even
+  with FORCE). Created NOLOGIN by a migration; **LOGIN + password come from secrets in prod**, and are
+  granted locally/CI (`ALTER ROLE aioi_app WITH LOGIN PASSWORD …`). Grants: CRUD on all tables +
+  `ALTER DEFAULT PRIVILEGES` for future tables.
+
+If `APP_DATABASE_URL` is unset, the runtime falls back to `DATABASE_URL` (dev only — RLS will NOT
+enforce). Rotate the `aioi_app` password via infra; never commit the prod password.
+
 ## 8. Backup & disaster recovery (detail in DR/BACKUP docs)
 
 - Postgres: automated daily snapshots + PITR (WAL); tested restore runbook; RPO ≤ 15m, RTO ≤ 1h target.

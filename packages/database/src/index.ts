@@ -5,4 +5,5 @@
 export { prisma } from "./client";
 export * from "./repositories";
 export { withOrgContext } from "./rls";
+export { bootstrapUser, type BootstrapInput, type BootstrapResult } from "./bootstrap";
 export { $Enums, Prisma } from "@prisma/client";

@@ -44,6 +44,18 @@ App-layer `tenantGuard` asserts an org context; Postgres **RLS** (`SET LOCAL app
 backstop (helper lives in `@aioi/database`, wired in the follow-up slice). Client-supplied org ids are
 never trusted (`assertOrg` rejects mismatches).
 
+### D6 — API-key authentication (machine clients)
+
+Public API clients send `Authorization: Bearer aioi_<secret>`. We store only a **SHA-256 hash** of the
+key (never the raw secret; shown once at creation). A key belongs to an org (its tenant boundary) and
+carries **scopes** — a scope-down of the `Permission` catalog. `can()`/`requirePermission()` gate
+API-key contexts by scopes, so a key **can never exceed its scopes** regardless of nominal role.
+`ApiKeyAuthProvider` takes an injected hash lookup (decoupled from the DB); a `ChainAuthProvider` tries
+API-key auth first, then the session provider, via one entry point (`getAuthProvider`). Because the key
+resolves the org **before** any org context exists, the hash lookup must run on a **privileged path**
+(owner role or a SECURITY DEFINER function) — RLS on `ApiKey` otherwise hides it (ADR-0003); this
+lookup wiring lands with the API-key management endpoints.
+
 ## Consequences
 
 - **Positive:** provider-swappable; fully unit-testable without Clerk/DB (47 tests); one RBAC source of

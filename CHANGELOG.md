@@ -16,6 +16,20 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Sign-up bootstrap** (B-015) — `@aioi/database` `bootstrapUser({ clerkId, email, name })` idempotently
+  provisions a new user's tenant on first sign-in: User (Clerk mirror) + personal Organization + OWNER
+  Membership + personal Workspace, in one transaction that sets the org context for the RLS-protected
+  Workspace insert. Re-running returns the existing tenant. 2 integration tests. (Clerk-webhook trigger
+  wires up with the Clerk verifier.)
+- **API-key authentication** (B-014 cont., ADR-0002 D6) — `@aioi/auth` `ApiKeyAuthProvider`
+  (`Authorization: Bearer aioi_…`), SHA-256 hash-only storage, `generateApiKey`/`hashApiKey`, org-scoped
+  contexts gated by **scopes** (a key never exceeds its scopes), and a `ChainAuthProvider` (API key →
+  session) surfaced via `getAuthProvider`. 11 unit tests. DB-backed lookup + management endpoints follow.
+- **Restricted runtime DB role** (B-027, ADR-0003) — migration creates a `NOSUPERUSER NOBYPASSRLS`
+  `aioi_app` role (NOLOGIN; login/password from secrets in prod) with CRUD grants + default privileges;
+  the `@aioi/database` client connects via `APP_DATABASE_URL` (falls back to `DATABASE_URL`). This makes
+  RLS actually enforce at runtime — the whole test suite + RLS tests now run as `aioi_app` in CI and
+  assert a non-superuser identity.
 - **Row-Level Security** (B-014 cont., ADR-0003) — `FORCE` RLS + `tenant_isolation` policies on
   org-scoped tables (Workspace/Watchlist/ApiKey/AuditLog/Brief/Subscription), a per-transaction org GUC
   via `@aioi/database` `withOrgContext(orgId, fn)`, fail-closed by default. Proven with 4 integration

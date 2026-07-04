@@ -3,14 +3,25 @@
  * touching consumers (ADR-0001 D3, ADR-0002).
  */
 
+import type { Permission } from "./permissions";
+
 /** Organization roles (mirrors the Prisma `Role` enum). */
 export type Role = "OWNER" | "ADMIN" | "MEMBER" | "BILLING" | "VIEWER";
 
-/** The authenticated request context every handler resolves. `orgId` is the tenant boundary. */
+/** How the principal authenticated. */
+export type AuthKind = "user" | "apikey";
+
+/**
+ * The authenticated request context every handler resolves. `orgId` is the tenant boundary.
+ * For API keys, `userId` is `apikey:<id>` and `scopes` restrict access (checked instead of `role`).
+ */
 export interface AuthContext {
   userId: string;
   orgId: string;
   role: Role;
+  kind?: AuthKind;
+  /** Present for API-key auth: the granted permissions (scope-down; used by `can` instead of role). */
+  scopes?: readonly Permission[];
   email?: string;
 }
 
