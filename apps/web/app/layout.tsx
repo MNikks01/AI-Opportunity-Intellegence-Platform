@@ -24,6 +24,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/trends" style={{ color: "var(--fg-muted)" }}>
               Trends
             </a>
+            <a href="/watchlists" style={{ color: "var(--fg-muted)" }}>
+              Watchlists
+            </a>
           </nav>
         </header>
         <div style={{ maxWidth: 1040, margin: "0 auto", padding: "24px" }}>{children}</div>
