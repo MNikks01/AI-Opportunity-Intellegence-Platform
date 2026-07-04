@@ -1,0 +1,2 @@
+# Fast pre-push gate. Full gate (lint/build/format) runs in CI.
+pnpm typecheck && pnpm test

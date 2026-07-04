@@ -24,7 +24,13 @@ export default async function TrendsPage() {
           }}
         >
           {trends.map((t) => (
-            <TrendCard key={t.slug} slug={t.slug} title={t.title} summary={t.summary} scores={t.scores} />
+            <TrendCard
+              key={t.slug}
+              slug={t.slug}
+              title={t.title}
+              summary={t.summary}
+              scores={t.scores}
+            />
           ))}
         </div>
       )}

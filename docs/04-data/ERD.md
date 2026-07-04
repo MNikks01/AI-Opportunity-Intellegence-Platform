@@ -92,6 +92,7 @@ erDiagram
 ```
 
 ## Legend & notes
+
 - **Global (shared intelligence):** Source, IngestionRun, Signal, Trend, TrendSignal, Entity,
   TrendEntity, Score, ActionPlan, Embedding.
 - **Tenant-owned (RLS by `organizationId`):** Organization, Workspace, Membership, User(link),

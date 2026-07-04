@@ -7,6 +7,7 @@ Low-fi ASCII wireframes for the key screens. High-fidelity component specs come 
 Aesthetic target: Linear/Vercel/Stripe-quality density and calm (original identity — see Design System).
 
 ## App shell
+
 ```
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ [◧ Logo]  ⌘K Search…            🔔  ☾  [Workspace ▼]        [Avatar ▼]     │  top bar
@@ -25,6 +26,7 @@ Aesthetic target: Linear/Vercel/Stripe-quality density and calm (original identi
 ```
 
 ## W1 — Trend Dashboard
+
 ```
 Trends                                     [Source ▼][Topic ▼][Score ▼][Date ▼]  [Sort: Newest ▼]
 ┌───────────────────────────────────────────────┐  ┌──────────────────────────┐
@@ -42,6 +44,7 @@ Empty: "No trends match these filters — clear filters or broaden topics."
 ```
 
 ## W2 — Trend Detail (answers the 10 questions)
+
 ```
 ← Trends /  MCP servers for local models          [☆ Watch] [⤓ Export] [Share]
 ┌───────────────────────────────────────────────────────────────────────────┐
@@ -64,6 +67,7 @@ Pending score → row shows skeleton + "scoring…" + confidence-unknown badge.
 ```
 
 ## W3 — Opportunity Dashboard
+
 ```
 Opportunities            Filter: [Comp: Low][Monet: High][Difficulty: ≤Med]   Sort: Opportunity ▼
 ┌───────────────┬───────────────┬───────────────┐   cards grid, drill-through to Trend Detail
@@ -73,6 +77,7 @@ Opportunities            Filter: [Comp: Low][Monet: High][Difficulty: ≤Med]   
 ```
 
 ## W4 — Command palette (⌘K) & global search
+
 ```
 ┌ ⌘K ─────────────────────────────────────────┐
 │ Search trends, companies, models, actions…  │
@@ -86,16 +91,19 @@ Opportunities            Filter: [Comp: Low][Monet: High][Difficulty: ≤Med]   
 ```
 
 ## W5 — Onboarding
+
 ```
 Step 1/2  What best describes you?   ( ) Builder ( ) Founder ( ) Creator ( ) Agency ( ) Investor
 Step 2/2  Pick topics you care about  [Agents][MCP][RAG][Vision][Voice][DevTools][Funding] …  [Continue]
 ```
 
 ## W6 — Reports / Weekly (R2) & Admin (P0 basics)
+
 Reports: header KPIs row → charts (Recharts) → trend table (TanStack) → [Export PDF].
 Admin: users/orgs table, audit-log viewer, feature flags, source health.
 
 ## Review checklist
+
 - [x] Trend Detail visibly answers all ten discovery questions.
 - [x] Inverted scores labeled; pending/empty/error states shown.
 - [x] Command palette + global search present (per brief).

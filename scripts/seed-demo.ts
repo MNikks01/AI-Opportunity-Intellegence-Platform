@@ -14,9 +14,24 @@ const trend: TrendLike = {
     "Model Context Protocol server implementations for local LLMs surged this week across GitHub and HN.",
   status: "ACTIVE",
   signals: [
-    { source: "hackernews", externalId: "seed-hn-1", title: "Show HN: local MCP server", text: "MCP for local LLMs is taking off" },
-    { source: "github", externalId: "seed-gh-1", title: "awesome-mcp-local", text: "1.2k stars this week for a local MCP server" },
-    { source: "github", externalId: "seed-gh-2", title: "mcp-runtime", text: "runtime to host MCP tools on-device" },
+    {
+      source: "hackernews",
+      externalId: "seed-hn-1",
+      title: "Show HN: local MCP server",
+      text: "MCP for local LLMs is taking off",
+    },
+    {
+      source: "github",
+      externalId: "seed-gh-1",
+      title: "awesome-mcp-local",
+      text: "1.2k stars this week for a local MCP server",
+    },
+    {
+      source: "github",
+      externalId: "seed-gh-2",
+      title: "mcp-runtime",
+      text: "runtime to host MCP tools on-device",
+    },
   ],
 };
 

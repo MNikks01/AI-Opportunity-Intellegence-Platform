@@ -2,7 +2,7 @@
  * Data-access layer. Maps between the domain model (@aioi/shared, lowercase dims) and the Prisma
  * enums (UPPER_SNAKE). Services depend on these functions, not on Prisma directly.
  */
-import { $Enums } from "@prisma/client";
+import type { $Enums } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
 import { bandForValue } from "@aioi/shared";
 import { prisma } from "./client";
@@ -20,12 +20,21 @@ const DIM_TO_DB: Record<ScoreDimension, $Enums.ScoreDimension> = {
   difficulty: "DIFFICULTY",
   predictedLifetime: "PREDICTED_LIFETIME",
 };
-const DIM_FROM_DB = Object.fromEntries(
-  Object.entries(DIM_TO_DB).map(([k, v]) => [v, k]),
-) as Record<$Enums.ScoreDimension, ScoreDimension>;
+const DIM_FROM_DB = Object.fromEntries(Object.entries(DIM_TO_DB).map(([k, v]) => [v, k])) as Record<
+  $Enums.ScoreDimension,
+  ScoreDimension
+>;
 
-const BAND_TO_DB: Record<ScoreBand, $Enums.ScoreBand> = { low: "LOW", medium: "MEDIUM", high: "HIGH" };
-const BAND_FROM_DB: Record<$Enums.ScoreBand, ScoreBand> = { LOW: "low", MEDIUM: "medium", HIGH: "high" };
+const BAND_TO_DB: Record<ScoreBand, $Enums.ScoreBand> = {
+  low: "LOW",
+  medium: "MEDIUM",
+  high: "HIGH",
+};
+const BAND_FROM_DB: Record<$Enums.ScoreBand, ScoreBand> = {
+  LOW: "low",
+  MEDIUM: "medium",
+  HIGH: "high",
+};
 
 // ── writes ───────────────────────────────────────────────────────────────────
 export async function ensureSource(key: string): Promise<string> {

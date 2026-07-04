@@ -10,8 +10,18 @@ const trend: TrendLike = {
   title: "MCP servers for local models",
   status: "ACTIVE",
   signals: [
-    { source: "hackernews", externalId: "111", title: "Show HN: local MCP", text: "surging interest in MCP for local LLMs" },
-    { source: "github", externalId: "222", title: "repo x", text: "1.2k stars this week for an MCP server" },
+    {
+      source: "hackernews",
+      externalId: "111",
+      title: "Show HN: local MCP",
+      text: "surging interest in MCP for local LLMs",
+    },
+    {
+      source: "github",
+      externalId: "222",
+      title: "repo x",
+      text: "1.2k stars this week for an MCP server",
+    },
   ],
 };
 

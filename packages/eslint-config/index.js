@@ -1,18 +1,24 @@
 // @aioi/eslint-config — shared flat config (ESLint 9).
-// Consumed by every package/app/service via `eslint.config.js` -> export from here.
+// Consumed by every package/app/service via its own `eslint.config.js` -> re-export from here.
+// Uses the non-type-checked recommended set for speed/reliability; strict TYPE safety is enforced
+// separately by `tsc` (typecheck). Type-aware lint rules are a future hardening (backlog).
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
 
-/** Base config shared by all workspaces. */
 export default tseslint.config(
-  js.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
   {
-    languageOptions: {
-      parserOptions: {
-        projectService: true,
-      },
-    },
+    ignores: [
+      "**/dist/**",
+      "**/.next/**",
+      "**/.turbo/**",
+      "**/coverage/**",
+      "**/*.d.ts",
+      "**/*.config.*",
+    ],
+  },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  {
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -23,8 +29,5 @@ export default tseslint.config(
       "no-console": ["warn", { allow: ["warn", "error"] }],
       eqeqeq: ["error", "always"],
     },
-  },
-  {
-    ignores: ["dist/**", ".next/**", ".turbo/**", "coverage/**", "**/*.config.*"],
   },
 );

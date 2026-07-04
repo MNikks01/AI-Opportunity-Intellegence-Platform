@@ -53,7 +53,8 @@ describe("hackernews connector", () => {
       http.get(`${HN}/topstories.json`, () => HttpResponse.json([1])),
       http.get(`${HN}/item/1.json`, () => {
         calls += 1;
-        if (calls === 1) return new HttpResponse(null, { status: 429, headers: { "retry-after": "0" } });
+        if (calls === 1)
+          return new HttpResponse(null, { status: 429, headers: { "retry-after": "0" } });
         return HttpResponse.json(story(1));
       }),
     );

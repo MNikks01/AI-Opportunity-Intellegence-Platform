@@ -58,7 +58,11 @@ export class InMemoryScoreCache implements ScoreCache {
   }
 }
 
-export function cacheKey(trendId: string, dimension: ScoreDimension, rubricVersion: string): string {
+export function cacheKey(
+  trendId: string,
+  dimension: ScoreDimension,
+  rubricVersion: string,
+): string {
   return `${trendId}:${dimension}:${rubricVersion}`;
 }
 

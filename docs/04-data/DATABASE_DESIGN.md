@@ -5,6 +5,7 @@
 **Realized in:** `packages/database` (Prisma). Engine: PostgreSQL 16 + `pgvector`.
 
 ## 1. Principles
+
 - **Multi-tenant, shared-schema.** Every tenant-owned row carries `organizationId`; isolation via
   Postgres **Row-Level Security (RLS)** + an app-layer tenant guard (defense in depth). See MULTI_TENANCY.
 - **Global vs tenant data.** `Signal`, `Trend`, `Entity`, `Source` and their scores are **global**
@@ -16,31 +17,33 @@
 - **Money & scores:** scores are `smallint` 0–100 + `band` enum; monetary in integer minor units.
 
 ## 2. Core entities (summary)
-| Table | Scope | Purpose |
-|---|---|---|
-| `Organization` | tenant root | billing + RBAC boundary |
-| `User`, `Membership` | tenant | users + role in org (Owner/Admin/Member/Billing/Viewer) |
-| `Workspace` | tenant | personal/team container |
-| `Source` | global | a data source + its legality classification + rate config |
-| `IngestionRun` | global | one fetch execution (cursor, status, metrics) — append-only |
-| `Signal` | global | one raw item from a source (deduped by `sourceId`+`externalId`) |
-| `Trend` | global | cluster of signals; the consumed unit |
-| `TrendSignal` | global | M:N trend↔signal with weight |
-| `Entity` | global | Company/Model/Repo/Tool/MCPServer/Paper/Person |
-| `TrendEntity` | global | M:N trend↔entity with role |
-| `Score` | global | one dimension score for a trend @ rubricVersion (versioned) |
-| `ActionPlan` | global | generated suggestions blob for a trend @ promptVersion |
-| `Embedding` | global | pgvector embedding for trend/entity (semantic search/RAG) |
-| `Watchlist`, `WatchlistItem` | tenant | tracked trends/entities/topics |
-| `Alert` | tenant | alert rule on a watchlist (trigger, channel, cadence) |
-| `Brief` | tenant | generated daily/weekly digest + delivery/open tracking |
-| `Report` | tenant | saved/exported report |
-| `ApiKey` | tenant | hashed, scoped, metered public-API key |
-| `Subscription` | tenant | Stripe plan + entitlements |
-| `AuditLog` | tenant | append-only privileged/mutating actions |
-| `FeatureFlag` | global | typed flags (+ per-org overrides) |
+
+| Table                        | Scope       | Purpose                                                         |
+| ---------------------------- | ----------- | --------------------------------------------------------------- |
+| `Organization`               | tenant root | billing + RBAC boundary                                         |
+| `User`, `Membership`         | tenant      | users + role in org (Owner/Admin/Member/Billing/Viewer)         |
+| `Workspace`                  | tenant      | personal/team container                                         |
+| `Source`                     | global      | a data source + its legality classification + rate config       |
+| `IngestionRun`               | global      | one fetch execution (cursor, status, metrics) — append-only     |
+| `Signal`                     | global      | one raw item from a source (deduped by `sourceId`+`externalId`) |
+| `Trend`                      | global      | cluster of signals; the consumed unit                           |
+| `TrendSignal`                | global      | M:N trend↔signal with weight                                    |
+| `Entity`                     | global      | Company/Model/Repo/Tool/MCPServer/Paper/Person                  |
+| `TrendEntity`                | global      | M:N trend↔entity with role                                      |
+| `Score`                      | global      | one dimension score for a trend @ rubricVersion (versioned)     |
+| `ActionPlan`                 | global      | generated suggestions blob for a trend @ promptVersion          |
+| `Embedding`                  | global      | pgvector embedding for trend/entity (semantic search/RAG)       |
+| `Watchlist`, `WatchlistItem` | tenant      | tracked trends/entities/topics                                  |
+| `Alert`                      | tenant      | alert rule on a watchlist (trigger, channel, cadence)           |
+| `Brief`                      | tenant      | generated daily/weekly digest + delivery/open tracking          |
+| `Report`                     | tenant      | saved/exported report                                           |
+| `ApiKey`                     | tenant      | hashed, scoped, metered public-API key                          |
+| `Subscription`               | tenant      | Stripe plan + entitlements                                      |
+| `AuditLog`                   | tenant      | append-only privileged/mutating actions                         |
+| `FeatureFlag`                | global      | typed flags (+ per-org overrides)                               |
 
 ## 3. Prisma schema (excerpt — canonical version lives in `packages/database/schema.prisma`)
+
 ```prisma
 // ---------- Tenancy & identity ----------
 model Organization {
@@ -199,15 +202,18 @@ model AuditLog {
   @@index([organizationId, createdAt])
 }
 ```
-*(Watchlist items, alerts, brief, report, subscription, feature flags follow the same patterns; full
-schema in `packages/database`.)*
+
+_(Watchlist items, alerts, brief, report, subscription, feature flags follow the same patterns; full
+schema in `packages/database`.)_
 
 ## 4. Multi-tenancy & RLS
+
 - Session sets `app.current_org` (via `SET LOCAL`); RLS policy: `organizationId = current_setting('app.current_org')::uuid`
   on every tenant table. Global tables have no RLS (read-only shared intelligence).
 - App-layer `tenantGuard` also injects `organizationId` on every query as belt-and-suspenders.
 
 ## 5. Indexing & performance
+
 - Dedupe unique index `Signal(sourceId, externalId)`; score cache unique `Score(trendId,dimension,rubricVersion)`.
 - Dashboard hot paths: `Trend(status,lastSignalAt)`, `Score(dimension,value)`, `AuditLog(orgId,createdAt)`.
 - Full-text search: Postgres `tsvector` GIN index on `Trend(title,summary)`.
@@ -215,12 +221,14 @@ schema in `packages/database`.)*
 - Partition `Signal` and `AuditLog` by month at scale (documented, not enabled at MVP).
 
 ## 6. Migrations, backup, retention
+
 - Prisma Migrate; every migration reviewed by the (to-author) `prisma-migration-auditor` skill for lock
   safety + tenant-isolation. Backfills batched. See DISASTER_RECOVERY/BACKUP (Phase 16 dir).
 - Retention: raw `Signal` payloads pruned/aggregated after N days; `AuditLog` retained per compliance.
 - GDPR: `deletedAt` soft-delete + a hard-erasure job for account deletion (cascades tenant data).
 
 ## 7. Review checklist
+
 - [x] Every PRD object has a table; global vs tenant scope explicit.
 - [x] Idempotent ingestion (unique dedupe) + score cache key modeled.
 - [x] Multi-tenancy via RLS + app guard; audit log append-only.

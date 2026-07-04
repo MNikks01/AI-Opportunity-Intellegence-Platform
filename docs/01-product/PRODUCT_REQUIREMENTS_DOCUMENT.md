@@ -7,13 +7,16 @@
 ---
 
 ## 1. Overview
+
 An AI-powered intelligence platform that continuously monitors the AI ecosystem, deduplicates raw
 signals into **trends**, attaches a consistent **10-dimension opportunity scorecard + action plan**
 to each, and surfaces them through dashboards, alerts, briefs, reports, workspaces, and an API.
 It answers the ten discovery questions for every trend and tells users **what to do next.**
 
 ## 2. Goals & non-goals
+
 **Goals**
+
 - G1. Detect and cluster AI-ecosystem signals into trustworthy trends with < 24h latency (target < 1h for high-signal sources).
 - G2. Produce an explainable, consistent scorecard + action plan for every trend.
 - G3. Drive **acted-on opportunities** (north-star) via workspaces, alerts, briefs, and exports.
@@ -24,10 +27,12 @@ It answers the ten discovery questions for every trend and tells users **what to
 native mobile apps (responsive web + browser extension only).
 
 ## 3. Personas & priority
+
 MVP focus **Maya (Indie Builder) → David (Founder) → Sofia (Creator)**; expansion Priya (Agency),
 Marcus (Investor), Org Admin. See [Personas](../00-discovery/PERSONAS.md).
 
 ## 4. The core object model (product language)
+
 - **Signal** — one raw item from one source (a repo, post, paper, release, funding round).
 - **Trend** — a deduplicated cluster of related signals over time; the unit users consume.
 - **Scorecard** — the 10 scores + confidence + evidence attached to a Trend.
@@ -38,27 +43,29 @@ Marcus (Investor), Org Admin. See [Personas](../00-discovery/PERSONAS.md).
 - **Organization** — billing + membership + RBAC boundary (multi-tenant root).
 
 ## 5. The Trend Detail view → ten questions (traceability)
+
 Every trend detail answers the brief's ten questions via defined components:
 
-| Question | Component |
-|---|---|
-| What changed? | Executive Summary + signal timeline |
-| Why does it matter? | Summary + "Why it matters" callout |
-| Should I care? | Opportunity Score + persona-fit badges |
-| Is it worth building? | Business + Difficulty scores + Suggested MVP/Tech Stack |
-| Can I make money? | Monetization Score + Suggested Pricing/GTM |
-| Suitable for content? | Creator + SEO scores + Suggested Content/Keywords |
-| How difficult? | Difficulty Score + Suggested Architecture/DB schema |
-| How competitive? | Competition Score + competitor list |
-| Who is already winning? | Linked Entities (companies/repos/tools) + Funding |
-| What should I do next? | Action Plan (SaaS/app/extension/API/domains/names/launch plan) |
+| Question                | Component                                                      |
+| ----------------------- | -------------------------------------------------------------- |
+| What changed?           | Executive Summary + signal timeline                            |
+| Why does it matter?     | Summary + "Why it matters" callout                             |
+| Should I care?          | Opportunity Score + persona-fit badges                         |
+| Is it worth building?   | Business + Difficulty scores + Suggested MVP/Tech Stack        |
+| Can I make money?       | Monetization Score + Suggested Pricing/GTM                     |
+| Suitable for content?   | Creator + SEO scores + Suggested Content/Keywords              |
+| How difficult?          | Difficulty Score + Suggested Architecture/DB schema            |
+| How competitive?        | Competition Score + competitor list                            |
+| Who is already winning? | Linked Entities (companies/repos/tools) + Funding              |
+| What should I do next?  | Action Plan (SaaS/app/extension/API/domains/names/launch plan) |
 
 ## 6. AI scorecard specification
+
 Ten scores, each `{ value 0–100, band, confidence, rationale, evidence[] }`, produced by the
 `opportunity-scoring-engine` skill against a **versioned rubric** and validated by `llm-eval-harness`:
 
 Opportunity (composite) · Business · Developer · Creator · SEO · Competition* · Monetization ·
-Risk* · Difficulty* · Predicted Lifetime. *(**\*** inverted: high = worse; UI labels this clearly.)*
+Risk* · Difficulty* · Predicted Lifetime. _(**\*** inverted: high = worse; UI labels this clearly.)_
 
 **Action Plan generators** (each is an eval-gated prompt): Suggested SaaS Ideas, Mobile Apps,
 Chrome Extensions, APIs, Content, Keywords, Domains, Product Names, GTM Strategy, Pricing, Tech
@@ -70,9 +77,11 @@ rubric bump; composite computed from sub-scores, never re-guessed. See rubric + 
 `.claude/skills/opportunity-scoring-engine/`.
 
 ## 7. Feature scope & prioritization (MoSCoW × release)
+
 Full list in [FEATURE_PRIORITIZATION](FEATURE_PRIORITIZATION.md) (Phase 8); summary here.
 
 ### MVP (R1) — Must
+
 - Ingestion for the **Tier-1 legally-clean sources** (GitHub Trending/Releases, Hacker News,
   Product Hunt, ArXiv, Hugging Face, Reddit via OAuth, package registries, RSS newsletters).
 - Signal→Trend clustering; Trend Dashboard + **Trend Detail (scorecard + action plan)**.
@@ -82,6 +91,7 @@ Full list in [FEATURE_PRIORITIZATION](FEATURE_PRIORITIZATION.md) (Phase 8); summ
 - Landing page, docs, status page.
 
 ### R2 — Should
+
 - Competitor / Market Intelligence / Funding / Research dashboards; AI Company/Model/Prompt tracking.
 - Weekly Reports + exports (PDF); Team Workspace + seats; Slack/Discord/Telegram integrations.
 - **MCP Server Discovery**; GitHub Repository Intelligence; Developer Tool Tracking.
@@ -89,14 +99,18 @@ Full list in [FEATURE_PRIORITIZATION](FEATURE_PRIORITIZATION.md) (Phase 8); summ
 - Referral program; Growth/Analytics dashboards; Team/Business tiers.
 
 ### R3 — Could
+
 - Agent Marketplace; Affiliate system; Organization Dashboard (advanced governance/SSO); Blog CMS,
   Help Center, Feedback Portal, public Roadmap/Changelog; advanced report white-labeling.
 
 ### Won't (v1)
+
 Native mobile apps; ToS-restricted sources (X/LinkedIn scraping, unofficial Google Trends).
 
 ## 8. Data sources (product view; full legal/rate-limit matrix in TRD & skill)
+
 Tiered by legality/feasibility (see `.claude/skills/data-source-integration/references/legality-classification.md`):
+
 - **Tier 1 (build first, official/clean):** GitHub API + Releases, Hacker News API, Product Hunt
   API, ArXiv, Hugging Face Hub, Reddit OAuth, npm/PyPI, Papers with Code, RSS newsletters, model
   provider blogs/changelogs (OpenAI/Anthropic/Google/Mistral) via official feeds.
@@ -106,6 +120,7 @@ Tiered by legality/feasibility (see `.claude/skills/data-source-integration/refe
   API only), Google Trends (licensed provider or compliant dataset only).
 
 ## 9. Functional requirements (selected, testable)
+
 - FR-1 Ingestion jobs are idempotent, rate-limit-compliant, and record source legality classification.
 - FR-2 A Trend must aggregate ≥2 corroborating signals or be flagged "early signal / low confidence."
 - FR-3 Scorecard generation is triggered on trend create + on material signal change; results cached.
@@ -119,6 +134,7 @@ Tiered by legality/feasibility (see `.claude/skills/data-source-integration/refe
 - FR-10 Public API mirrors read models with per-key rate limits + usage metering for billing.
 
 ## 10. Non-functional requirements (NFRs)
+
 - **Performance:** dashboard TTFB < 500ms p75; API read p95 < 300ms; brief generation < 60s/user batch.
 - **Availability:** 99.9% for the web app + read API; ingestion may degrade gracefully.
 - **Scalability:** ingestion horizontally scalable; scorecard generation queue-backed and rate-limited.
@@ -130,11 +146,13 @@ Tiered by legality/feasibility (see `.claude/skills/data-source-integration/refe
 - **Observability:** structured logs, metrics, traces (OTel), LLM traces (Langfuse), health/readiness.
 
 ## 11. Monetization (summary; detail in PRICING_MODEL)
+
 Free (daily brief, limited trends, 1 watchlist) → **Pro $29/mo** (full scores, unlimited watchlists,
 alerts, semantic search) → **Team $99/mo** (seats, shared workspaces, reports, integrations) →
 **Business/API** (custom, API quota, SSO, white-label reports). Referral + affiliate in R2/R3.
 
 ## 12. Success metrics
+
 - **North-star:** Weekly Acted-On Opportunities.
 - **Activation:** % new users who set ≥1 watchlist + open ≥1 brief within 7 days (target ≥40%).
 - **Retention:** W4 retention ≥25% (Pro); brief open rate ≥35%.
@@ -142,17 +160,20 @@ alerts, semantic search) → **Team $99/mo** (seats, shared workspaces, reports,
 - **Monetization:** free→paid ≥3% (R2), net revenue retention ≥100% (Team/Business).
 
 ## 13. Release plan
+
 R1 MVP → private beta (10 design partners) → public beta → GA. R2 growth surfaces + API +
 integrations. R3 marketplace + governance + content/community surfaces. Tracked in [ROADMAP](../09-process/ROADMAP.md).
 
 ## 14. Assumptions & open questions
-- **A1:** Tier-1 sources provide enough signal for compelling trends without X/LinkedIn. *(Validate in beta.)*
-- **A2:** $29 Pro price clears for Maya/Sofia. *(Validate with pricing tests.)*
-- **A3:** pgvector suffices for semantic/RAG at MVP scale before a dedicated vector DB. *(TRD ADR.)*
+
+- **A1:** Tier-1 sources provide enough signal for compelling trends without X/LinkedIn. _(Validate in beta.)_
+- **A2:** $29 Pro price clears for Maya/Sofia. _(Validate with pricing tests.)_
+- **A3:** pgvector suffices for semantic/RAG at MVP scale before a dedicated vector DB. _(TRD ADR.)_
 - **Q1:** Clerk vs Auth.js for auth/orgs — decided in [ADR-0001](../adr/ADR-0001-core-stack.md).
 - **Q2:** Which licensed provider for funding + Google-Trends-equivalent data — spike in R2.
 
 ## 15. Phase-6 review checklist
+
 - [x] Every core feature mapped to a persona and a release.
 - [x] Ten discovery questions traced to Trend Detail components.
 - [x] Scorecard spec references the implementing skill + schema.

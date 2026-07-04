@@ -1,0 +1,46 @@
+name: 🐛 Bug report
+description: Something isn't working as expected
+labels: ["bug", "triage"]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Go to '...'
+        2. Click '...'
+        3. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - web
+        - api
+        - ai-service
+        - ingestion-service
+        - database
+        - ui
+        - infra/ci
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Node version, branch/commit.
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs / screenshots
+      description: Redact any secrets or PII before pasting.

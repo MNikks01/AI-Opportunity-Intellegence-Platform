@@ -36,14 +36,19 @@ export interface FetchDeps {
 
 const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
 
-async function getJson<T>(url: string, deps: Required<Pick<FetchDeps, "fetchImpl" | "sleep" | "maxRetries">>): Promise<T> {
+async function getJson<T>(
+  url: string,
+  deps: Required<Pick<FetchDeps, "fetchImpl" | "sleep" | "maxRetries">>,
+): Promise<T> {
   let attempt = 0;
   for (;;) {
     const res = await deps.fetchImpl(url);
     if (res.status === 429 || res.status >= 500) {
-      if (attempt >= deps.maxRetries) throw new Error(`HN fetch failed ${res.status} after ${attempt} retries`);
+      if (attempt >= deps.maxRetries)
+        throw new Error(`HN fetch failed ${res.status} after ${attempt} retries`);
       const retryAfter = Number(res.headers.get("retry-after"));
-      const backoff = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2 ** attempt * 200;
+      const backoff =
+        Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 2 ** attempt * 200;
       const jitter = Math.floor(Math.random() * 100);
       await deps.sleep(backoff + jitter);
       attempt += 1;
@@ -55,7 +60,10 @@ async function getJson<T>(url: string, deps: Required<Pick<FetchDeps, "fetchImpl
 }
 
 function stripHtml(s: string | undefined): string {
-  return (s ?? "").replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+  return (s ?? "")
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 /** Normalize a validated HN item to a SourceRecord (returns null if not a story-like item). */

@@ -1,0 +1,14 @@
+# Code ownership — reviewers auto-requested on matching paths.
+# Update handles as the team grows. Default owner:
+*                           @MNikks01
+
+# Areas (assign specialists here later)
+/apps/web/                  @MNikks01
+/services/api/              @MNikks01
+/services/ai-service/       @MNikks01
+/services/ingestion-service/ @MNikks01
+/packages/database/         @MNikks01
+/packages/ai-sdk/           @MNikks01
+/infra/                     @MNikks01
+/.github/                   @MNikks01
+/docs/                      @MNikks01

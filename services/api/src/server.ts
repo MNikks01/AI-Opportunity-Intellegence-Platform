@@ -30,13 +30,16 @@ export function buildServer(): FastifyInstance {
   app.get<{ Params: { slug: string } }>("/api/v1/trends/:slug", async (req, reply) => {
     const trend = await getTrendBySlug(req.params.slug);
     if (!trend) {
-      return reply.code(404).type("application/problem+json").send({
-        type: "about:blank",
-        title: "Not Found",
-        status: 404,
-        detail: `No trend with slug '${req.params.slug}'`,
-        code: "trend_not_found",
-      });
+      return reply
+        .code(404)
+        .type("application/problem+json")
+        .send({
+          type: "about:blank",
+          title: "Not Found",
+          status: 404,
+          detail: `No trend with slug '${req.params.slug}'`,
+          code: "trend_not_found",
+        });
     }
     return trend;
   });

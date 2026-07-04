@@ -35,13 +35,17 @@ async function main() {
   console.log(`\n→ Scoring trend: "${trend.title}"`);
   const scores = await scoreTrend(trend);
   for (const s of scores) {
-    const inverted = ["competition", "risk", "difficulty"].includes(s.dimension) ? " (high=worse)" : "";
+    const inverted = ["competition", "risk", "difficulty"].includes(s.dimension)
+      ? " (high=worse)"
+      : "";
     console.log(
       `  ${s.dimension.padEnd(18)} ${String(s.value).padStart(3)}  ${s.band.padEnd(6)} conf ${s.confidence}${inverted}`,
     );
   }
   const opp = scores.find((s) => s.dimension === "opportunity");
-  console.log(`\n✓ Opportunity ${opp?.value} (${opp?.band}) — composed from ${opp?.composedFrom?.length} sub-dimensions.`);
+  console.log(
+    `\n✓ Opportunity ${opp?.value} (${opp?.band}) — composed from ${opp?.composedFrom?.length} sub-dimensions.`,
+  );
 }
 
 main().catch((e) => {

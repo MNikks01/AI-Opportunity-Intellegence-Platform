@@ -4,6 +4,7 @@
 **Traces to:** [TRD §2 D2](../01-product/TECHNICAL_REQUIREMENTS_DOCUMENT.md) · [DB Design](../04-data/DATABASE_DESIGN.md) · [OpenAPI](openapi.yaml)
 
 ## 1. Surfaces
+
 - **Internal (web ⇄ api): tRPC v11.** End-to-end types, no codegen, Zod input/output shared with
   `packages/validation`. Organized by router: `trends`, `opportunities`, `entities`, `watchlists`,
   `alerts`, `briefs`, `search`, `workspace`, `org`, `billing`, `admin`.
@@ -14,6 +15,7 @@
   Slack/Discord/Telegram/customer endpoints; HMAC-signed, verified, retried.
 
 ## 2. Conventions (both surfaces)
+
 - **Auth:** web = Clerk session (tRPC context); public = `Authorization: Bearer <api_key>` (hashed,
   scoped, rate-limited, metered). JWTs (short access + rotating refresh) for first-party mobile/extension.
 - **Errors:** RFC 9457 problem+json for REST; typed `TRPCError` internally. Envelope:
@@ -27,44 +29,58 @@
 - **Observability:** every request traced (OTel), audit-logged if mutating, cost-tagged if it triggers AI.
 
 ## 3. Core REST resources (`/api/v1`)
-| Method & path | Purpose | Scope |
-|---|---|---|
-| `GET /trends` | list/filter/sort trends (+scores summary) | `trends:read` |
-| `GET /trends/{id}` | trend detail: scores + evidence + action plan | `trends:read` |
-| `GET /trends/{id}/scores` | full scorecard | `trends:read` |
-| `GET /opportunities` | trends via opportunity lens (score filters) | `trends:read` |
-| `GET /entities/{type}/{id}` | company/model/repo/... detail + trends | `entities:read` |
-| `GET /search?q=&mode=keyword\|semantic` | search trends/entities | `search:read` |
-| `GET/POST /watchlists`, `GET/PATCH/DELETE /watchlists/{id}` | manage watchlists | `watchlists:*` |
-| `POST /watchlists/{id}/items`, `DELETE …/items/{itemId}` | track/untrack | `watchlists:write` |
-| `GET/POST /alerts`, `PATCH/DELETE /alerts/{id}` | alert rules | `alerts:*` |
-| `GET /briefs`, `GET /briefs/{id}` | briefs (read + delivery status) | `briefs:read` |
-| `GET/POST /reports`, `GET /reports/{id}` (+ `?format=pdf`) | reports/exports | `reports:*` |
-| `POST /api-keys`, `GET /api-keys`, `DELETE /api-keys/{id}` | key lifecycle | `org:admin` |
-| `GET /me`, `GET /org` | identity + org context | authed |
-| `POST /webhooks/stripe` | Stripe events (verified signature) | system |
+
+| Method & path                                               | Purpose                                       | Scope              |
+| ----------------------------------------------------------- | --------------------------------------------- | ------------------ |
+| `GET /trends`                                               | list/filter/sort trends (+scores summary)     | `trends:read`      |
+| `GET /trends/{id}`                                          | trend detail: scores + evidence + action plan | `trends:read`      |
+| `GET /trends/{id}/scores`                                   | full scorecard                                | `trends:read`      |
+| `GET /opportunities`                                        | trends via opportunity lens (score filters)   | `trends:read`      |
+| `GET /entities/{type}/{id}`                                 | company/model/repo/... detail + trends        | `entities:read`    |
+| `GET /search?q=&mode=keyword\|semantic`                     | search trends/entities                        | `search:read`      |
+| `GET/POST /watchlists`, `GET/PATCH/DELETE /watchlists/{id}` | manage watchlists                             | `watchlists:*`     |
+| `POST /watchlists/{id}/items`, `DELETE …/items/{itemId}`    | track/untrack                                 | `watchlists:write` |
+| `GET/POST /alerts`, `PATCH/DELETE /alerts/{id}`             | alert rules                                   | `alerts:*`         |
+| `GET /briefs`, `GET /briefs/{id}`                           | briefs (read + delivery status)               | `briefs:read`      |
+| `GET/POST /reports`, `GET /reports/{id}` (+ `?format=pdf`)  | reports/exports                               | `reports:*`        |
+| `POST /api-keys`, `GET /api-keys`, `DELETE /api-keys/{id}`  | key lifecycle                                 | `org:admin`        |
+| `GET /me`, `GET /org`                                       | identity + org context                        | authed             |
+| `POST /webhooks/stripe`                                     | Stripe events (verified signature)            | system             |
 
 ## 4. Example (trend detail response — shape)
+
 ```jsonc
 {
-  "id": "…", "slug": "mcp-servers-local-models", "title": "MCP servers for local models",
-  "status": "ACTIVE", "summary": "…executive summary…",
+  "id": "…",
+  "slug": "mcp-servers-local-models",
+  "title": "MCP servers for local models",
+  "status": "ACTIVE",
+  "summary": "…executive summary…",
   "scores": [
-    { "dimension": "opportunity", "value": 82, "band": "high", "confidence": 0.74,
-      "rationale": "…", "evidence": ["signal:…","entity:…"], "rubricVersion": "2026-07-01" }
+    {
+      "dimension": "opportunity",
+      "value": 82,
+      "band": "high",
+      "confidence": 0.74,
+      "rationale": "…",
+      "evidence": ["signal:…", "entity:…"],
+      "rubricVersion": "2026-07-01",
+    },
     /* …10 dimensions… */
   ],
-  "actionPlan": { "saasIdeas": ["…"], "keywords": ["…"], "techStack": ["…"], /* … */ },
+  "actionPlan": { "saasIdeas": ["…"], "keywords": ["…"], "techStack": ["…"] /* … */ },
   "entities": [{ "type": "repo", "id": "…", "name": "…", "role": "leading" }],
-  "signals": [{ "source": "github", "url": "…", "publishedAt": "…" }]
+  "signals": [{ "source": "github", "url": "…", "publishedAt": "…" }],
 }
 ```
 
 ## 5. tRPC ↔ REST parity
+
 REST read models are generated views over the same service layer the tRPC routers call — single
 business-logic layer (`services/api/src/modules/*`), two transports. No logic duplicated.
 
 ## 6. Review checklist
+
 - [x] Internal tRPC + public REST/OpenAPI justified and both specified.
 - [x] Auth, errors (RFC 9457), pagination, rate limits, idempotency, versioning conventions set.
 - [x] Every resource maps to a DB entity + RBAC scope.

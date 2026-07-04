@@ -7,11 +7,14 @@
   "types": "./src/index.ts",
   "description": "Prisma client + schema + migrations (Postgres + pgvector).",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && tsc -p tsconfig.json",
     "dev": "tsc -w -p tsconfig.json",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
