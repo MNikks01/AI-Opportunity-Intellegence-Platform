@@ -10,6 +10,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 
 ## [Unreleased]
 
+### Changed
+- deps: adopt safe major dependency bumps validated by CI — turbo 2.10, @types/node 26, pino 10,
+  next 16, lint-staged 17, @commitlint/{cli,config-conventional} 21, zod 4, eslint 10. (TypeScript 6
+  held back — fails typecheck; tracked as B-026.)
+
 ### Added
 - **Foundation & docs** — Discovery, market research, personas, competitive analysis, vision,
   PRD, TRD, ADR-0001 (core stack), user stories, feature prioritization, UX flows, wireframes,

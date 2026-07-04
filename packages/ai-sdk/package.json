@@ -17,7 +17,7 @@
   "dependencies": {
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",
-    "zod": "^3.23.8"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@aioi/eslint-config": "workspace:*",
