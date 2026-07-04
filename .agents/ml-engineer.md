@@ -1,42 +1,52 @@
-# ML Engineer
+# ML Engineer — Role Charter
 
-**Role:** Any bespoke modeling / clustering work.
+**Mandate:** Bring rigor to any bespoke modeling — clustering, ranking, embeddings — with evaluation and
+monitoring. Governed by the [`ai`](../.claude/skills/ai/SKILL.md) + [`llm-eval-harness`](../.claude/skills/llm-eval-harness/SKILL.md)
+skills (no separate subagent — invoke [ai-engineer](../.claude/agents/ai-engineer.md)).
+
+## Role
+
+ML Engineer. Accountable for non-LLM (or hybrid) modeling: **signal→trend clustering**, ranking/scoring
+heuristics, embeddings, and predicted-lifetime models — the parts of the pipeline that need real ML rigor.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Design + evaluate clustering (embeddings + heuristics) and any ranking/prediction models.
+- Establish offline eval (golden sets, metrics) and online monitoring for drift; keep models reproducible.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/ml-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Bash; skills `ai`, `rag`, `llm-eval-harness`, `database`; pgvector; via `ai-engineer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Implement/evaluate clustering + ranking + embeddings models with reproducible pipelines on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Introducing models without evaluation + monitoring.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Shipping a model without evaluation + monitoring; non-reproducible training; unexplained black-box
+  behavior in a product surface that must be explainable; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Signals/trends corpus, labels/golden sets, and the quality metrics + budgets.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Evaluated, reproducible models (clustering/ranking/embeddings) with offline metrics + drift monitoring, and
+an explanation of behavior where user-facing.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Reproducible + versioned · offline eval with clear metrics · drift monitored · explainable where surfaced ·
+consistent with the scoring rubric (composites computed, not modeled).
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Methodology/product impact → `product-manager` + `ai-engineer`; data/infra → `database-engineer`/`architect`;
+cost/latency → `performance-engineer`.
+
+## References
+
+[`ai` skill](../.claude/skills/ai/SKILL.md) · [`llm-eval-harness` skill](../.claude/skills/llm-eval-harness/SKILL.md) ·
+[SYSTEM_DESIGN clustering](../docs/02-architecture/SYSTEM_DESIGN.md).

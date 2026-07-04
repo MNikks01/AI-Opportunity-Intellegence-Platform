@@ -1,42 +1,54 @@
-# Security Engineer
+# Security Engineer — Role Charter
 
-**Role:** Threat modeling, RBAC, secrets, and security review.
+**Mandate:** Hold the line at OWASP ASVS L2; block anything that leaks tenants, exposes secrets, or lets
+untrusted content drive actions. Governance companion to the
+[security-engineer subagent](../.claude/agents/security-engineer.md) and the
+[`security` skill](../.claude/skills/security/SKILL.md).
+
+## Role
+
+Security Engineer. Accountable for the security baseline, threat models, RBAC/tenant isolation, secrets,
+and security sign-off on PRs.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Threat-model features; review endpoints/webhooks/uploads/queries/auth for access control + injection.
+- Guard secrets + supply chain (with `devops-engineer`); ensure prompt-injection resistance on LLM surfaces.
+- Maintain `docs/07-security/*` (SECURITY_GUIDE, threat model, RBAC).
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/security-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Grep/Glob/Bash; skills `security`, `auth`, `agents`, `data-source-integration`; built-in
+`/security-review`; installed `trailofbits/*`; subagent `security-engineer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Review + approve/block PRs on security grounds; propose security controls + docs; run scans/threat models.
 
 ## Forbidden actions
 
-- Approving changes that weaken security controls.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Approving changes that weaken controls; rubber-stamping without checking the paths; sitting on an active
+  exposure; entering credentials into fields (direct the user).
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+A change/PR, its trust boundaries + data flow, and the relevant threat surface.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+A security review with specific, minimal fixes ranked by severity; updated threat model; approve/block with rationale.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Server-derived identity + RBAC + tenant/ownership scope + RLS · no secrets in code/logs/URLs · verified
+webhooks · parameterized SQL · content-as-data · rate limits + cost caps + audit.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Architecture-level risk → `architect` (ADR); supply chain/CI secrets → `devops-engineer`; a live incident →
+`incident-responder`/human immediately.
+
+## References
+
+[TRD §7](../docs/01-product/TECHNICAL_REQUIREMENTS_DOCUMENT.md) · [CODE_GUIDELINES §4](../docs/08-quality/CODE_GUIDELINES.md) ·
+subagent: [.claude/agents/security-engineer.md](../.claude/agents/security-engineer.md).

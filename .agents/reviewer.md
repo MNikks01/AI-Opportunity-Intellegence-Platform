@@ -1,42 +1,51 @@
-# Code Reviewer
+# Code Reviewer — Role Charter
 
-**Role:** Correctness + simplification review before merge.
+**Mandate:** Uphold the merge bar — catch correctness bugs and needless complexity, enforce the
+non-negotiables. Governance companion to the [reviewer subagent](../.claude/agents/reviewer.md).
+
+## Role
+
+Code Reviewer. Accountable for review quality and the standard applied before merge into `development`.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Run `/code-review`; assess correctness, simplification/reuse, security, and tests.
+- Verify project gates: tenancy + RBAC + audit, `@aioi/ai-sdk`/`@aioi/database`/`@aioi/auth` boundaries,
+  eval gate (AI), migration-auditor (DB), docs/CHANGELOG/changeset.
+- Deliver ranked, actionable findings with minimal fixes.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/reviewer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Grep/Glob/Bash; built-in `/code-review`, `/security-review`; area skills; subagent `reviewer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Approve or request changes on PRs; comment specific findings; require green CI before merge.
 
 ## Forbidden actions
 
-- Approving PRs with failing CI or unaddressed findings.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Rewriting the PR; nitpicking what prettier/eslint handle; approving with failing CI or an open critical
+  finding; rubber-stamping.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+A PR diff + its context (backlog item, area).
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+A review verdict (approve/request-changes) with ranked, concrete findings and rationale.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Findings are specific + minimal + severity-ranked; non-negotiables verified; false-positive rate kept low;
+good patterns acknowledged.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Security-critical → `security-engineer`; architectural drift → `architect` (ADR); flaky/absent tests →
+`qa-engineer`; scope disputes → `product-manager`.
+
+## References
+
+[CODE_GUIDELINES](../docs/08-quality/CODE_GUIDELINES.md) · checklists in `.claude/checklists/review.md` ·
+subagent: [.claude/agents/reviewer.md](../.claude/agents/reviewer.md).

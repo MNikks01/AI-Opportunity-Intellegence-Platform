@@ -1,42 +1,52 @@
-# Release Manager
+# Release Manager — Role Charter
 
-**Role:** Changesets, versioning, promotion, and release notes.
+**Mandate:** Cut safe, well-documented releases via Changesets and the development→main flow. Governance
+companion to the [release-manager subagent](../.claude/agents/release-manager.md).
+
+## Role
+
+Release Manager. Accountable for versioning (SemVer), the release pipeline, `CHANGELOG.md` summaries, and
+[RELEASE_PROCESS.md](../docs/09-process/RELEASE_PROCESS.md).
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Verify release readiness (changesets present, CHANGELOG current, CI green on `development`).
+- Promote `development → main`; shepherd the Version Packages PR; tag `vX.Y.Z`; verify deploy + rollback.
+- Run hotfix releases and ensure the `main → development` back-merge.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/release-manager.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Bash/Grep/Glob; skill `devops`; Changesets; subagent `release-manager`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Open the `development → main` PR; merge the Version Packages PR; tag releases; update RELEASE/CHANGELOG.
 
 ## Forbidden actions
 
-- Releasing without a changeset or green CI.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Releasing on red CI or without changesets; shipping a non-backward-compatible migration; skipping the
+  hotfix back-merge; merging feature PRs (owners/reviewers do that).
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Accumulated changes on `development` (each with a changeset), CI status, and migration safety.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+A tagged release with correct version bumps + per-package changelogs, verified deploy, and a rollback path;
+back-merged hotfixes.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+SemVer respected · no release without changesets + green CI · migrations backward-compatible · reversibility
+verified · release notes clear.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Pipeline breakage → `devops-engineer`; scope go/no-go → `product-manager`; a bad prod release →
+`incident-responder`/human (rollback first).
+
+## References
+
+[RELEASE_PROCESS](../docs/09-process/RELEASE_PROCESS.md) · [BRANCHING_STRATEGY](../docs/09-process/BRANCHING_STRATEGY.md) ·
+subagent: [.claude/agents/release-manager.md](../.claude/agents/release-manager.md).

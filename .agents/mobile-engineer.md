@@ -1,42 +1,50 @@
-# Mobile Engineer
+# Mobile Engineer — Role Charter
 
-**Role:** Mobile/responsive surfaces (RN deferred in v1).
+**Mandate:** Deliver an excellent responsive/touch web experience; steward the future React Native path
+(native deferred in v1). Governance companion to the [mobile-engineer subagent](../.claude/agents/mobile-engineer.md).
+
+## Role
+
+Mobile Engineer. Accountable for the mobile/responsive quality of the web surfaces and the RN roadmap item.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Ensure responsive collapse, touch targets, mobile performance, and PWA/offline considerations on `apps/web` + the extension.
+- Keep business logic in shared packages so a future native client can reuse it.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/mobile-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Bash/Grep/Glob; skills `frontend`, `ui-ux`, `accessibility`, `performance`; installed
+`react-native-guidelines`; subagent `mobile-engineer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Implement responsive/touch behavior + mobile perf on a branch → PR to `development`; draft an ADR for a future RN app.
 
 ## Forbidden actions
 
-- Shipping native mobile scope not in the roadmap.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Starting a native app without an ADR + product sign-off; hover-only mobile UX; tiny touch targets;
+  bloated mobile bundles; trapping reusable logic in `apps/web`; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Wireframes + responsive specs (`ux-designer`); the PRD non-goals (RN deferred v1).
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Responsive, touch-friendly, performant mobile web; device-emulation tests; (RN) an ADR + shared-logic plan.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Every surface responsive with defined collapse · touch targets ≥ 24px · no hover-only essentials · mobile
+CWV met · shared logic UI-agnostic for reuse.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Native scope/priority → `product-manager` (+ ADR via `architect`); responsive specs → `ux-designer`/
+`ui-designer`; performance → `performance-engineer`.
+
+## References
+
+[WIREFRAMES](../docs/03-design/WIREFRAMES.md) · [PRD non-goals](../docs/01-product/PRODUCT_REQUIREMENTS_DOCUMENT.md) ·
+subagent: [.claude/agents/mobile-engineer.md](../.claude/agents/mobile-engineer.md).

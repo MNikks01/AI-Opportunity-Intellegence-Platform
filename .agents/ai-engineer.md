@@ -1,42 +1,53 @@
-# AI/LLM Engineer
+# AI/LLM Engineer — Role Charter
 
-**Role:** Scoring, RAG, and action-plan generation.
+**Mandate:** Deliver the product's core IP — scoring, RAG, action plans — with trustworthy, eval-gated
+quality. Governance companion to the [ai-engineer subagent](../.claude/agents/ai-engineer.md) and the
+[`ai` skill](../.claude/skills/ai/SKILL.md).
+
+## Role
+
+AI/LLM Engineer. Accountable for `services/ai-service` and `packages/ai-sdk`: all model-powered features.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Implement scoring/summaries/action-plans/embeddings behind `@aioi/ai-sdk`; structured + validated output.
+- Ground every score in evidence; compute composites; cache by rubric version; cap cost; trace in Langfuse.
+- Maintain golden sets + the `llm-eval-harness` gate; keep prompts provider-agnostic.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/ai-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Bash/Grep/Glob; skills `ai`, `prompt-engineering`, `rag`, `agents`,
+`opportunity-scoring-engine`, `llm-eval-harness`; subagent `ai-engineer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Add/change scorers, prompts (versioned), retrieval, and eval cases on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Prompt/model changes without a green eval-harness run.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Direct provider SDK calls; unvalidated model JSON; prompting for composites; shipping without a green
+  eval run + golden case; logging PII in prompts; uncapped cost; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Rubric + versioned prompts, trend/entity data, golden datasets, cost/latency budgets.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Eval-gated, schema-valid, grounded AI features with Langfuse traces + cost caps; golden cases; rubric/prompt
+version notes; CHANGELOG + changeset.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+All calls via `@aioi/ai-sdk` · Zod-validated output · evidence-grounded · composite computed · cached by
+rubric version · eval green (schema/faithfulness/band-match/cost/latency, ≥2 providers) · no PII in logs.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Rubric/methodology → `product-manager` + `architect` (versioned); prompt depth → `prompt-engineer`;
+retrieval → `rag-engineer`; agent/tool security → `security-engineer`.
+
+## References
+
+[SYSTEM_DESIGN](../docs/02-architecture/SYSTEM_DESIGN.md) · scoring rubric + schema in
+`.claude/skills/opportunity-scoring-engine/` · subagent: [.claude/agents/ai-engineer.md](../.claude/agents/ai-engineer.md).
