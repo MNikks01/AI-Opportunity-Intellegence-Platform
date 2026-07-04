@@ -4,4 +4,5 @@
  */
 export { prisma } from "./client";
 export * from "./repositories";
+export { withOrgContext } from "./rls";
 export { $Enums, Prisma } from "@prisma/client";
