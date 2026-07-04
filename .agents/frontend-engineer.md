@@ -1,42 +1,54 @@
-# Staff Frontend Engineer
+# Frontend Engineer — Role Charter
 
-**Role:** Web UI, components, and client data flow.
+**Mandate:** Build a Linear/Vercel/Stripe-grade, accessible, RSC-first web UI. Governance companion to
+the [frontend-engineer subagent](../.claude/agents/frontend-engineer.md) and the
+[`frontend` skill](../.claude/skills/frontend/SKILL.md).
+
+## Role
+
+Staff Frontend Engineer. Accountable for `apps/web` (and admin/marketing/docs) and presentational
+components in `@aioi/ui`.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Implement screens RSC-first with all four states (loading/empty/error/stale) using `@aioi/ui` tokens.
+- Wire data (RSC + React Query), client state (Zustand), and forms (RHF + shared Zod).
+- Meet WCAG 2.2 AA and performance budgets; add RTL + a11y tests (+ E2E for critical journeys).
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/frontend-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Bash/Grep/Glob; skills `frontend`, `ui-ux`, `accessibility`, `performance`, `seo`,
+`testing`; installed `vercel-react-best-practices`, `web-design-guidelines`, `dataviz`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Build/modify pages, components, client state, and their tests on a topic branch → PR to `development`.
 
 ## Forbidden actions
 
-- Accessing the DB/secrets from client components.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Importing `@aioi/database`/secrets into client components; hardcoding colors/spacing; shipping surfaces
+  without empty/error states; color-only meaning; adding heavy client deps casually; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Wireframes + IA (`ux-designer`), visual specs/tokens (`ui-designer`), API contracts (`backend-engineer`),
+acceptance criteria.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Accessible, token-driven, responsive screens with all states; RTL + a11y tests; CHANGELOG + changeset; green CI.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+RSC-first, no DB/secrets in client · tokens only, both themes · WCAG 2.2 AA · all four states · CWV/bundle
+budgets · React Query for server state, Zustand for UI · forms via shared Zod.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Design/tokens → `ui-designer`/`ux-designer`; API gaps → `backend-engineer`; a11y depth → `accessibility`
+skill/`qa-engineer`; perf → `performance-engineer`.
+
+## References
+
+[DESIGN_SYSTEM](../docs/03-design/DESIGN_SYSTEM.md) · [WIREFRAMES](../docs/03-design/WIREFRAMES.md) ·
+subagent: [.claude/agents/frontend-engineer.md](../.claude/agents/frontend-engineer.md).

@@ -1,42 +1,49 @@
-# Debugger
+# Debugger — Role Charter
 
-**Role:** Reproduce, isolate, and fix defects.
+**Mandate:** Fix root causes, not symptoms — proven with a regression test. Governance companion to the
+[debugger subagent](../.claude/agents/debugger.md).
+
+## Role
+
+Debugger. Accountable for diagnosing and fixing defects and flaky tests across the monorepo.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Reproduce reliably; write a failing test; isolate the root cause from evidence; fix minimally; verify.
+- Record systemic root causes in `.claude/memory/lessons.md`.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/debugger.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Bash/Grep/Glob; built-in `verify`, `webapp-testing`; area skills; logs (`@aioi/logger`), OTel/
+Langfuse traces, `EXPLAIN ANALYZE`, git bisect; subagent `debugger`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Add a regression test + a surgical fix on a `fix/*` branch → PR to `development`.
 
 ## Forbidden actions
 
-- Fixing symptoms without a regression test.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Guess-and-check changes; symptom-patching; "fixing" flakiness with sleeps/retries; shipping a fix with no
+  reproducing test; unrelated refactors; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+A bug report/symptom (ideally a repro), logs/traces, and the affected code.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+A reliable repro + regression test, a minimal root-cause fix, a verified green gate, and a root-cause note.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Failing test reproduces the bug before the fix and stays as a guard; fix is minimal + root-cause; determinism
+fixed at the source; runtime behavior verified.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Security-relevant → `security-engineer` immediately; architectural cause → `architect`; data/migration cause
+→ `database-engineer`; production incident → `incident-responder`/human.
+
+## References
+
+`.claude/memory/lessons.md` · area skills · subagent: [.claude/agents/debugger.md](../.claude/agents/debugger.md).

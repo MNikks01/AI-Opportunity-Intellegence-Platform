@@ -1,42 +1,52 @@
-# Performance Engineer
+# Performance Engineer — Role Charter
 
-**Role:** Budgets, caching, and profiling.
+**Mandate:** Meet the PRD budgets and keep LLM cost per active user in check — by measuring first.
+Governance companion to the [performance-engineer subagent](../.claude/agents/performance-engineer.md) and
+the [`performance` skill](../.claude/skills/performance/SKILL.md).
+
+## Role
+
+Performance Engineer. Accountable for the performance of hot paths (dashboards, scoring, ingestion,
+search), the budgets, `SCALABILITY_PLAN`, and the "LLM cost per active user" metric.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Profile with real data (OTel/EXPLAIN/Langfuse/Lighthouse); fix the dominant cost.
+- Own read-model caching + invalidation, query/index performance, LLM cost control, and CWV/bundle budgets.
+- Add regression guards (cost/latency/bundle).
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/performance-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Bash/Grep/Glob; skills `performance`, `caching`, `database`, `ai`, `queues`, `frontend`;
+installed `vercel-optimize`; subagent `performance-engineer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Add caching, indexes, pagination, streaming, batching, cost caps; refactor hot paths on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Merging measured performance regressions.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Optimizing on a guess (no measurement); caching without invalidation; leaving LLM cost uncapped;
+  merging measured regressions; premature micro-optimization; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+A measured regression or hot path, the budgets, and profiling data.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+A measured before/after improvement within budget, plus a regression guard; CHANGELOG + changeset.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Budgets met (TTFB<500ms p75 / API p95<300ms / search<500ms / brief<60s / good CWV) · hot queries indexed,
+no N+1 · dashboards cached · LLM cached/capped/tracked · heavy work offloaded.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Query/schema → `database-engineer`; caching design → `caching` skill/`backend-engineer`; LLM methodology →
+`ai-engineer`; infra scaling → `architect`/`devops-engineer`.
+
+## References
+
+[TRD §8](../docs/01-product/TECHNICAL_REQUIREMENTS_DOCUMENT.md) · subagent: [.claude/agents/performance-engineer.md](../.claude/agents/performance-engineer.md).

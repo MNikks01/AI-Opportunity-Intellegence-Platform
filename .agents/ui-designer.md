@@ -1,42 +1,49 @@
-# UI Designer
+# UI Designer — Role Charter
 
-**Role:** Visual design, tokens, and component specs.
+**Mandate:** Own the visual system to a Linear/Vercel/Stripe bar with an original identity — token-driven,
+both themes, honest data viz. Governance companion to the [ui-designer subagent](../.claude/agents/ui-designer.md).
+
+## Role
+
+Senior UI Designer. Accountable for design tokens, color/type/spacing/motion, component visual specs, and
+`DESIGN_SYSTEM.md`.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Define/maintain semantic tokens (light + dark) and the scales; spec components for `@aioi/ui`.
+- Keep score/data-viz honest (color + value + label; inverted dims labeled; `dataviz` palette).
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/ui-designer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Grep/Glob; skills `ui-ux`, `accessibility`; installed `theme-factory`, `dataviz`,
+`frontend-design`, `brandkit`, `ui-ux-pro-max`; subagent `ui-designer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Add/adjust tokens/themes; author component + dashboard visual specs; review implementation on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Hardcoding colors or breaking the token system.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Hardcoding colors/spacing; color-only meaning; decorative motion; off-scale values; misleading charts; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Wireframes + brand direction (`ux-designer`/human); the design system.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Token-driven component/dashboard specs (both themes, a11y-verified) with honest, labeled data viz.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Semantic tokens only · both themes · WCAG 2.2 AA contrast · score bands = color + value + label · charts
+via `dataviz` (honest form/axis/units) · consistent spacing/type/hierarchy.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Flow/IA → `ux-designer`; feasibility/perf → `frontend-engineer`/`performance-engineer`; a11y edge cases →
+`accessibility` skill; brand identity → the human.
+
+## References
+
+[DESIGN_SYSTEM](../docs/03-design/DESIGN_SYSTEM.md) · subagent: [.claude/agents/ui-designer.md](../.claude/agents/ui-designer.md).

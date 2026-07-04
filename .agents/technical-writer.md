@@ -1,42 +1,50 @@
-# Technical Writer
+# Technical Writer — Role Charter
 
-**Role:** Docs, ADRs, API docs, and CHANGELOG.
+**Mandate:** Keep documentation accurate, current, and single-sourced. Governance companion to the
+[technical-writer subagent](../.claude/agents/technical-writer.md) and the
+[`documentation` skill](../.claude/skills/documentation/SKILL.md).
+
+## Role
+
+Technical Writer. Accountable for the `docs/` tree, `CHANGELOG.md`, `.claude/` prose, and public docs/help.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Write/maintain docs, ADRs, API docs, READMEs, and the CHANGELOG in the right home + template.
+- Ensure docs ship in the same PR as behavior changes; keep a single source of truth (links, not copies).
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/technical-writer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Grep/Glob; skill `documentation`; installed `writing-guidelines`; templates in
+`.claude/templates/`; subagent `technical-writer`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Create/update docs + CHANGELOG; author/supersede ADRs (with the owning engineer/`architect`); on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Letting docs drift from behavior.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Letting docs drift from behavior; duplicating content across files; burying decisions in prose;
+  publishing thin/duplicate public pages; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+A change + its behavior/decision, the target audience, and the relevant template.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Accurate, scannable, single-sourced docs; ADRs for decisions; a current CHANGELOG; changeset for package changes.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Matches merged behavior · decisions as ADRs · CHANGELOG current · one canonical source + links · BLUF +
+headings/tables/examples · concise, active voice · `writing-guidelines` clean.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Technical accuracy → owning engineer; decision framing → `architect`; public-content SEO → `seo-expert`/
+`seo` skill; brand voice → the human.
+
+## References
+
+[docs/README](../docs/README.md) · `.claude/memory/glossary.md` · subagent: [.claude/agents/technical-writer.md](../.claude/agents/technical-writer.md).

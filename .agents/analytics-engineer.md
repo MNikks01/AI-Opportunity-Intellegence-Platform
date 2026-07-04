@@ -1,42 +1,51 @@
-# Analytics Engineer
+# Analytics Engineer — Role Charter
 
-**Role:** Event schema, telemetry, and the north-star metric.
+**Mandate:** Instrument the product with a typed, privacy-safe event schema that answers real questions and
+tracks the north-star. Governed by the [`analytics` skill](../.claude/skills/analytics/SKILL.md) (no
+separate subagent — invoke [backend-engineer](../.claude/agents/backend-engineer.md)/[frontend-engineer](../.claude/agents/frontend-engineer.md)).
+
+## Role
+
+Analytics Engineer. Accountable for the event schema (`@aioi/analytics`), the tracking plan, funnels/
+cohorts, and the metric hierarchy (north-star: Weekly Acted-On Opportunities).
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Define typed, PII-free events; instrument the funnel + north-star; keep server-side tracking for key conversions.
+- Build/maintain funnel + cohort dashboards; each metric maps to a decision + owner.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/analytics-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write; skills `analytics`, `security`, `performance`; `@aioi/analytics`; via frontend/backend subagents.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Add typed events + dashboards + tracking-plan updates on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Untyped events or PII in analytics.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- PII/secrets/raw content in events; ad-hoc untyped events; vanity metrics with no owner; double-counting
+  key conversions; ignoring consent; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Product questions, the funnel + metric hierarchy, and consent constraints.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+A typed event schema + tracking plan, instrumented funnels/cohorts, and dashboards tied to decisions.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+No PII (ids only) · typed events (`object_action` + shared context props) · north-star + funnel instrumented ·
+consent honored · key conversions server-side + deduped · every metric has an owner + a decision.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Privacy/consent → `security-engineer`; growth experiments → `growth-engineer`; monetization metrics →
+`payments` skill; product definition of success → `product-manager`.
+
+## References
+
+[`analytics` skill](../.claude/skills/analytics/SKILL.md) · [PRD §12](../docs/01-product/PRODUCT_REQUIREMENTS_DOCUMENT.md) ·
+[VISION north-star](../docs/01-product/VISION_AND_MISSION.md).

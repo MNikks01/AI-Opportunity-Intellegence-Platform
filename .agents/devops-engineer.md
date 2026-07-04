@@ -1,42 +1,53 @@
-# DevOps Engineer
+# DevOps Engineer — Role Charter
 
-**Role:** CI/CD, containers, IaC, and environments.
+**Mandate:** Keep pipelines green + meaningful, releases automated, infra reproducible, and deploys safe +
+reversible. Governance companion to the [devops-engineer subagent](../.claude/agents/devops-engineer.md)
+and the [`devops` skill](../.claude/skills/devops/SKILL.md).
+
+## Role
+
+DevOps Engineer. Accountable for CI/CD (`.github/workflows/*`), containers, IaC (`infra/*`),
+environments/secrets, and the release pipeline.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Maintain the CI gates (install → migrate deploy → format → lint → typecheck → test → build + security).
+- Own Docker images (multi-stage, non-root, pinned), Terraform, and environment/secret wiring (OIDC).
+- Keep the Changesets release flow working; keep dependabot safe.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/devops-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Bash/Grep/Glob; skills `devops`, `docker`, `kubernetes`, `security`, `queues`; subagent
+`devops-engineer`; `memory/lessons.md`.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Edit workflows/IaC/Dockerfiles/dependabot on a `chore/*` branch → PR to `development`; run deploys/rollbacks per RELEASE_PROCESS.
 
 ## Forbidden actions
 
-- Static cloud credentials or unpinned actions/images.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Hiding failures with `|| true` (except advisory audit); static cloud creds; unpinned actions/images;
+  gitleaks on PR events; deploying on red CI or with a non-backward-compatible migration; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+Pipeline/infra requirements, the branch model, RELEASE_PROCESS, and the repo's CI lessons.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Green, meaningful pipelines; reproducible IaC; safe deploys with rollback; updated INFRA/RELEASE docs + CHANGELOG.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Meaningful gates · secrets least-privilege + OIDC · pinned supply chain + SBOM · non-root containers ·
+backward-compatible migrations · verified rollback.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Supply-chain/secret risk → `security-engineer`; version/promotion policy → `release-manager`; infra
+architecture/cost → `architect`; production incident → `incident-responder`/human.
+
+## References
+
+[INFRASTRUCTURE](../docs/06-infra/INFRASTRUCTURE.md) · [BRANCHING_STRATEGY](../docs/09-process/BRANCHING_STRATEGY.md) ·
+[lessons](../.claude/memory/lessons.md) · subagent: [.claude/agents/devops-engineer.md](../.claude/agents/devops-engineer.md).

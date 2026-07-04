@@ -1,42 +1,51 @@
-# RAG Engineer
+# RAG Engineer — Role Charter
 
-**Role:** Retrieval, embeddings, and faithfulness.
+**Mandate:** Make retrieval grounded and faithful — cite or refuse. Governed by the
+[`rag` skill](../.claude/skills/rag/SKILL.md) (no separate subagent — invoke
+[ai-engineer](../.claude/agents/ai-engineer.md) or [database-engineer](../.claude/agents/database-engineer.md)).
+
+## Role
+
+RAG Engineer. Accountable for semantic search + RAG quality: chunking, embeddings (pgvector), retrieval,
+rerank, and grounded answers for the Knowledge Base / RAG Search.
 
 ## Responsibilities
 
-- Own the outcomes for this role across the delivery lifecycle.
-- Collaborate via PRs into `development`; keep changes small and reviewable.
+- Own the pipeline: chunk → embed → kNN (HNSW) → rerank → grounded prompt → validate + cite.
+- Keep embeddings fresh (embed on write; re-embed on model/chunking change); tune recall vs latency.
 
 ## Tools
 
-Repo tools (Read/Edit/Write/Bash/Grep/Glob), the relevant `.claude/skills/*`, and the matching
-`.claude/agents/rag-engineer.md` subagent. Product context: `.claude/PROJECT.md`, `docs/`.
+Read/Edit/Write/Bash; skills `rag`, `ai`, `database`, `prompt-engineering`, `llm-eval-harness`;
+`@aioi/ai-sdk` + `@aioi/database` (pgvector); via `ai-engineer`/`database-engineer` subagents.
 
 ## Allowed actions
 
-- Implement/change code and docs within this role's scope on a topic branch.
-- Run the local gate (typecheck/lint/test/build) and open PRs into `development`.
+- Implement/tune chunking, embeddings, retrieval, rerank, and grounded answers + eval on a branch → PR to `development`.
 
 ## Forbidden actions
 
-- Shipping ungrounded answers or a stale index.
-- Pushing to `main` directly; bypassing CI, RBAC, audit, or the eval gate; committing secrets.
+- Ungrounded answers; stale index; wrong distance / no HNSW; shipping without a faithfulness gate; pushing to `main`.
 
 ## Inputs
 
-Backlog item (B-0xx) + acceptance criteria, relevant docs, and design/system specs.
+The corpus (trends/entities/KB), the embedding model, and a golden query set.
 
 ## Outputs
 
-A merged-ready PR: passing CI, updated docs/CHANGELOG/changeset, and a backlog/roadmap update.
+Grounded, cited answers + semantic search within latency/cost budget; a faithfulness-gated eval; fresh index.
 
 ## Quality standards
 
-Strict TS + Zod · RBAC + audit on mutations · tests to coverage gate · WCAG 2.2 AA (UI) ·
-OWASP ASVS L2 (security) · performance budgets · Conventional Commits.
+Answers only from context + cite chunk ids · non-empty citations validated · semantic chunking + metadata ·
+HNSW cosine (model-matched) · retrieve → rerank → top-k · faithfulness/relevance eval green.
 
 ## Escalation rules
 
-Stop and ask on: ambiguous scope, security/privacy or data-loss risk, cross-cutting architecture
-changes, or anything needing a new ADR. Route architecture calls to the Architect, security to the
-Security Engineer, and release decisions to the Release Manager.
+Index/DB → `database-engineer`; prompt/answer contract → `prompt-engineer`/`ai-engineer`; cost/latency →
+`performance-engineer`.
+
+## References
+
+[`rag` skill](../.claude/skills/rag/SKILL.md) · [DATABASE_DESIGN](../docs/04-data/DATABASE_DESIGN.md) ·
+[ai-engineer subagent](../.claude/agents/ai-engineer.md).
