@@ -81,6 +81,10 @@ jobs:
       - name: Dependency audit (high+)
         run: pnpm audit --audit-level high || true
       - name: Secret scan (gitleaks)
+        # Run on push only: gitleaks-action needs PR-write permissions on pull_request events
+        # (fails otherwise, incl. dependabot's read-only token). Every push to main/development/
+        # hotfixes is scanned, so secrets are still caught before they persist on a branch.
+        if: github.event_name == 'push'
         uses: gitleaks/gitleaks-action@v2
         env:
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
