@@ -313,6 +313,9 @@ importers:
 
   services/api:
     dependencies:
+      '@aioi/auth':
+        specifier: workspace:*
+        version: link:../../packages/auth
       '@aioi/database':
         specifier: workspace:*
         version: link:../../packages/database
