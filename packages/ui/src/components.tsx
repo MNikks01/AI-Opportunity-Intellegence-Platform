@@ -1,7 +1,14 @@
 import type { ReactNode } from "react";
 import { INVERTED_DIMENSIONS, type Score, type ScoreBand, type ScoreDimension } from "@aioi/shared";
 
+/** Dimensions whose display label is an acronym (not title-cased). */
+const ACRONYM_LABELS: Partial<Record<ScoreDimension, string>> = {
+  seo: "SEO",
+};
+
 function humanize(dim: ScoreDimension): string {
+  const acronym = ACRONYM_LABELS[dim];
+  if (acronym) return acronym;
   const spaced = dim.replace(/([A-Z])/g, " $1");
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
