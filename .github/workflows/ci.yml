@@ -85,7 +85,7 @@ jobs:
         # (fails otherwise, incl. dependabot's read-only token). Every push to main/development/
         # hotfixes is scanned, so secrets are still caught before they persist on a branch.
         if: github.event_name == 'push'
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
 # NOTE: an llm-eval-harness smoke gate (B-009) will be added as a job here once wired.
