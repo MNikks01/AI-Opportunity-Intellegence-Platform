@@ -27,7 +27,7 @@
     "@aioi/eslint-config": "workspace:*",
     "@aioi/prettier-config": "workspace:*",
     "@changesets/cli": "^2.27.9",
-    "@commitlint/cli": "^19.5.0",
+    "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^19.5.0",
     "@eslint/js": "^9.12.0",
     "@types/node": "^22.7.0",
