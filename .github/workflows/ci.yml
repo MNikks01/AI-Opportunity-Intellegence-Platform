@@ -37,6 +37,8 @@ jobs:
         ports: ["6379:6379"]
     env:
       DATABASE_URL: "postgresql://aioi:aioi@localhost:5432/aioi?schema=public"
+      # Runtime connects as the restricted role so RLS is exercised by the suite (ADR-0003 / B-027).
+      APP_DATABASE_URL: "postgresql://aioi_app:aioi_app@localhost:5432/aioi?schema=public"
       REDIS_URL: "redis://localhost:6379"
     steps:
       - uses: actions/checkout@v7
@@ -51,6 +53,10 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Apply database migrations
         run: pnpm --filter @aioi/database exec prisma migrate deploy
+      - name: Grant restricted role login (dev/CI only; prod sets this via secrets)
+        run: |
+          printf "ALTER ROLE aioi_app WITH LOGIN PASSWORD 'aioi_app';" \
+            | pnpm --filter @aioi/database exec prisma db execute --url "$DATABASE_URL" --stdin
       - name: Format check
         run: pnpm format:check
       - name: Lint
