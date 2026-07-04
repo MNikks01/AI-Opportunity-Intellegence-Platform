@@ -43,8 +43,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 - 13/13 tests green (unit + MSW connector + live-DB router integration); all packages strict-typecheck
   clean; full loop (ingest → score → persist → serve → render) confirmed in-browser.
 
+### Fixed
+- UI: acronym score dimensions now render correctly (e.g. "SEO" instead of "Seo").
+
 ### Known issues / polish
-- UI: acronym casing ("Seo" → "SEO"); score-bar fill contrast faint in dark mode.
+- UI: score-bar fill contrast faint in dark mode.
 
 ### Not yet implemented (tracked in BACKLOG)
 - Auth (`@aioi/auth` Clerk adapter + RBAC + tenant guard), real embedding-based clustering,
