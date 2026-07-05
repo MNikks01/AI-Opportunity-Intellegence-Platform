@@ -36,6 +36,7 @@ import {
   revokeApiKey,
 } from "@aioi/database";
 import { entitlementsFor, PlanLimitError } from "@aioi/billing";
+import { getBillingProvider } from "./stripe";
 import {
   createWatchlistSchema,
   renameWatchlistSchema,
@@ -264,6 +265,19 @@ export const appRouter = router({
       .mutation(({ ctx, input }) => {
         authorize(ctx.auth, "billing:manage"); // OWNER/BILLING only
         return setPlan(ctx.auth.orgId, input.plan);
+      }),
+
+    // Start a Stripe Checkout to upgrade to Pro (Stub URL until Stripe is configured).
+    checkout: protectedProcedure
+      .input(z.object({ successUrl: z.string().url(), cancelUrl: z.string().url() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "billing:manage");
+        return getBillingProvider().createCheckoutSession({
+          orgId: ctx.auth.orgId,
+          plan: "PRO",
+          successUrl: input.successUrl,
+          cancelUrl: input.cancelUrl,
+        });
       }),
   }),
 

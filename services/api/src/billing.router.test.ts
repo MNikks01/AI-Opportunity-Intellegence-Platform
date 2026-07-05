@@ -44,4 +44,13 @@ describe.skipIf(!enabled)("billing tRPC router (integration)", () => {
       code: "FORBIDDEN",
     });
   });
+
+  it("checkout returns a URL (Stub without Stripe keys)", async () => {
+    const owner = appRouter.createCaller({ auth: as("OWNER") });
+    const res = await owner.billing.checkout({
+      successUrl: "https://app.test/billing",
+      cancelUrl: "https://app.test/billing",
+    });
+    expect(res.url).toContain("stub_checkout");
+  });
 });

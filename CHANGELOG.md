@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Stripe payments** (B-020 cont.) — a `BillingProvider` seam (`@aioi/billing`) with a deterministic
+  `StubBillingProvider` and a Stripe implementation (checkout sessions) gated on
+  `STRIPE_SECRET_KEY`+`STRIPE_PRICE_PRO`. `billing.checkout` returns a session URL; a
+  signature-verified `POST /webhooks/stripe` syncs `customer.subscription.*` → `setPlan` (via the
+  subscription's `orgId` metadata). Inert without keys. 6 tests.
 - **API-key management + auth lookup** (B-014 cont.) — completes the API-key path: `createApiKey`
   (raw shown once, SHA-256 stored), `listApiKeys` (never exposes the hash), `revokeApiKey`
   (org-scoped, RLS), and a SECURITY DEFINER `app_find_api_key` for the auth-time lookup. Wired into the
