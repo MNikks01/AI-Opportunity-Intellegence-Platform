@@ -52,4 +52,10 @@ describe.skipIf(!hasDb)("api router (integration)", () => {
     const caller = appRouter.createCaller(await createContext());
     await expect(caller.trends.bySlug({ slug: "does-not-exist-xyz" })).rejects.toThrow();
   });
+
+  it("trends.search finds the seeded trend by keyword", async () => {
+    const caller = appRouter.createCaller(await createContext());
+    const results = await caller.trends.search({ q: "router test" });
+    expect(results.some((t) => t.slug === slug)).toBe(true);
+  });
 });
