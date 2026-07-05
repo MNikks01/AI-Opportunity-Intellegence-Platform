@@ -100,4 +100,20 @@ export const createAlertSchema = z.object({
 });
 export type CreateAlertInput = z.infer<typeof createAlertSchema>;
 
+// ── Action plans (B-021) ────────────────────────────────────────────────────
+/** The "what to build" output for a scored trend. Validated on the way out of the model. */
+export const actionPlanContentSchema = z.object({
+  saasIdeas: z.array(z.string().min(1)).min(1),
+  apiIdeas: z.array(z.string().min(1)),
+  contentIdeas: z.array(z.string().min(1)),
+  keywords: z.array(z.string().min(1)),
+  domainNames: z.array(z.string().min(1)),
+  productNames: z.array(z.string().min(1)),
+  targetAudience: z.string().min(1),
+  pricingHint: z.string().min(1),
+  mvpScope: z.string().min(1),
+  techStack: z.array(z.string().min(1)),
+});
+export type ActionPlanContent = z.infer<typeof actionPlanContentSchema>;
+
 export { z };

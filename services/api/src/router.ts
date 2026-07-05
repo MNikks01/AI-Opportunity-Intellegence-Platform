@@ -1,10 +1,12 @@
 /** Application tRPC router — read models over the intelligence core + tenant CRUD. */
 import { z } from "zod";
+import { cached } from "@aioi/cache";
 import {
   getTrendBySlug,
   listTrends,
   searchTrends,
   semanticSearchTrends,
+  persistActionPlan,
   NotFoundError,
   createWatchlist,
   listWatchlists,
@@ -23,6 +25,10 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   listAuditLogs,
+  generateDailyBrief,
+  listBriefs,
+  getBrief,
+  markBriefOpened,
 } from "@aioi/database";
 import {
   createWatchlistSchema,
@@ -30,6 +36,7 @@ import {
   watchlistItemSchema,
   createAlertSchema,
 } from "@aioi/validation";
+import { generateActionPlan } from "@aioi/ai-service";
 import { authorize, protectedProcedure, publicProcedure, router, TRPCError } from "./trpc";
 
 /** Map data-layer NotFound to a tRPC error; rethrow everything else. */
@@ -45,7 +52,10 @@ export const appRouter = router({
   trends: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().int().min(1).max(100).default(25) }).optional())
-      .query(({ input }) => listTrends(input?.limit ?? 25)),
+      .query(({ input }) => {
+        const limit = input?.limit ?? 25;
+        return cached(`trends:list:${limit}`, 60, () => listTrends(limit));
+      }),
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string().min(1) }))
@@ -62,7 +72,11 @@ export const appRouter = router({
           limit: z.number().int().min(1).max(50).default(25),
         }),
       )
-      .query(({ input }) => searchTrends(input.q, input.limit)),
+      .query(({ input }) =>
+        cached(`trends:search:kw:${input.q}:${input.limit}`, 30, () =>
+          searchTrends(input.q, input.limit),
+        ),
+      ),
 
     semanticSearch: publicProcedure
       .input(
@@ -71,7 +85,26 @@ export const appRouter = router({
           limit: z.number().int().min(1).max(50).default(25),
         }),
       )
-      .query(({ input }) => semanticSearchTrends(input.q, input.limit)),
+      .query(({ input }) =>
+        cached(`trends:search:sem:${input.q}:${input.limit}`, 30, () =>
+          semanticSearchTrends(input.q, input.limit),
+        ),
+      ),
+
+    // Generate + persist the "what to build" action plan for a trend (admin, expensive).
+    generateActionPlan: protectedProcedure
+      .input(z.object({ slug: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        authorize(ctx.auth, "admin:access");
+        const trend = await getTrendBySlug(input.slug);
+        if (!trend) throw new TRPCError({ code: "NOT_FOUND", message: "Trend not found" });
+        const plan = await generateActionPlan(
+          { title: trend.title, summary: trend.summary },
+          trend.scores,
+        );
+        await persistActionPlan(trend.id, plan.promptVersion, plan.content);
+        return plan;
+      }),
   }),
 
   watchlists: router({
@@ -184,6 +217,30 @@ export const appRouter = router({
       .query(({ ctx, input }) => {
         authorize(ctx.auth, "admin:access"); // audit trail is admin-only
         return listAuditLogs(ctx.auth.orgId, input?.limit);
+      }),
+  }),
+
+  briefs: router({
+    list: protectedProcedure.query(({ ctx }) => {
+      authorize(ctx.auth, "briefs:read");
+      return listBriefs(ctx.auth.orgId);
+    }),
+
+    byId: protectedProcedure.input(z.object({ id: z.string().uuid() })).query(({ ctx, input }) => {
+      authorize(ctx.auth, "briefs:read");
+      return getBrief(ctx.auth.orgId, input.id).catch(toTRPC);
+    }),
+
+    generate: protectedProcedure.mutation(({ ctx }) => {
+      authorize(ctx.auth, "briefs:read");
+      return generateDailyBrief(ctx.auth.orgId);
+    }),
+
+    markOpened: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "briefs:read");
+        return markBriefOpened(ctx.auth.orgId, input.id).catch(toTRPC);
       }),
   }),
 });

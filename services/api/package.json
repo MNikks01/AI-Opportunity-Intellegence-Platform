@@ -14,7 +14,9 @@
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
+    "@aioi/ai-service": "workspace:*",
     "@aioi/auth": "workspace:*",
+    "@aioi/cache": "workspace:*",
     "@aioi/database": "workspace:*",
     "@aioi/logger": "workspace:*",
     "@aioi/shared": "workspace:*",

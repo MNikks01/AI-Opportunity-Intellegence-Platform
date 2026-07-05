@@ -16,6 +16,21 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Daily Brief** (B-018) — per-org digest: `generateDailyBrief` aggregates the top-opportunity trends
+  + the org's watchlist/unread-alert counts into a `Brief` (in-app delivered), with `listBriefs`/
+  `getBrief` and **open tracking** (`markBriefOpened`, idempotent). `briefs` tRPC router
+  (generate/list/byId/markOpened) + a `/briefs` list & detail UI (opens tracked on view). All org-scoped
+  (RLS). 5 tests. (Email delivery is a follow-up.)
+- **Action-plan generators** (B-021) — turn a scored trend into a concrete "what to build" plan
+  (SaaS/API/content ideas, keywords, domains, product names, target audience, pricing, MVP scope, tech
+  stack). `@aioi/ai-sdk` `generateActionPlan` (deterministic Stub + LiteLLM, schema-validated),
+  `@aioi/ai-service` orchestration, `persistActionPlan`/`getActionPlan` + `getTrendBySlug` now includes
+  the plan, an admin-gated `trends.generateActionPlan` mutation, and a plan section on the trend detail
+  page. 3 tests. (Also fixes `@aioi/ai-service` `package.json` `main`/`types` so it's importable.)
+- **Redis read-model cache** (B-011) — new `@aioi/cache` package: cache-aside over ioredis with
+  **graceful degradation** (a cache outage falls through to the source, never throws) and a lazy
+  fail-fast client. The trends read endpoints (`trends.list` 60s, `trends.search`/`semanticSearch` 30s)
+  are cached. Bypassed in tests / when `CACHE_DISABLED=1`. 3 unit tests (hit/miss, invalidate, degrade).
 - **Audit logging** (B-022) — a tRPC middleware on `protectedProcedure` writes an `AuditLog` entry for
   every successful **mutation** (action = procedure path, actor, kind; best-effort so it never fails the
   mutation), so all existing protected mutations are covered cross-cuttingly. `@aioi/database`

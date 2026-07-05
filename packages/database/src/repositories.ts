@@ -2,7 +2,7 @@
  * Data-access layer. Maps between the domain model (@aioi/shared, lowercase dims) and the Prisma
  * enums (UPPER_SNAKE). Services depend on these functions, not on Prisma directly.
  */
-import type { $Enums } from "@prisma/client";
+import type { $Enums, Prisma } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
 import { bandForValue } from "@aioi/shared";
 import { getEmbedder } from "@aioi/ai-sdk";
@@ -133,6 +133,8 @@ export interface TrendView {
   summary: string | null;
   status: TrendStatus;
   scores: Score[];
+  /** Populated by getTrendBySlug (B-021); undefined in list views. */
+  actionPlan?: { promptVersion: string; content: unknown } | null;
 }
 
 function toScore(row: {
@@ -172,7 +174,10 @@ export async function listTrends(limit = 25): Promise<TrendView[]> {
 }
 
 export async function getTrendBySlug(slug: string): Promise<TrendView | null> {
-  const t = await prisma.trend.findUnique({ where: { slug }, include: { scores: true } });
+  const t = await prisma.trend.findUnique({
+    where: { slug },
+    include: { scores: true, actionPlan: true },
+  });
   if (!t) return null;
   return {
     id: t.id,
@@ -181,7 +186,28 @@ export async function getTrendBySlug(slug: string): Promise<TrendView | null> {
     summary: t.summary,
     status: t.status as TrendStatus,
     scores: t.scores.map(toScore),
+    actionPlan: t.actionPlan
+      ? { promptVersion: t.actionPlan.promptVersion, content: t.actionPlan.content }
+      : null,
   };
+}
+
+/** Upsert a trend's action plan (B-021). One plan per trend (unique trendId). */
+export async function persistActionPlan(
+  trendId: string,
+  promptVersion: string,
+  content: unknown,
+): Promise<string> {
+  const plan = await prisma.actionPlan.upsert({
+    where: { trendId },
+    create: { trendId, promptVersion, content: content as Prisma.InputJsonValue },
+    update: { promptVersion, content: content as Prisma.InputJsonValue },
+  });
+  return plan.id;
+}
+
+export function getActionPlan(trendId: string) {
+  return prisma.actionPlan.findUnique({ where: { trendId } });
 }
 
 /**
