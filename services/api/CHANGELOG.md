@@ -1,5 +1,13 @@
 # @aioi/api
 
+## 0.5.0
+
+### Minor Changes
+
+- 8fcdb7c: Clerk verifier + sign-up webhook (B-014/B-015): the API verifies real Clerk session JWTs via the auth
+  adapter when CLERK_SECRET_KEY is set (else the Stub), and a Svix-verified POST /webhooks/clerk
+  provisions a tenant on user.created (bootstrapUser). buildServer is now async (raw body for signatures).
+
 ## 0.4.0
 
 ### Minor Changes
