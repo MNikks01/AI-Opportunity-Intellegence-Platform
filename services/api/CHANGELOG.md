@@ -1,5 +1,24 @@
 # @aioi/api
 
+## 0.6.0
+
+### Minor Changes
+
+- 2995824: API-key management + auth lookup (B-014 cont.): `createApiKey`/`listApiKeys`/`revokeApiKey` (org-scoped,
+  RLS) + a SECURITY DEFINER `app_find_api_key` for the RLS-safe auth-time lookup, wired into the API
+  context so `Authorization: Bearer aioi_…` authenticates against the DB. Adds an admin-gated `apikeys` router.
+- eab0a4f: Stripe payments (B-020 cont.): a `BillingProvider` seam (Stub + Stripe checkout sessions),
+  `billing.checkout` returning a session URL, and a signature-verified `POST /webhooks/stripe` that syncs
+  `customer.subscription.*` events to `setPlan`. Inert without Stripe keys (Stub fallback).
+
+### Patch Changes
+
+- Updated dependencies [2995824]
+- Updated dependencies [eab0a4f]
+  - @aioi/database@0.7.0
+  - @aioi/billing@0.2.0
+  - @aioi/ai-service@0.1.2
+
 ## 0.5.0
 
 ### Minor Changes
