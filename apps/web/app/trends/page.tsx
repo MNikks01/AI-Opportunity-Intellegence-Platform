@@ -1,19 +1,76 @@
-import { listTrends } from "@aioi/database";
+import { listTrends, searchTrends } from "@aioi/database";
 import { TrendCard } from "@aioi/ui";
 
 export const dynamic = "force-dynamic";
 
-export default async function TrendsPage() {
-  const trends = await listTrends(50);
+export default async function TrendsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string }>;
+}) {
+  const { q } = await searchParams;
+  const query = q?.trim() ?? "";
+  const trends = query ? await searchTrends(query, 50) : await listTrends(50);
+
   return (
     <main>
       <h1 style={{ fontSize: "1.5rem", margin: "0 0 4px" }}>Trends</h1>
       <p style={{ color: "var(--fg-muted)", margin: "0 0 20px" }}>
-        {trends.length} scored {trends.length === 1 ? "trend" : "trends"} from the AI ecosystem.
+        {query
+          ? `${trends.length} ${trends.length === 1 ? "result" : "results"} for “${query}”.`
+          : `${trends.length} scored ${trends.length === 1 ? "trend" : "trends"} from the AI ecosystem.`}
       </p>
+
+      <form method="get" style={{ display: "flex", gap: "8px", margin: "0 0 24px", maxWidth: 520 }}>
+        <input
+          name="q"
+          defaultValue={query}
+          placeholder="Search trends…"
+          aria-label="Search trends"
+          style={{
+            flex: 1,
+            padding: "8px 12px",
+            borderRadius: "8px",
+            border: "1px solid var(--border)",
+            background: "var(--bg)",
+            color: "var(--fg)",
+          }}
+        />
+        <button
+          type="submit"
+          style={{
+            padding: "8px 16px",
+            borderRadius: "8px",
+            border: "1px solid var(--primary)",
+            background: "var(--primary)",
+            color: "#fff",
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          Search
+        </button>
+        {query && (
+          <a
+            href="/trends"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              padding: "0 12px",
+              color: "var(--fg-muted)",
+              fontSize: "0.875rem",
+            }}
+          >
+            Clear
+          </a>
+        )}
+      </form>
+
       {trends.length === 0 ? (
         <div className="aioi-card" style={{ color: "var(--fg-muted)" }}>
-          No trends yet — run the ingestion + scoring pipeline to populate this dashboard.
+          {query
+            ? "No trends match your search."
+            : "No trends yet — run the ingestion + scoring pipeline to populate this dashboard."}
         </div>
       ) : (
         <div

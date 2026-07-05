@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   getTrendBySlug,
   listTrends,
+  searchTrends,
   NotFoundError,
   createWatchlist,
   listWatchlists,
@@ -51,6 +52,15 @@ export const appRouter = router({
         if (!trend) throw new TRPCError({ code: "NOT_FOUND", message: "Trend not found" });
         return trend;
       }),
+
+    search: publicProcedure
+      .input(
+        z.object({
+          q: z.string().min(1).max(200),
+          limit: z.number().int().min(1).max(50).default(25),
+        }),
+      )
+      .query(({ input }) => searchTrends(input.q, input.limit)),
   }),
 
   watchlists: router({

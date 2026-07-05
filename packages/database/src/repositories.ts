@@ -171,3 +171,37 @@ export async function getTrendBySlug(slug: string): Promise<TrendView | null> {
     scores: t.scores.map(toScore),
   };
 }
+
+/**
+ * Keyword full-text search over trends (B-019). Uses the STORED `searchVector` (GIN-indexed) with
+ * `plainto_tsquery`, ranked by `ts_rank` then recency. Returns the same `TrendView` shape as
+ * `listTrends`. Semantic (pgvector) search is a follow-up. Trends are global → public.
+ */
+export async function searchTrends(query: string, limit = 25): Promise<TrendView[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const matches = await prisma.$queryRaw<Array<{ id: string }>>`
+    SELECT id
+    FROM "Trend"
+    WHERE "searchVector" @@ plainto_tsquery('english', ${q})
+    ORDER BY ts_rank("searchVector", plainto_tsquery('english', ${q})) DESC,
+             "lastSignalAt" DESC NULLS LAST
+    LIMIT ${limit}`;
+  if (matches.length === 0) return [];
+
+  const order = new Map(matches.map((m, i) => [m.id, i]));
+  const rows = await prisma.trend.findMany({
+    where: { id: { in: matches.map((m) => m.id) } },
+    include: { scores: true },
+  });
+  return rows
+    .sort((a, b) => order.get(a.id)! - order.get(b.id)!)
+    .map((t) => ({
+      id: t.id,
+      slug: t.slug,
+      title: t.title,
+      summary: t.summary,
+      status: t.status as TrendStatus,
+      scores: t.scores.map(toScore),
+    }));
+}
