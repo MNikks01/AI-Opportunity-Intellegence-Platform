@@ -14,6 +14,7 @@
     "clean": "rm -rf dist .turbo *.tsbuildinfo"
   },
   "dependencies": {
+    "@aioi/ai-service": "workspace:*",
     "@aioi/database": "workspace:*",
     "@aioi/email": "workspace:*",
     "@aioi/ingestion-service": "workspace:*",
