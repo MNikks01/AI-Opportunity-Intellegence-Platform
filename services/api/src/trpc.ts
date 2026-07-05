@@ -12,6 +12,9 @@ import {
   type AuthContext,
   type Permission,
 } from "@aioi/auth";
+import { writeAuditLog } from "@aioi/database";
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export interface Context {
   /** Authenticated, org-scoped context — null when unauthenticated. Never read org from the client. */
@@ -31,11 +34,28 @@ const t = initTRPC.context<Context>().create();
 export const router = t.router;
 export const publicProcedure = t.procedure;
 
-/** Requires an authenticated, org-scoped context. Narrows `ctx.auth` to non-null for the resolver. */
-export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
+/**
+ * Requires an authenticated, org-scoped context (narrows `ctx.auth` for the resolver) AND writes an
+ * audit-log entry for every successful mutation (B-022). Auditing is best-effort: a failed audit write
+ * never fails the mutation. `actorUserId` is a real user uuid or null (API-key/dev principals are
+ * recorded in metadata).
+ */
+export const protectedProcedure = t.procedure.use(async ({ ctx, type, path, next }) => {
   if (!ctx.auth?.orgId)
     throw new TRPCError({ code: "UNAUTHORIZED", message: "Authentication required" });
-  return next({ ctx: { auth: ctx.auth } });
+  const auth = ctx.auth;
+  const result = await next({ ctx: { auth } });
+
+  if (type === "mutation" && result.ok) {
+    await writeAuditLog(auth.orgId, {
+      actorUserId: UUID_RE.test(auth.userId) ? auth.userId : null,
+      action: path,
+      metadata: { actor: auth.userId, kind: auth.kind ?? "user" },
+    }).catch(() => {
+      /* best-effort — never fail the mutation because auditing failed */
+    });
+  }
+  return result;
 });
 
 /** Enforce a permission inside a resolver; maps auth errors to tRPC codes. */

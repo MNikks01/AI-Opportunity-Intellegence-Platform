@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Audit logging** (B-022) — a tRPC middleware on `protectedProcedure` writes an `AuditLog` entry for
+  every successful **mutation** (action = procedure path, actor, kind; best-effort so it never fails the
+  mutation), so all existing protected mutations are covered cross-cuttingly. `@aioi/database`
+  `writeAuditLog`/`listAuditLogs` (org-scoped, RLS), and an admin-gated `audit.list` endpoint. 4 tests
+  (isolation; mutation-audited-but-not-query; RBAC).
 - **Prisma-backed ingestion** (B-024) — `PrismaSignalRepository` persists connector output to the
   global `Signal` table, deduping via `createMany({ skipDuplicates })` (idempotent, returns the new
   count); ensures the `Source` (+ legality tier) first. `createSignalRepository()` picks Prisma when a

@@ -22,6 +22,7 @@ import {
   unreadNotificationCount,
   markNotificationRead,
   markAllNotificationsRead,
+  listAuditLogs,
 } from "@aioi/database";
 import {
   createWatchlistSchema,
@@ -175,6 +176,15 @@ export const appRouter = router({
       authorize(ctx.auth, "alerts:read");
       return markAllNotificationsRead(ctx.auth.orgId);
     }),
+  }),
+
+  audit: router({
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(200).default(50) }).optional())
+      .query(({ ctx, input }) => {
+        authorize(ctx.auth, "admin:access"); // audit trail is admin-only
+        return listAuditLogs(ctx.auth.orgId, input?.limit);
+      }),
   }),
 });
 
