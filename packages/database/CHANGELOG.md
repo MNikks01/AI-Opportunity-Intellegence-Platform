@@ -1,5 +1,27 @@
 # @aioi/database
 
+## 0.4.0
+
+### Minor Changes
+
+- 5762d93: Alerts pipeline auto-eval (B-017): `persistScoredTrend` now calls `evaluateTrendAllOrgs`, which uses a
+  `SECURITY DEFINER` function (`app_orgs_watching_trend`) for RLS-safe cross-tenant discovery and fires
+  per-org notifications for matched alerts. Alerts fire automatically when new scores land.
+- 486c37f: Audit logging (B-022): a tRPC middleware on `protectedProcedure` writes an `AuditLog` entry for every
+  successful mutation (best-effort), covering all protected mutations cross-cuttingly. Adds
+  `writeAuditLog`/`listAuditLogs` (org-scoped, RLS) and an admin-gated `audit.list` endpoint.
+- e7d23d8: Semantic trend search (B-019): an `Embedder` in `@aioi/ai-sdk` (Stub + LiteLLM, dim 1536), a pgvector
+  `embedding` column + HNSW cosine index on Trend backfilled on persist, `semanticSearchTrends(q)` and a
+  public `trends.semanticSearch` endpoint, and a Keyword/Semantic toggle on the trends search.
+- c01468e: Trend keyword full-text search (B-019): a STORED generated `searchVector` + GIN index on Trend, a
+  `searchTrends(q, limit)` repo (`plainto_tsquery`, ranked by `ts_rank` then recency), a public
+  `trends.search` tRPC endpoint, and a search box on the trends page. Semantic (pgvector) search follows.
+
+### Patch Changes
+
+- Updated dependencies [e7d23d8]
+  - @aioi/ai-sdk@0.1.0
+
 ## 0.3.0
 
 ### Minor Changes
