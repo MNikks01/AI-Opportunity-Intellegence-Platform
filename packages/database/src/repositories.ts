@@ -6,6 +6,7 @@ import type { $Enums } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
 import { bandForValue } from "@aioi/shared";
 import { prisma } from "./client";
+import { evaluateTrendAllOrgs } from "./alerts";
 
 // ── enum maps ────────────────────────────────────────────────────────────────
 const DIM_TO_DB: Record<ScoreDimension, $Enums.ScoreDimension> = {
@@ -103,6 +104,11 @@ export async function persistScoredTrend(trend: TrendLike, scores: Score[]): Pro
       },
     });
   }
+
+  // Auto-evaluate alerts for every org watching this trend (B-017 pipeline). No-op if unwatched.
+  const scoreMap: Record<string, number> = {};
+  for (const s of scores) scoreMap[s.dimension] = s.value;
+  await evaluateTrendAllOrgs({ trendId: dbTrend.id, title: trend.title, scores: scoreMap });
 
   return dbTrend.id;
 }
