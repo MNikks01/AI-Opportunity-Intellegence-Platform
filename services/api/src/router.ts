@@ -1,5 +1,6 @@
 /** Application tRPC router — read models over the intelligence core + tenant CRUD. */
 import { z } from "zod";
+import { cached } from "@aioi/cache";
 import {
   getTrendBySlug,
   listTrends,
@@ -45,7 +46,10 @@ export const appRouter = router({
   trends: router({
     list: publicProcedure
       .input(z.object({ limit: z.number().int().min(1).max(100).default(25) }).optional())
-      .query(({ input }) => listTrends(input?.limit ?? 25)),
+      .query(({ input }) => {
+        const limit = input?.limit ?? 25;
+        return cached(`trends:list:${limit}`, 60, () => listTrends(limit));
+      }),
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string().min(1) }))
@@ -62,7 +66,11 @@ export const appRouter = router({
           limit: z.number().int().min(1).max(50).default(25),
         }),
       )
-      .query(({ input }) => searchTrends(input.q, input.limit)),
+      .query(({ input }) =>
+        cached(`trends:search:kw:${input.q}:${input.limit}`, 30, () =>
+          searchTrends(input.q, input.limit),
+        ),
+      ),
 
     semanticSearch: publicProcedure
       .input(
@@ -71,7 +79,11 @@ export const appRouter = router({
           limit: z.number().int().min(1).max(50).default(25),
         }),
       )
-      .query(({ input }) => semanticSearchTrends(input.q, input.limit)),
+      .query(({ input }) =>
+        cached(`trends:search:sem:${input.q}:${input.limit}`, 30, () =>
+          semanticSearchTrends(input.q, input.limit),
+        ),
+      ),
   }),
 
   watchlists: router({

@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Redis read-model cache** (B-011) — new `@aioi/cache` package: cache-aside over ioredis with
+  **graceful degradation** (a cache outage falls through to the source, never throws) and a lazy
+  fail-fast client. The trends read endpoints (`trends.list` 60s, `trends.search`/`semanticSearch` 30s)
+  are cached. Bypassed in tests / when `CACHE_DISABLED=1`. 3 unit tests (hit/miss, invalidate, degrade).
 - **Audit logging** (B-022) — a tRPC middleware on `protectedProcedure` writes an `AuditLog` entry for
   every successful **mutation** (action = procedure path, actor, kind; best-effort so it never fails the
   mutation), so all existing protected mutations are covered cross-cuttingly. `@aioi/database`
