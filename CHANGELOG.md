@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **GDPR export/delete** (B-023) — `exportOrgData` (org-scoped data portability, secrets
+  excluded) + `deleteOrg` (right-to-erasure hard delete, cascades) and a `gdpr` tRPC router (export
+  admin-gated; deleteOrg owner-only). Also **hardens all RLS policies** with
+  `NULLIF(current_setting('app.current_org',true),'')` so an unset/empty org context fails closed
+  instead of throwing `''::uuid` on pooled connections. 4 tests.
 - **Signal → Trend clustering** (B-006) — connects ingestion to trends: `clusterSignals` (embed +
   greedy cosine; deterministic offline via the StubEmbedder) + `clusterRecentSignals` orchestration;
   `@aioi/database` `listUnclusteredSignals`/`createTrendFromSignalIds`; and an hourly scheduler

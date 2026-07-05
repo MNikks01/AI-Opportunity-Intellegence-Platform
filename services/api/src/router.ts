@@ -34,6 +34,8 @@ import {
   createApiKey,
   listApiKeys,
   revokeApiKey,
+  exportOrgData,
+  deleteOrg,
 } from "@aioi/database";
 import { entitlementsFor, PlanLimitError } from "@aioi/billing";
 import { getBillingProvider } from "./stripe";
@@ -299,6 +301,22 @@ export const appRouter = router({
       .mutation(({ ctx, input }) => {
         authorize(ctx.auth, "apikeys:manage");
         return revokeApiKey(ctx.auth.orgId, input.id).catch(toTRPC);
+      }),
+  }),
+
+  gdpr: router({
+    // Data portability — export all of the org's data (admin).
+    export: protectedProcedure.query(({ ctx }) => {
+      authorize(ctx.auth, "admin:access");
+      return exportOrgData(ctx.auth.orgId);
+    }),
+
+    // Right to erasure — hard-delete the org and all its data (owner only, irreversible).
+    deleteOrg: protectedProcedure
+      .input(z.object({ confirm: z.literal(true) }))
+      .mutation(({ ctx }) => {
+        authorize(ctx.auth, "org:delete");
+        return deleteOrg(ctx.auth.orgId);
       }),
   }),
 });
