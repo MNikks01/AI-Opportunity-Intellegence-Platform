@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Clerk verifier + sign-up webhook** (B-014/B-015) — the API now verifies real Clerk session JWTs
+  (`@clerk/backend`) via the auth adapter when `CLERK_SECRET_KEY` is set (else the dev Stub), and a
+  Svix-verified `POST /webhooks/clerk` provisions a tenant on `user.created` (`handleClerkUserEvent →
+  bootstrapUser`, idempotent). `buildServer` is now async (raw-body for signature verification). Inert
+  without keys, so CI stays green. 5 tests (verifier without key; webhook handler; server smoke).
 - **Scheduler service** — `@aioi/scheduler` (BullMQ + cron): `runIngestionJob` (HN ingestion every 30m)
   and `runDailyBriefsJob` (fan out `generateDailyBrief` over all active orgs, at 07:00 UTC). Pure job
   functions (testable without Redis) + a thin `startScheduler` worker; `@aioi/database`
