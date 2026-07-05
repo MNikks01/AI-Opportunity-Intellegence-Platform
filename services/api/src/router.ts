@@ -4,6 +4,7 @@ import {
   getTrendBySlug,
   listTrends,
   searchTrends,
+  semanticSearchTrends,
   NotFoundError,
   createWatchlist,
   listWatchlists,
@@ -61,6 +62,15 @@ export const appRouter = router({
         }),
       )
       .query(({ input }) => searchTrends(input.q, input.limit)),
+
+    semanticSearch: publicProcedure
+      .input(
+        z.object({
+          q: z.string().min(1).max(200),
+          limit: z.number().int().min(1).max(50).default(25),
+        }),
+      )
+      .query(({ input }) => semanticSearchTrends(input.q, input.limit)),
   }),
 
   watchlists: router({

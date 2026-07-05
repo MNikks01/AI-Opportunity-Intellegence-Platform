@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Semantic trend search** (B-019) — `@aioi/ai-sdk` gains an `Embedder` (deterministic `StubEmbedder`
+  + `LiteLLMEmbedder`, `EMBED_DIM=1536`); a pgvector `embedding` column + **HNSW cosine index** on
+  Trend, backfilled on `persistScoredTrend`; `semanticSearchTrends(q)` (`<=>` cosine) + a public
+  `trends.semanticSearch` endpoint; and a Keyword/Semantic toggle on the trends search. 6 tests
+  (embedder determinism/shape + nearest-neighbor ranking). Completes B-019.
 - **Trend keyword search** (B-019) — Postgres full-text search over trends: a STORED generated
   `searchVector` (title weighted above summary) + GIN index, a `searchTrends(q, limit)` repo
   (`plainto_tsquery` ranked by `ts_rank` then recency, returns the `TrendView` shape), a public

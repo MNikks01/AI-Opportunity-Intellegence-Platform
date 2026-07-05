@@ -58,4 +58,10 @@ describe.skipIf(!hasDb)("api router (integration)", () => {
     const results = await caller.trends.search({ q: "router test" });
     expect(results.some((t) => t.slug === slug)).toBe(true);
   });
+
+  it("trends.semanticSearch returns the seeded trend for its embedded text", async () => {
+    const caller = appRouter.createCaller(await createContext());
+    const results = await caller.trends.semanticSearch({ q: `${trend.title}\n${trend.summary}` });
+    expect(results.some((t) => t.slug === slug)).toBe(true);
+  });
 });
