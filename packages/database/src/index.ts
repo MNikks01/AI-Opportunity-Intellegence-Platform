@@ -42,4 +42,5 @@ export {
   type BriefContent,
   type BriefTrend,
 } from "./briefs";
+export { getPlan, getEntitlements, setPlan } from "./subscription";
 export { $Enums, Prisma } from "@prisma/client";

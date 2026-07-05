@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@aioi/ai-sdk": "workspace:*",
+    "@aioi/billing": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",
     "@prisma/client": "^5.20.0"

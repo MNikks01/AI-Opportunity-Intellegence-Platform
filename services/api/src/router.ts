@@ -29,7 +29,10 @@ import {
   listBriefs,
   getBrief,
   markBriefOpened,
+  getPlan,
+  setPlan,
 } from "@aioi/database";
+import { entitlementsFor, PlanLimitError } from "@aioi/billing";
 import {
   createWatchlistSchema,
   renameWatchlistSchema,
@@ -39,10 +42,12 @@ import {
 import { generateActionPlan } from "@aioi/ai-service";
 import { authorize, protectedProcedure, publicProcedure, router, TRPCError } from "./trpc";
 
-/** Map data-layer NotFound to a tRPC error; rethrow everything else. */
+/** Map data-layer errors to tRPC codes; rethrow everything else. */
 function toTRPC(err: unknown): never {
   if (err instanceof NotFoundError)
     throw new TRPCError({ code: "NOT_FOUND", message: err.message });
+  if (err instanceof PlanLimitError)
+    throw new TRPCError({ code: "FORBIDDEN", message: err.message });
   throw err;
 }
 
@@ -241,6 +246,21 @@ export const appRouter = router({
       .mutation(({ ctx, input }) => {
         authorize(ctx.auth, "briefs:read");
         return markBriefOpened(ctx.auth.orgId, input.id).catch(toTRPC);
+      }),
+  }),
+
+  billing: router({
+    plan: protectedProcedure.query(async ({ ctx }) => {
+      authorize(ctx.auth, "org:read");
+      const plan = await getPlan(ctx.auth.orgId);
+      return { plan, entitlements: entitlementsFor(plan) };
+    }),
+
+    setPlan: protectedProcedure
+      .input(z.object({ plan: z.enum(["FREE", "PRO"]) }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "billing:manage"); // OWNER/BILLING only
+        return setPlan(ctx.auth.orgId, input.plan);
       }),
   }),
 });

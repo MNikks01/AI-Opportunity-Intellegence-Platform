@@ -3,6 +3,8 @@
   "version": "0.1.1",
   "private": true,
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "description": "Source workers: fetch, validate, dedupe, emit signal.ingested. Legality-gated.",
   "scripts": {
     "dev": "tsx watch src/index.ts",
