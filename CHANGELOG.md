@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **API-key management + auth lookup** (B-014 cont.) — completes the API-key path: `createApiKey`
+  (raw shown once, SHA-256 stored), `listApiKeys` (never exposes the hash), `revokeApiKey`
+  (org-scoped, RLS), and a SECURITY DEFINER `app_find_api_key` for the auth-time lookup. Wired into the
+  API context (`getAuthProvider({ apiKeyLookup })`) so `Authorization: Bearer aioi_…` authenticates
+  against the DB (revoked keys denied), plus an admin-gated `apikeys` router. 5 tests.
 - **Frontend Clerk sign-in** — `apps/web` wires `@clerk/nextjs` **conditionally** on
   `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: `ClerkProvider` + a header Sign-in/UserButton, `clerkMiddleware`
   (pass-through without keys), and `getDevOrg` now resolves the **signed-in user's** tenant (via

@@ -31,6 +31,9 @@ import {
   markBriefOpened,
   getPlan,
   setPlan,
+  createApiKey,
+  listApiKeys,
+  revokeApiKey,
 } from "@aioi/database";
 import { entitlementsFor, PlanLimitError } from "@aioi/billing";
 import {
@@ -261,6 +264,27 @@ export const appRouter = router({
       .mutation(({ ctx, input }) => {
         authorize(ctx.auth, "billing:manage"); // OWNER/BILLING only
         return setPlan(ctx.auth.orgId, input.plan);
+      }),
+  }),
+
+  apikeys: router({
+    list: protectedProcedure.query(({ ctx }) => {
+      authorize(ctx.auth, "apikeys:manage");
+      return listApiKeys(ctx.auth.orgId);
+    }),
+
+    create: protectedProcedure
+      .input(z.object({ name: z.string().min(1).max(80), scopes: z.array(z.string()).default([]) }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "apikeys:manage");
+        return createApiKey(ctx.auth.orgId, input.name, input.scopes); // raw returned once
+      }),
+
+    revoke: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "apikeys:manage");
+        return revokeApiKey(ctx.auth.orgId, input.id).catch(toTRPC);
       }),
   }),
 });
