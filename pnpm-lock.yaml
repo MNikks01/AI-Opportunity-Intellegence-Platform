@@ -119,6 +119,9 @@ importers:
       '@aioi/ui':
         specifier: workspace:*
         version: link:../../packages/ui
+      '@aioi/validation':
+        specifier: workspace:*
+        version: link:../../packages/validation
       next:
         specifier: ^16.2.10
         version: 16.2.10(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -196,6 +199,9 @@ importers:
       '@aioi/shared':
         specifier: workspace:*
         version: link:../shared
+      '@aioi/validation':
+        specifier: workspace:*
+        version: link:../validation
       '@prisma/client':
         specifier: ^5.20.0
         version: 5.22.0(prisma@5.22.0)

@@ -54,4 +54,50 @@ export const rawModelScoreSchema = z.object({
 });
 export type RawModelScore = z.infer<typeof rawModelScoreSchema>;
 
+// ── Watchlists (B-016) ──────────────────────────────────────────────────────
+export const watchTargetTypeSchema = z.enum(["TREND", "ENTITY", "TOPIC"]);
+export type WatchTargetType = z.infer<typeof watchTargetTypeSchema>;
+
+export const createWatchlistSchema = z.object({
+  workspaceId: z.string().uuid(),
+  name: z.string().min(1).max(120),
+});
+export type CreateWatchlistInput = z.infer<typeof createWatchlistSchema>;
+
+export const renameWatchlistSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string().min(1).max(120),
+});
+export type RenameWatchlistInput = z.infer<typeof renameWatchlistSchema>;
+
+export const watchlistItemSchema = z.object({
+  watchlistId: z.string().uuid(),
+  targetType: watchTargetTypeSchema,
+  targetId: z.string().min(1).max(200),
+});
+export type WatchlistItemInput = z.infer<typeof watchlistItemSchema>;
+
+// ── Alerts (B-017) ──────────────────────────────────────────────────────────
+/** An alert fires when a watched trend matches this trigger. */
+export const alertTriggerSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("NEW_TREND") }),
+  z.object({
+    type: z.literal("SCORE_CROSSES"),
+    dimension: scoreDimensionSchema,
+    gte: z.number().int().min(0).max(100),
+  }),
+]);
+export type AlertTrigger = z.infer<typeof alertTriggerSchema>;
+
+export const alertChannelSchema = z.enum(["IN_APP", "EMAIL", "SLACK", "DISCORD", "TELEGRAM"]);
+export const alertCadenceSchema = z.enum(["INSTANT", "DAILY_DIGEST"]);
+
+export const createAlertSchema = z.object({
+  watchlistId: z.string().uuid(),
+  trigger: alertTriggerSchema,
+  channel: alertChannelSchema.default("IN_APP"),
+  cadence: alertCadenceSchema.default("INSTANT"),
+});
+export type CreateAlertInput = z.infer<typeof createAlertSchema>;
+
 export { z };

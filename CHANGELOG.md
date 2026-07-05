@@ -16,6 +16,25 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Alerts & notifications web UI** (B-017) — an Alerts section on the watchlist detail (create
+  `SCORE_CROSSES`/`NEW_TREND` alerts, enable/disable, delete) and a `/notifications` inbox (mark
+  read / mark all read) with a nav link, all via Server Actions over the RLS-enforced repos. Verified
+  end-to-end in the browser: alert → engine → in-app notification rendered.
+- **Alerts engine** (B-017) — a new `Notification` model + org-scoped alert/notification repositories,
+  a pure trigger matcher (`NEW_TREND`, `SCORE_CROSSES`), and `evaluateTrendForOrg` that writes in-app
+  notifications for matched alerts. `alerts` + `notifications` tRPC routers (protected + RBAC
+  `alerts:read`/`:write`). RLS on `Alert` (EXISTS-via-parent) and `Notification` (direct-org). 6 tests
+  (matcher unit + engine/CRUD/mark-read + cross-tenant isolation). Pipeline auto-eval + email delivery
+  + web UI are follow-ups.
+- **Watchlists web UI** (B-016) — `apps/web` `/watchlists` (list + create + delete) and
+  `/watchlists/[id]` (items + add/remove) as RSC pages driven by Server Actions over the RLS-enforced
+  repository. A request-cached `getDevOrg` (idempotent `bootstrapUser`) stands in for a session until
+  the Clerk verifier lands. Verified end-to-end in the browser (create list → add item).
+- **Watchlists CRUD** (B-016) — first user-facing feature: `@aioi/database` watchlist/item repository
+  (all ops via `withOrgContext`), a `watchlists` tRPC router on `protectedProcedure` with RBAC
+  (`watchlists:read`/`:write`), and shared Zod input schemas. Adds RLS on `WatchlistItem` (EXISTS policy
+  via its parent watchlist — closes a child-table gap from ADR-0003). Proven end-to-end: 9 integration
+  tests covering CRUD, RBAC deny, unauthenticated, and cross-tenant isolation for both watchlists and items.
 - **Sign-up bootstrap** (B-015) — `@aioi/database` `bootstrapUser({ clerkId, email, name })` idempotently
   provisions a new user's tenant on first sign-in: User (Clerk mirror) + personal Organization + OWNER
   Membership + personal Workspace, in one transaction that sets the org context for the RLS-protected
