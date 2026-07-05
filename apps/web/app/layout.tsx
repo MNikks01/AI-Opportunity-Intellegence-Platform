@@ -1,13 +1,43 @@
 import "@aioi/ui/tokens.css";
 import type { ReactNode } from "react";
+import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { clerkEnabled } from "./lib/dev-org";
 
 export const metadata = {
   title: "AI Opportunity Intelligence",
   description: "Discover AI trends before everyone else. Validate opportunities. Build faster.",
 };
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+function AuthControls() {
   return (
+    <>
+      <SignedOut>
+        <SignInButton mode="modal">
+          <button
+            style={{
+              padding: "6px 14px",
+              borderRadius: "8px",
+              border: "1px solid var(--primary)",
+              background: "var(--primary)",
+              color: "#fff",
+              fontWeight: 600,
+              cursor: "pointer",
+              fontSize: "0.8125rem",
+            }}
+          >
+            Sign in
+          </button>
+        </SignInButton>
+      </SignedOut>
+      <SignedIn>
+        <UserButton afterSignOutUrl="/trends" />
+      </SignedIn>
+    </>
+  );
+}
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  const body = (
     <html lang="en">
       <body>
         <header
@@ -20,7 +50,15 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           }}
         >
           <span style={{ fontWeight: 600 }}>◧ AI Opportunity Intelligence</span>
-          <nav style={{ marginLeft: "auto", display: "flex", gap: "16px", fontSize: "0.875rem" }}>
+          <nav
+            style={{
+              marginLeft: "auto",
+              display: "flex",
+              gap: "16px",
+              fontSize: "0.875rem",
+              alignItems: "center",
+            }}
+          >
             <a href="/trends" style={{ color: "var(--fg-muted)" }}>
               Trends
             </a>
@@ -36,10 +74,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/billing" style={{ color: "var(--fg-muted)" }}>
               Billing
             </a>
+            {clerkEnabled && <AuthControls />}
           </nav>
         </header>
         <div style={{ maxWidth: 1040, margin: "0 auto", padding: "24px" }}>{children}</div>
       </body>
     </html>
   );
+
+  return clerkEnabled ? <ClerkProvider>{body}</ClerkProvider> : body;
 }

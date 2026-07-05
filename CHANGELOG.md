@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Frontend Clerk sign-in** — `apps/web` wires `@clerk/nextjs` **conditionally** on
+  `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`: `ClerkProvider` + a header Sign-in/UserButton, `clerkMiddleware`
+  (pass-through without keys), and `getDevOrg` now resolves the **signed-in user's** tenant (via
+  `bootstrapUser`) when Clerk is on — falling back to the dev tenant otherwise. Builds/CI stay green
+  without keys.
 - **Clerk verifier + sign-up webhook** (B-014/B-015) — the API now verifies real Clerk session JWTs
   (`@clerk/backend`) via the auth adapter when `CLERK_SECRET_KEY` is set (else the dev Stub), and a
   Svix-verified `POST /webhooks/clerk` provisions a tenant on `user.created` (`handleClerkUserEvent →
