@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Daily Brief** (B-018) — per-org digest: `generateDailyBrief` aggregates the top-opportunity trends
+  + the org's watchlist/unread-alert counts into a `Brief` (in-app delivered), with `listBriefs`/
+  `getBrief` and **open tracking** (`markBriefOpened`, idempotent). `briefs` tRPC router
+  (generate/list/byId/markOpened) + a `/briefs` list & detail UI (opens tracked on view). All org-scoped
+  (RLS). 5 tests. (Email delivery is a follow-up.)
 - **Action-plan generators** (B-021) — turn a scored trend into a concrete "what to build" plan
   (SaaS/API/content ideas, keywords, domains, product names, target audience, pricing, MVP scope, tech
   stack). `@aioi/ai-sdk` `generateActionPlan` (deterministic Stub + LiteLLM, schema-validated),
