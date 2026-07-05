@@ -12,7 +12,7 @@ import {
   type AuthContext,
   type Permission,
 } from "@aioi/auth";
-import { writeAuditLog } from "@aioi/database";
+import { writeAuditLog, findApiKeyByHash } from "@aioi/database";
 import { clerkVerifier } from "./clerk";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,7 +23,7 @@ export interface Context {
 }
 
 // Provider is chosen once (Stub in dev/test; Clerk when the verifier + CLERK_SECRET_KEY are set).
-const authProvider = getAuthProvider({ clerkVerifier });
+const authProvider = getAuthProvider({ clerkVerifier, apiKeyLookup: findApiKeyByHash });
 
 export async function createContext(req?: FastifyRequest): Promise<Context> {
   const auth = await authProvider.authenticate({ headers: req?.headers ?? {} });
