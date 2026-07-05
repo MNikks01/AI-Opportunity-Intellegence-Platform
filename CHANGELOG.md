@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Email delivery** — new `@aioi/email`: an `EmailProvider` seam (Stub outbox + **Resend**) with
+  brief/alert templates. The scheduler's daily-brief job now **emails each org's members**
+  (`@aioi/database` `listOrgMemberEmails`) — captured by the Stub outbox offline, sent via Resend when
+  `RESEND_API_KEY`+`EMAIL_FROM` are set. 5 tests. Also registers the `email` commitlint scope.
 - **Stripe payments** (B-020 cont.) — a `BillingProvider` seam (`@aioi/billing`) with a deterministic
   `StubBillingProvider` and a Stripe implementation (checkout sessions) gated on
   `STRIPE_SECRET_KEY`+`STRIPE_PRICE_PRO`. `billing.checkout` returns a session URL; a

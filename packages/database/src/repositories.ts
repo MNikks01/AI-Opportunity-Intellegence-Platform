@@ -44,6 +44,15 @@ const BAND_FROM_DB: Record<$Enums.ScoreBand, ScoreBand> = {
 };
 
 // ── writes ───────────────────────────────────────────────────────────────────
+/** Member emails for an org (Membership has no RLS) — for system delivery jobs (scheduler). */
+export async function listOrgMemberEmails(orgId: string): Promise<string[]> {
+  const members = await prisma.membership.findMany({
+    where: { organizationId: orgId },
+    include: { user: { select: { email: true } } },
+  });
+  return members.map((m) => m.user.email);
+}
+
 /** Active (non-deleted) org ids — for system fan-out jobs (scheduler). Organization has no RLS. */
 export async function listActiveOrgIds(limit = 1000): Promise<string[]> {
   const orgs = await prisma.organization.findMany({
