@@ -253,6 +253,19 @@ importers:
         specifier: ^5.20.0
         version: 5.22.0
 
+  packages/email:
+    dependencies:
+      '@aioi/logger':
+        specifier: workspace:*
+        version: link:../logger
+    devDependencies:
+      '@aioi/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@aioi/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
+
   packages/eslint-config:
     dependencies:
       eslint:
@@ -461,6 +474,9 @@ importers:
       '@aioi/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@aioi/email':
+        specifier: workspace:*
+        version: link:../../packages/email
       '@aioi/ingestion-service':
         specifier: workspace:*
         version: link:../ingestion-service

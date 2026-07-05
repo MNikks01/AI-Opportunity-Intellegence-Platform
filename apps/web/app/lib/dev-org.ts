@@ -15,8 +15,10 @@ export const getDevOrg = cache(
     workspaceId: string | null;
   }> => {
     if (clerkEnabled) {
+      // Sign-in is enforced by middleware; resolve the signed-in user (no dev fallback in auth mode).
       const resolved = await resolveClerkOrg();
-      if (resolved) return resolved;
+      if (!resolved) throw new Error("Unauthenticated");
+      return resolved;
     }
     const r = await bootstrapUser({
       clerkId: "dev-user",

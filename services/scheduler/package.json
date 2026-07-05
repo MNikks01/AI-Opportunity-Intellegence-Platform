@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@aioi/database": "workspace:*",
+    "@aioi/email": "workspace:*",
     "@aioi/ingestion-service": "workspace:*",
     "@aioi/logger": "workspace:*",
     "@aioi/shared": "workspace:*",
