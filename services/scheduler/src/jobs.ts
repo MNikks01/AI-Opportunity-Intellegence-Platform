@@ -3,8 +3,9 @@
  * the queue layer just schedules them. System fan-out over all active orgs uses `listActiveOrgIds`
  * (Organization has no RLS); each per-org call is RLS-scoped inside the repo.
  */
-import { generateDailyBrief, listActiveOrgIds } from "@aioi/database";
+import { generateDailyBrief, listActiveOrgIds, listOrgMemberEmails } from "@aioi/database";
 import { runHackerNewsIngestion } from "@aioi/ingestion-service";
+import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
 import { logger } from "@aioi/logger";
 
 export async function runIngestionJob(limit = 30) {
@@ -15,19 +16,26 @@ export async function runIngestionJob(limit = 30) {
 
 export async function runDailyBriefsJob(
   orgIds?: string[],
-): Promise<{ orgs: number; generated: number }> {
+): Promise<{ orgs: number; generated: number; emailed: number }> {
   const ids = orgIds ?? (await listActiveOrgIds());
+  const email = getEmailProvider();
   let generated = 0;
+  let emailed = 0;
   for (const id of ids) {
     try {
-      await generateDailyBrief(id);
+      const brief = await generateDailyBrief(id);
       generated += 1;
+      const msg = renderBriefEmail(brief.content as unknown as BriefLike);
+      for (const to of await listOrgMemberEmails(id)) {
+        await email.send({ to, ...msg });
+        emailed += 1;
+      }
     } catch (err) {
-      logger.warn({ err, orgId: id }, "scheduler: brief generation failed for org");
+      logger.warn({ err, orgId: id }, "scheduler: daily brief failed for org");
     }
   }
-  logger.info({ orgs: ids.length, generated }, "scheduler: daily briefs job complete");
-  return { orgs: ids.length, generated };
+  logger.info({ orgs: ids.length, generated, emailed }, "scheduler: daily briefs job complete");
+  return { orgs: ids.length, generated, emailed };
 }
 
 export const JOB = {

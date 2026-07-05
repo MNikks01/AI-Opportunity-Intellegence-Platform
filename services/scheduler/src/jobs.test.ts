@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
-import { afterAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { bootstrapUser, listBriefs, prisma } from "@aioi/database";
+import { clearOutbox, outbox } from "@aioi/email";
 import { runDailyBriefsJob } from "./jobs";
 
 // Integration — needs a live Postgres (+ restricted role for RLS). Exercises only the pure job
@@ -18,17 +19,20 @@ async function tenant(): Promise<string> {
 }
 
 describe.skipIf(!enabled)("runDailyBriefsJob (integration)", () => {
+  beforeAll(() => clearOutbox());
   afterAll(async () => {
     for (const id of orgIds) await prisma.organization.delete({ where: { id } }).catch(() => {});
     for (const id of userIds) await prisma.user.delete({ where: { id } }).catch(() => {});
   });
 
-  it("generates one brief per given org", async () => {
+  it("generates and emails one brief per given org", async () => {
     const a = await tenant();
     const b = await tenant();
     const res = await runDailyBriefsJob([a, b]);
-    expect(res).toEqual({ orgs: 2, generated: 2 });
+    expect(res).toEqual({ orgs: 2, generated: 2, emailed: 2 }); // one member per org
     expect((await listBriefs(a)).length).toBeGreaterThan(0);
     expect((await listBriefs(b)).length).toBeGreaterThan(0);
+    // brief emails landed in the stub outbox
+    expect(outbox.filter((m) => m.subject.startsWith("Your daily brief"))).toHaveLength(2);
   });
 });
