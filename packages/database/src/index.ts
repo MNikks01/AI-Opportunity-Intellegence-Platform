@@ -33,4 +33,5 @@ export {
   markNotificationRead,
   markAllNotificationsRead,
 } from "./notifications";
+export { writeAuditLog, listAuditLogs, type AuditEntry } from "./audit";
 export { $Enums, Prisma } from "@prisma/client";
