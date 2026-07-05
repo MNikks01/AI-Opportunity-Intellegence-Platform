@@ -25,6 +25,10 @@ import {
   markNotificationRead,
   markAllNotificationsRead,
   listAuditLogs,
+  generateDailyBrief,
+  listBriefs,
+  getBrief,
+  markBriefOpened,
 } from "@aioi/database";
 import {
   createWatchlistSchema,
@@ -213,6 +217,30 @@ export const appRouter = router({
       .query(({ ctx, input }) => {
         authorize(ctx.auth, "admin:access"); // audit trail is admin-only
         return listAuditLogs(ctx.auth.orgId, input?.limit);
+      }),
+  }),
+
+  briefs: router({
+    list: protectedProcedure.query(({ ctx }) => {
+      authorize(ctx.auth, "briefs:read");
+      return listBriefs(ctx.auth.orgId);
+    }),
+
+    byId: protectedProcedure.input(z.object({ id: z.string().uuid() })).query(({ ctx, input }) => {
+      authorize(ctx.auth, "briefs:read");
+      return getBrief(ctx.auth.orgId, input.id).catch(toTRPC);
+    }),
+
+    generate: protectedProcedure.mutation(({ ctx }) => {
+      authorize(ctx.auth, "briefs:read");
+      return generateDailyBrief(ctx.auth.orgId);
+    }),
+
+    markOpened: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "briefs:read");
+        return markBriefOpened(ctx.auth.orgId, input.id).catch(toTRPC);
       }),
   }),
 });

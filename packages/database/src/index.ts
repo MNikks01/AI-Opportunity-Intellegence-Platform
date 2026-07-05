@@ -34,4 +34,12 @@ export {
   markAllNotificationsRead,
 } from "./notifications";
 export { writeAuditLog, listAuditLogs, type AuditEntry } from "./audit";
+export {
+  generateDailyBrief,
+  listBriefs,
+  getBrief,
+  markBriefOpened,
+  type BriefContent,
+  type BriefTrend,
+} from "./briefs";
 export { $Enums, Prisma } from "@prisma/client";
