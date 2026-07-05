@@ -64,4 +64,14 @@ describe.skipIf(!hasDb)("api router (integration)", () => {
     const results = await caller.trends.semanticSearch({ q: `${trend.title}\n${trend.summary}` });
     expect(results.some((t) => t.slug === slug)).toBe(true);
   });
+
+  it("trends.generateActionPlan persists a plan surfaced by bySlug", async () => {
+    const caller = appRouter.createCaller(await createContext());
+    const plan = await caller.trends.generateActionPlan({ slug });
+    expect(plan.content.saasIdeas.length).toBeGreaterThan(0);
+
+    const detail = await caller.trends.bySlug({ slug });
+    const content = detail.actionPlan?.content as { saasIdeas: string[] } | undefined;
+    expect(content?.saasIdeas.length ?? 0).toBeGreaterThan(0);
+  });
 });

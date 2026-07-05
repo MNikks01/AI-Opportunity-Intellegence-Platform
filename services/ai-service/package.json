@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
   "description": "Scoring (opportunity-scoring-engine), RAG, and action-plan generation; eval-gated.",
   "scripts": {
     "dev": "tsx watch src/index.ts",

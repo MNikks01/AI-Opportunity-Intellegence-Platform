@@ -6,6 +6,7 @@ import {
   listTrends,
   searchTrends,
   semanticSearchTrends,
+  persistActionPlan,
   NotFoundError,
   createWatchlist,
   listWatchlists,
@@ -31,6 +32,7 @@ import {
   watchlistItemSchema,
   createAlertSchema,
 } from "@aioi/validation";
+import { generateActionPlan } from "@aioi/ai-service";
 import { authorize, protectedProcedure, publicProcedure, router, TRPCError } from "./trpc";
 
 /** Map data-layer NotFound to a tRPC error; rethrow everything else. */
@@ -84,6 +86,21 @@ export const appRouter = router({
           semanticSearchTrends(input.q, input.limit),
         ),
       ),
+
+    // Generate + persist the "what to build" action plan for a trend (admin, expensive).
+    generateActionPlan: protectedProcedure
+      .input(z.object({ slug: z.string().min(1) }))
+      .mutation(async ({ ctx, input }) => {
+        authorize(ctx.auth, "admin:access");
+        const trend = await getTrendBySlug(input.slug);
+        if (!trend) throw new TRPCError({ code: "NOT_FOUND", message: "Trend not found" });
+        const plan = await generateActionPlan(
+          { title: trend.title, summary: trend.summary },
+          trend.scores,
+        );
+        await persistActionPlan(trend.id, plan.promptVersion, plan.content);
+        return plan;
+      }),
   }),
 
   watchlists: router({
