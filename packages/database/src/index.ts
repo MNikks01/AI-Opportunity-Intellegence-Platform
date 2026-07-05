@@ -44,4 +44,5 @@ export {
 } from "./briefs";
 export { getPlan, getEntitlements, setPlan } from "./subscription";
 export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey } from "./apikeys";
+export { exportOrgData, deleteOrg } from "./gdpr";
 export { $Enums, Prisma } from "@prisma/client";
