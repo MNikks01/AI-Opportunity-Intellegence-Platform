@@ -31,8 +31,12 @@ import {
   markBriefOpened,
   getPlan,
   setPlan,
+  createApiKey,
+  listApiKeys,
+  revokeApiKey,
 } from "@aioi/database";
 import { entitlementsFor, PlanLimitError } from "@aioi/billing";
+import { getBillingProvider } from "./stripe";
 import {
   createWatchlistSchema,
   renameWatchlistSchema,
@@ -261,6 +265,40 @@ export const appRouter = router({
       .mutation(({ ctx, input }) => {
         authorize(ctx.auth, "billing:manage"); // OWNER/BILLING only
         return setPlan(ctx.auth.orgId, input.plan);
+      }),
+
+    // Start a Stripe Checkout to upgrade to Pro (Stub URL until Stripe is configured).
+    checkout: protectedProcedure
+      .input(z.object({ successUrl: z.string().url(), cancelUrl: z.string().url() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "billing:manage");
+        return getBillingProvider().createCheckoutSession({
+          orgId: ctx.auth.orgId,
+          plan: "PRO",
+          successUrl: input.successUrl,
+          cancelUrl: input.cancelUrl,
+        });
+      }),
+  }),
+
+  apikeys: router({
+    list: protectedProcedure.query(({ ctx }) => {
+      authorize(ctx.auth, "apikeys:manage");
+      return listApiKeys(ctx.auth.orgId);
+    }),
+
+    create: protectedProcedure
+      .input(z.object({ name: z.string().min(1).max(80), scopes: z.array(z.string()).default([]) }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "apikeys:manage");
+        return createApiKey(ctx.auth.orgId, input.name, input.scopes); // raw returned once
+      }),
+
+    revoke: protectedProcedure
+      .input(z.object({ id: z.string().uuid() }))
+      .mutation(({ ctx, input }) => {
+        authorize(ctx.auth, "apikeys:manage");
+        return revokeApiKey(ctx.auth.orgId, input.id).catch(toTRPC);
       }),
   }),
 });

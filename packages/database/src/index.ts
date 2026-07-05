@@ -43,4 +43,5 @@ export {
   type BriefTrend,
 } from "./briefs";
 export { getPlan, getEntitlements, setPlan } from "./subscription";
+export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey } from "./apikeys";
 export { $Enums, Prisma } from "@prisma/client";

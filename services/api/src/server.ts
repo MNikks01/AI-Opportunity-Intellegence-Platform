@@ -7,6 +7,7 @@ import { getTrendBySlug, listTrends, prisma } from "@aioi/database";
 import { appRouter } from "./router";
 import { createContext } from "./trpc";
 import { handleClerkUserEvent, type ClerkUserEvent } from "./clerk";
+import { handleStripeEvent, stripeConfigured, verifyStripeEvent } from "./stripe";
 
 export async function buildServer(): Promise<FastifyInstance> {
   const app = Fastify({ logger: false });
@@ -29,6 +30,23 @@ export async function buildServer(): Promise<FastifyInstance> {
     }
     await handleClerkUserEvent(evt);
     return { ok: true as const };
+  });
+
+  // Stripe webhook → sync subscription plan (B-020). Inert until Stripe is configured.
+  app.post("/webhooks/stripe", { config: { rawBody: true } }, async (req, reply) => {
+    if (!stripeConfigured())
+      return reply.code(503).send({ error: "billing webhooks not configured" });
+    const sig = req.headers["stripe-signature"];
+    try {
+      const evt = verifyStripeEvent(
+        req.rawBody as string,
+        Array.isArray(sig) ? sig[0]! : (sig ?? ""),
+      );
+      await handleStripeEvent(evt as unknown as Parameters<typeof handleStripeEvent>[0]);
+    } catch {
+      return reply.code(400).send({ error: "invalid signature" });
+    }
+    return { received: true as const };
   });
 
   void app.register(fastifyTRPCPlugin, {

@@ -12,7 +12,7 @@ let userId: string;
 
 const as = (role: AuthContext["role"]): AuthContext => ({ userId, orgId, role });
 
-describe.skipIf(!enabled)("billing tRPC router (integration)", () => {
+describe.skipIf(!enabled)("apikeys tRPC router (integration)", () => {
   beforeAll(async () => {
     const clerkId = `clerk_${randomUUID().slice(0, 12)}`;
     const r = await bootstrapUser({ clerkId, email: `${clerkId}@example.com` });
@@ -26,31 +26,20 @@ describe.skipIf(!enabled)("billing tRPC router (integration)", () => {
     for (const id of userIds) await prisma.user.delete({ where: { id } }).catch(() => {});
   });
 
-  it("reports the plan + entitlements and upgrades via setPlan", async () => {
+  it("creates (raw once), lists, and revokes a key", async () => {
     const owner = appRouter.createCaller({ auth: as("OWNER") });
-    const before = await owner.billing.plan();
-    expect(before.plan).toBe("FREE");
-    expect(before.entitlements.semanticSearch).toBe(false);
+    const created = await owner.apikeys.create({ name: "prod", scopes: ["trends:read"] });
+    expect(created.raw.startsWith("aioi_")).toBe(true);
 
-    await owner.billing.setPlan({ plan: "PRO" });
-    const after = await owner.billing.plan();
-    expect(after.plan).toBe("PRO");
-    expect(after.entitlements.semanticSearch).toBe(true);
+    const list = await owner.apikeys.list();
+    expect(list.some((k) => k.id === created.id)).toBe(true);
+
+    const revoked = await owner.apikeys.revoke({ id: created.id });
+    expect(revoked.revokedAt).toBeTruthy();
   });
 
-  it("setPlan requires billing:manage (VIEWER forbidden)", async () => {
+  it("requires apikeys:manage (VIEWER forbidden)", async () => {
     const viewer = appRouter.createCaller({ auth: as("VIEWER") });
-    await expect(viewer.billing.setPlan({ plan: "FREE" })).rejects.toMatchObject({
-      code: "FORBIDDEN",
-    });
-  });
-
-  it("checkout returns a URL (Stub without Stripe keys)", async () => {
-    const owner = appRouter.createCaller({ auth: as("OWNER") });
-    const res = await owner.billing.checkout({
-      successUrl: "https://app.test/billing",
-      cancelUrl: "https://app.test/billing",
-    });
-    expect(res.url).toContain("stub_checkout");
+    await expect(viewer.apikeys.list()).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
 });

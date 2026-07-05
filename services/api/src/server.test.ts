@@ -31,4 +31,13 @@ describe("buildServer", () => {
       if (saved !== undefined) process.env.CLERK_WEBHOOK_SECRET = saved;
     }
   });
+
+  it("gates the Stripe webhook when unconfigured (503)", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/webhooks/stripe",
+      payload: { type: "customer.subscription.updated", data: { object: {} } },
+    });
+    expect(res.statusCode).toBe(503);
+  });
 });
