@@ -1,5 +1,20 @@
 # @aioi/ai-sdk
 
+## 0.2.0
+
+### Minor Changes
+
+- c10faf2: Action-plan generators (B-021): `generateActionPlan` in `@aioi/ai-sdk` (Stub + LiteLLM, schema-validated)
+
+  - `@aioi/ai-service` orchestration, `persistActionPlan`/`getActionPlan` with `getTrendBySlug` including
+    the plan, an admin-gated `trends.generateActionPlan` mutation, and a plan section on the trend detail
+    page. Also adds `main`/`types` to `@aioi/ai-service` so it can be imported.
+
+### Patch Changes
+
+- Updated dependencies [c10faf2]
+  - @aioi/validation@0.2.0
+
 ## 0.1.0
 
 ### Minor Changes
