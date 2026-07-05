@@ -6,6 +6,7 @@
  */
 import type { Prisma } from "@prisma/client";
 import { alertTriggerSchema, type AlertTrigger, type CreateAlertInput } from "@aioi/validation";
+import { prisma } from "./client";
 import { withOrgContext } from "./rls";
 import { NotFoundError } from "./watchlists";
 
@@ -111,4 +112,23 @@ export function evaluateTrendForOrg(orgId: string, event: TrendEvent) {
     }
     return created;
   });
+}
+
+/**
+ * Fan-out entry point for the scoring pipeline: evaluate a scored trend against EVERY org that watches
+ * it and write notifications. Uses the SECURITY DEFINER `app_orgs_watching_trend` for cross-tenant
+ * discovery (the runtime role can't read other orgs' watchlists), then per-org `evaluateTrendForOrg`
+ * (RLS-scoped). Safe no-op when nobody watches the trend.
+ */
+export async function evaluateTrendAllOrgs(
+  event: TrendEvent,
+): Promise<{ orgs: number; notifications: number }> {
+  const rows = await prisma.$queryRaw<Array<{ org: string }>>`
+    SELECT app_orgs_watching_trend(${event.trendId}) AS org`;
+  let notifications = 0;
+  for (const { org } of rows) {
+    const fired = await evaluateTrendForOrg(org, event);
+    notifications += fired.length;
+  }
+  return { orgs: rows.length, notifications };
 }

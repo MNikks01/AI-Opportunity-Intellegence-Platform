@@ -24,6 +24,7 @@ export {
   setAlertEnabled,
   deleteAlert,
   evaluateTrendForOrg,
+  evaluateTrendAllOrgs,
   type TrendEvent,
 } from "./alerts";
 export {
