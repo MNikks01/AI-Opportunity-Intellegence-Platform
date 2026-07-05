@@ -4,3 +4,4 @@
  */
 export * from "./scoring";
 export * from "./action-plan";
+export * from "./clustering";

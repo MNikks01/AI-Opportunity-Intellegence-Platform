@@ -2,6 +2,7 @@
  * Data-access layer. Maps between the domain model (@aioi/shared, lowercase dims) and the Prisma
  * enums (UPPER_SNAKE). Services depend on these functions, not on Prisma directly.
  */
+import { randomUUID } from "node:crypto";
 import type { $Enums, Prisma } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
 import { bandForValue } from "@aioi/shared";
@@ -44,6 +45,44 @@ const BAND_FROM_DB: Record<$Enums.ScoreBand, ScoreBand> = {
 };
 
 // ── writes ───────────────────────────────────────────────────────────────────
+/** Signals not yet attached to any trend (candidates for clustering, B-006). Global tables. */
+export async function listUnclusteredSignals(limit = 500) {
+  return prisma.signal.findMany({
+    where: { trends: { none: {} } },
+    take: limit,
+    orderBy: { fetchedAt: "desc" },
+    select: { id: true, title: true },
+  });
+}
+
+/** Create a Trend from a cluster of signals + link them (B-006). Returns the trend id. */
+export async function createTrendFromSignalIds(
+  signalIds: string[],
+  title: string,
+  summary?: string,
+): Promise<string> {
+  const base =
+    title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40) || "trend";
+  const trend = await prisma.trend.create({
+    data: {
+      slug: `${base}-${randomUUID().slice(0, 6)}`,
+      title,
+      summary,
+      status: "EARLY",
+      lastSignalAt: new Date(),
+    },
+  });
+  await prisma.trendSignal.createMany({
+    data: signalIds.map((signalId) => ({ trendId: trend.id, signalId })),
+    skipDuplicates: true,
+  });
+  return trend.id;
+}
+
 /** Member emails for an org (Membership has no RLS) — for system delivery jobs (scheduler). */
 export async function listOrgMemberEmails(orgId: string): Promise<string[]> {
   const members = await prisma.membership.findMany({

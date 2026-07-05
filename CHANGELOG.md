@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Signal → Trend clustering** (B-006) — connects ingestion to trends: `clusterSignals` (embed +
+  greedy cosine; deterministic offline via the StubEmbedder) + `clusterRecentSignals` orchestration;
+  `@aioi/database` `listUnclusteredSignals`/`createTrendFromSignalIds`; and an hourly scheduler
+  clustering job. Swaps to real semantic clustering with a real embedder. 3 tests.
 - **Email delivery** — new `@aioi/email`: an `EmailProvider` seam (Stub outbox + **Resend**) with
   brief/alert templates. The scheduler's daily-brief job now **emails each org's members**
   (`@aioi/database` `listOrgMemberEmails`) — captured by the Stub outbox offline, sent via Resend when
