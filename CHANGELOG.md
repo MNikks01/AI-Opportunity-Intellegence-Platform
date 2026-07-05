@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Alerts & notifications web UI** (B-017) — an Alerts section on the watchlist detail (create
+  `SCORE_CROSSES`/`NEW_TREND` alerts, enable/disable, delete) and a `/notifications` inbox (mark
+  read / mark all read) with a nav link, all via Server Actions over the RLS-enforced repos. Verified
+  end-to-end in the browser: alert → engine → in-app notification rendered.
 - **Alerts engine** (B-017) — a new `Notification` model + org-scoped alert/notification repositories,
   a pure trigger matcher (`NEW_TREND`, `SCORE_CROSSES`), and `evaluateTrendForOrg` that writes in-app
   notifications for matched alerts. `alerts` + `notifications` tRPC routers (protected + RBAC
