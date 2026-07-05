@@ -24,6 +24,7 @@ export {
   setAlertEnabled,
   deleteAlert,
   evaluateTrendForOrg,
+  evaluateTrendAllOrgs,
   type TrendEvent,
 } from "./alerts";
 export {
@@ -32,4 +33,5 @@ export {
   markNotificationRead,
   markAllNotificationsRead,
 } from "./notifications";
+export { writeAuditLog, listAuditLogs, type AuditEntry } from "./audit";
 export { $Enums, Prisma } from "@prisma/client";

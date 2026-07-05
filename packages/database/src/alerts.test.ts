@@ -11,6 +11,7 @@ import {
   setAlertEnabled,
   deleteAlert,
   evaluateTrendForOrg,
+  evaluateTrendAllOrgs,
 } from "./alerts";
 import {
   listNotifications,
@@ -108,6 +109,26 @@ describe.skipIf(!enabled)("alerts engine (integration)", () => {
     );
     expect(await unreadNotificationCount(orgB)).toBe(0);
     expect(await listNotifications(orgB)).toHaveLength(0);
+  });
+
+  it("evaluateTrendAllOrgs fans out only to orgs watching the trend", async () => {
+    const tId = `trend-${randomUUID().slice(0, 8)}`;
+    const wl = await createWatchlist(orgA, { workspaceId: wsA, name: "fanout" });
+    await addWatchlistItem(orgA, { watchlistId: wl.id, targetType: "TREND", targetId: tId });
+    await createAlert(orgA, {
+      watchlistId: wl.id,
+      trigger: { type: "SCORE_CROSSES", dimension: "opportunity", gte: 80 },
+      channel: "IN_APP",
+      cadence: "INSTANT",
+    });
+
+    const res = await evaluateTrendAllOrgs({
+      trendId: tId,
+      title: "X",
+      scores: { opportunity: 90 },
+    });
+    expect(res).toEqual({ orgs: 1, notifications: 1 }); // org A only
+    expect(await unreadNotificationCount(orgB)).toBe(0); // org B never watched it
   });
 
   it("marks notifications read", async () => {

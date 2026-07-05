@@ -5,7 +5,14 @@
 import type { $Enums } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
 import { bandForValue } from "@aioi/shared";
+import { getEmbedder } from "@aioi/ai-sdk";
 import { prisma } from "./client";
+import { evaluateTrendAllOrgs } from "./alerts";
+
+/** pgvector literal for a bound `::vector` param, e.g. [0.1,0.2] → "[0.1,0.2]". */
+function vectorLiteral(nums: number[]): string {
+  return `[${nums.join(",")}]`;
+}
 
 // ── enum maps ────────────────────────────────────────────────────────────────
 const DIM_TO_DB: Record<ScoreDimension, $Enums.ScoreDimension> = {
@@ -104,6 +111,17 @@ export async function persistScoredTrend(trend: TrendLike, scores: Score[]): Pro
     });
   }
 
+  // Backfill the semantic embedding (B-019) so the trend is searchable by meaning.
+  const [embedding] = await getEmbedder().embed([`${trend.title}\n${trend.summary ?? ""}`]);
+  if (embedding) {
+    await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(embedding)}::vector WHERE id = ${dbTrend.id}::uuid`;
+  }
+
+  // Auto-evaluate alerts for every org watching this trend (B-017 pipeline). No-op if unwatched.
+  const scoreMap: Record<string, number> = {};
+  for (const s of scores) scoreMap[s.dimension] = s.value;
+  await evaluateTrendAllOrgs({ trendId: dbTrend.id, title: trend.title, scores: scoreMap });
+
   return dbTrend.id;
 }
 
@@ -164,4 +182,74 @@ export async function getTrendBySlug(slug: string): Promise<TrendView | null> {
     status: t.status as TrendStatus,
     scores: t.scores.map(toScore),
   };
+}
+
+/**
+ * Keyword full-text search over trends (B-019). Uses the STORED `searchVector` (GIN-indexed) with
+ * `plainto_tsquery`, ranked by `ts_rank` then recency. Returns the same `TrendView` shape as
+ * `listTrends`. Semantic (pgvector) search is a follow-up. Trends are global → public.
+ */
+export async function searchTrends(query: string, limit = 25): Promise<TrendView[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const matches = await prisma.$queryRaw<Array<{ id: string }>>`
+    SELECT id
+    FROM "Trend"
+    WHERE "searchVector" @@ plainto_tsquery('english', ${q})
+    ORDER BY ts_rank("searchVector", plainto_tsquery('english', ${q})) DESC,
+             "lastSignalAt" DESC NULLS LAST
+    LIMIT ${limit}`;
+  if (matches.length === 0) return [];
+
+  const order = new Map(matches.map((m, i) => [m.id, i]));
+  const rows = await prisma.trend.findMany({
+    where: { id: { in: matches.map((m) => m.id) } },
+    include: { scores: true },
+  });
+  return rows
+    .sort((a, b) => order.get(a.id)! - order.get(b.id)!)
+    .map((t) => ({
+      id: t.id,
+      slug: t.slug,
+      title: t.title,
+      summary: t.summary,
+      status: t.status as TrendStatus,
+      scores: t.scores.map(toScore),
+    }));
+}
+
+/**
+ * Semantic search over trends (B-019): embed the query and rank by cosine distance (`<=>`, HNSW index).
+ * Trends without an embedding are skipped. Returns the `TrendView` shape. Quality depends on the
+ * configured embedder (deterministic Stub offline; real vectors when LiteLLM is configured).
+ */
+export async function semanticSearchTrends(query: string, limit = 25): Promise<TrendView[]> {
+  const q = query.trim();
+  if (!q) return [];
+  const [embedding] = await getEmbedder().embed([q]);
+  if (!embedding) return [];
+
+  const matches = await prisma.$queryRaw<Array<{ id: string }>>`
+    SELECT id
+    FROM "Trend"
+    WHERE embedding IS NOT NULL
+    ORDER BY embedding <=> ${vectorLiteral(embedding)}::vector
+    LIMIT ${limit}`;
+  if (matches.length === 0) return [];
+
+  const order = new Map(matches.map((m, i) => [m.id, i]));
+  const rows = await prisma.trend.findMany({
+    where: { id: { in: matches.map((m) => m.id) } },
+    include: { scores: true },
+  });
+  return rows
+    .sort((a, b) => order.get(a.id)! - order.get(b.id)!)
+    .map((t) => ({
+      id: t.id,
+      slug: t.slug,
+      title: t.title,
+      summary: t.summary,
+      status: t.status as TrendStatus,
+      scores: t.scores.map(toScore),
+    }));
 }

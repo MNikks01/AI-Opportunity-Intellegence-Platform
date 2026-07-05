@@ -3,6 +3,8 @@ import { z } from "zod";
 import {
   getTrendBySlug,
   listTrends,
+  searchTrends,
+  semanticSearchTrends,
   NotFoundError,
   createWatchlist,
   listWatchlists,
@@ -20,6 +22,7 @@ import {
   unreadNotificationCount,
   markNotificationRead,
   markAllNotificationsRead,
+  listAuditLogs,
 } from "@aioi/database";
 import {
   createWatchlistSchema,
@@ -51,6 +54,24 @@ export const appRouter = router({
         if (!trend) throw new TRPCError({ code: "NOT_FOUND", message: "Trend not found" });
         return trend;
       }),
+
+    search: publicProcedure
+      .input(
+        z.object({
+          q: z.string().min(1).max(200),
+          limit: z.number().int().min(1).max(50).default(25),
+        }),
+      )
+      .query(({ input }) => searchTrends(input.q, input.limit)),
+
+    semanticSearch: publicProcedure
+      .input(
+        z.object({
+          q: z.string().min(1).max(200),
+          limit: z.number().int().min(1).max(50).default(25),
+        }),
+      )
+      .query(({ input }) => semanticSearchTrends(input.q, input.limit)),
   }),
 
   watchlists: router({
@@ -155,6 +176,15 @@ export const appRouter = router({
       authorize(ctx.auth, "alerts:read");
       return markAllNotificationsRead(ctx.auth.orgId);
     }),
+  }),
+
+  audit: router({
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().int().min(1).max(200).default(50) }).optional())
+      .query(({ ctx, input }) => {
+        authorize(ctx.auth, "admin:access"); // audit trail is admin-only
+        return listAuditLogs(ctx.auth.orgId, input?.limit);
+      }),
   }),
 });
 

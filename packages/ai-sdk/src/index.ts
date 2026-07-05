@@ -107,3 +107,5 @@ export function getProvider(env: NodeJS.ProcessEnv = process.env): LLMProvider {
   if (base && hasKey) return new LiteLLMProvider(base);
   return new StubProvider();
 }
+
+export { EMBED_DIM, StubEmbedder, LiteLLMEmbedder, getEmbedder, type Embedder } from "./embed";

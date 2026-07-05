@@ -16,6 +16,29 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Audit logging** (B-022) — a tRPC middleware on `protectedProcedure` writes an `AuditLog` entry for
+  every successful **mutation** (action = procedure path, actor, kind; best-effort so it never fails the
+  mutation), so all existing protected mutations are covered cross-cuttingly. `@aioi/database`
+  `writeAuditLog`/`listAuditLogs` (org-scoped, RLS), and an admin-gated `audit.list` endpoint. 4 tests
+  (isolation; mutation-audited-but-not-query; RBAC).
+- **Prisma-backed ingestion** (B-024) — `PrismaSignalRepository` persists connector output to the
+  global `Signal` table, deduping via `createMany({ skipDuplicates })` (idempotent, returns the new
+  count); ensures the `Source` (+ legality tier) first. `createSignalRepository()` picks Prisma when a
+  DB is configured, else in-memory; `runHackerNewsIngestion` now defaults to it. 2 integration tests.
+- **Semantic trend search** (B-019) — `@aioi/ai-sdk` gains an `Embedder` (deterministic `StubEmbedder`
+  + `LiteLLMEmbedder`, `EMBED_DIM=1536`); a pgvector `embedding` column + **HNSW cosine index** on
+  Trend, backfilled on `persistScoredTrend`; `semanticSearchTrends(q)` (`<=>` cosine) + a public
+  `trends.semanticSearch` endpoint; and a Keyword/Semantic toggle on the trends search. 6 tests
+  (embedder determinism/shape + nearest-neighbor ranking). Completes B-019.
+- **Trend keyword search** (B-019) — Postgres full-text search over trends: a STORED generated
+  `searchVector` (title weighted above summary) + GIN index, a `searchTrends(q, limit)` repo
+  (`plainto_tsquery` ranked by `ts_rank` then recency, returns the `TrendView` shape), a public
+  `trends.search` tRPC endpoint, and a search box on the trends page. 5 tests. Semantic (pgvector)
+  search is the next slice (needs an embedder).
+- **Alerts pipeline auto-eval** (B-017) — `persistScoredTrend` now fires `evaluateTrendAllOrgs` when a
+  scored trend lands, fanning out to every org watching it via a `SECURITY DEFINER` function
+  (`app_orgs_watching_trend`) for RLS-safe cross-tenant discovery (ADR-0003), then per-org
+  `evaluateTrendForOrg`. Alerts are now autonomous. (Email/Slack delivery remains a separate epic.)
 - **Alerts & notifications web UI** (B-017) — an Alerts section on the watchlist detail (create
   `SCORE_CROSSES`/`NEW_TREND` alerts, enable/disable, delete) and a `/notifications` inbox (mark
   read / mark all read) with a nav link, all via Server Actions over the RLS-enforced repos. Verified
