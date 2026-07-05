@@ -6,8 +6,11 @@ import {
   deleteWatchlist,
   addWatchlistItem,
   removeWatchlistItem,
+  createAlert,
+  setAlertEnabled,
+  deleteAlert,
 } from "@aioi/database";
-import { createWatchlistSchema, watchlistItemSchema } from "@aioi/validation";
+import { createWatchlistSchema, watchlistItemSchema, createAlertSchema } from "@aioi/validation";
 import { getDevOrg } from "../lib/dev-org";
 
 export async function createWatchlistAction(formData: FormData): Promise<void> {
@@ -48,5 +51,42 @@ export async function removeItemAction(formData: FormData): Promise<void> {
   const itemId = String(formData.get("itemId") ?? "");
   if (!watchlistId || !itemId) return;
   await removeWatchlistItem(organizationId, watchlistId, itemId);
+  revalidatePath(`/watchlists/${watchlistId}`);
+}
+
+export async function createAlertAction(formData: FormData): Promise<void> {
+  const { organizationId } = await getDevOrg();
+  const watchlistId = String(formData.get("watchlistId") ?? "");
+  const type = String(formData.get("type") ?? "");
+  const trigger =
+    type === "SCORE_CROSSES"
+      ? {
+          type: "SCORE_CROSSES" as const,
+          dimension: String(formData.get("dimension") ?? ""),
+          gte: Number(formData.get("gte") ?? 0),
+        }
+      : { type: "NEW_TREND" as const };
+  const parsed = createAlertSchema.safeParse({ watchlistId, trigger });
+  if (!parsed.success) return;
+  await createAlert(organizationId, parsed.data);
+  revalidatePath(`/watchlists/${watchlistId}`);
+}
+
+export async function toggleAlertAction(formData: FormData): Promise<void> {
+  const { organizationId } = await getDevOrg();
+  const id = String(formData.get("id") ?? "");
+  const watchlistId = String(formData.get("watchlistId") ?? "");
+  const enabled = String(formData.get("enabled") ?? "") === "true";
+  if (!id) return;
+  await setAlertEnabled(organizationId, id, enabled);
+  revalidatePath(`/watchlists/${watchlistId}`);
+}
+
+export async function deleteAlertAction(formData: FormData): Promise<void> {
+  const { organizationId } = await getDevOrg();
+  const id = String(formData.get("id") ?? "");
+  const watchlistId = String(formData.get("watchlistId") ?? "");
+  if (!id) return;
+  await deleteAlert(organizationId, id);
   revalidatePath(`/watchlists/${watchlistId}`);
 }
