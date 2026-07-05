@@ -1,5 +1,12 @@
 # @aioi/web
 
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [2995824]
+  - @aioi/database@0.7.0
+
 ## 0.5.0
 
 ### Minor Changes
