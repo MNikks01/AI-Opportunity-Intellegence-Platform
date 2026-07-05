@@ -1,5 +1,22 @@
 # @aioi/database
 
+## 0.6.0
+
+### Minor Changes
+
+- 5488c28: Billing & entitlements (B-020): new `@aioi/billing` (plans + entitlements + `PlanLimitError`),
+  `getPlan`/`setPlan`/`getEntitlements` on Subscription (org-scoped RLS), `createWatchlist` enforces the
+  plan's watchlist limit, a `billing` tRPC router (plan/setPlan), and a `/billing` page. Stripe
+  checkout/webhooks follow.
+- dd23ccb: Scheduler service: `@aioi/scheduler` (BullMQ + cron) with `runIngestionJob` and `runDailyBriefsJob`
+  (fan out `generateDailyBrief` over active orgs) as pure, testable job functions + a `startScheduler`
+  worker. Adds `listActiveOrgIds` to `@aioi/database` and `main`/`types` to `@aioi/ingestion-service`.
+
+### Patch Changes
+
+- Updated dependencies [5488c28]
+  - @aioi/billing@0.1.0
+
 ## 0.5.0
 
 ### Minor Changes
