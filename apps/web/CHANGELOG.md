@@ -1,5 +1,14 @@
 # @aioi/web
 
+## 0.5.2
+
+### Patch Changes
+
+- d021fac: Enforce sign-in when Clerk is configured: middleware protects every app route (unauthenticated →
+  sign-in) and `getDevOrg` no longer falls back to the dev tenant in auth mode. Pass-through without keys.
+- Updated dependencies [0d328db]
+  - @aioi/database@0.8.0
+
 ## 0.5.1
 
 ### Patch Changes

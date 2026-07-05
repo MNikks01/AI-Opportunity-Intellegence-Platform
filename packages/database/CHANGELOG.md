@@ -1,5 +1,13 @@
 # @aioi/database
 
+## 0.8.0
+
+### Minor Changes
+
+- 0d328db: Email delivery: new `@aioi/email` (EmailProvider seam — Stub outbox + Resend — plus brief/alert
+  templates). The scheduler's daily-brief job now emails each org's members (`listOrgMemberEmails`), via
+  the Stub outbox offline and Resend when `RESEND_API_KEY`+`EMAIL_FROM` are set.
+
 ## 0.7.0
 
 ### Minor Changes
