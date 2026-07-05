@@ -1,4 +1,4 @@
-import { listTrends, searchTrends } from "@aioi/database";
+import { listTrends, searchTrends, semanticSearchTrends } from "@aioi/database";
 import { TrendCard } from "@aioi/ui";
 
 export const dynamic = "force-dynamic";
@@ -6,11 +6,16 @@ export const dynamic = "force-dynamic";
 export default async function TrendsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; mode?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, mode } = await searchParams;
   const query = q?.trim() ?? "";
-  const trends = query ? await searchTrends(query, 50) : await listTrends(50);
+  const semantic = mode === "semantic";
+  const trends = query
+    ? semantic
+      ? await semanticSearchTrends(query, 50)
+      : await searchTrends(query, 50)
+    : await listTrends(50);
 
   return (
     <main>
@@ -21,7 +26,7 @@ export default async function TrendsPage({
           : `${trends.length} scored ${trends.length === 1 ? "trend" : "trends"} from the AI ecosystem.`}
       </p>
 
-      <form method="get" style={{ display: "flex", gap: "8px", margin: "0 0 24px", maxWidth: 520 }}>
+      <form method="get" style={{ display: "flex", gap: "8px", margin: "0 0 24px", maxWidth: 640 }}>
         <input
           name="q"
           defaultValue={query}
@@ -36,6 +41,21 @@ export default async function TrendsPage({
             color: "var(--fg)",
           }}
         />
+        <select
+          name="mode"
+          aria-label="Search mode"
+          defaultValue={semantic ? "semantic" : "keyword"}
+          style={{
+            padding: "8px 12px",
+            borderRadius: "8px",
+            border: "1px solid var(--border)",
+            background: "var(--bg)",
+            color: "var(--fg)",
+          }}
+        >
+          <option value="keyword">Keyword</option>
+          <option value="semantic">Semantic</option>
+        </select>
         <button
           type="submit"
           style={{
