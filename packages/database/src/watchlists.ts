@@ -5,6 +5,7 @@
  * authenticated context (@aioi/auth) — never from client input.
  */
 import type { Prisma } from "@prisma/client";
+import { entitlementsFor, withinLimit, PlanLimitError } from "@aioi/billing";
 import { withOrgContext } from "./rls";
 import {
   type CreateWatchlistInput,
@@ -31,6 +32,13 @@ export function createWatchlist(orgId: string, input: CreateWatchlistInput) {
   return withOrgContext(orgId, async (tx) => {
     const ws = await tx.workspace.findFirst({ where: { id: input.workspaceId } });
     if (!ws) throw new NotFoundError("workspace"); // RLS: only our org's workspace is visible
+
+    // Enforce the plan's watchlist limit (B-020). No subscription row → FREE.
+    const sub = await tx.subscription.findFirst();
+    const limit = entitlementsFor(sub?.plan ?? "FREE").maxWatchlists;
+    const count = await tx.watchlist.count();
+    if (!withinLimit(limit, count)) throw new PlanLimitError("watchlists");
+
     return tx.watchlist.create({
       data: { organizationId: orgId, workspaceId: input.workspaceId, name: input.name },
     });

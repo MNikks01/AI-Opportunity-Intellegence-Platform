@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Billing & entitlements** (B-020) — new `@aioi/billing` (plans + per-plan entitlements + `withinLimit`
+  + `PlanLimitError`, Stripe-agnostic). `@aioi/database` `getPlan`/`setPlan`/`getEntitlements` (Subscription,
+  org-scoped RLS); **`createWatchlist` now enforces the plan's watchlist limit** (FREE=5, PRO=unlimited).
+  `billing` tRPC router (plan/setPlan) with `PlanLimitError → FORBIDDEN`, and a `/billing` page
+  (plan + entitlements + upgrade/downgrade). 8 tests. (Stripe checkout/webhooks are a follow-up.)
 - **Daily Brief** (B-018) — per-org digest: `generateDailyBrief` aggregates the top-opportunity trends
   + the org's watchlist/unread-alert counts into a `Brief` (in-app delivered), with `listBriefs`/
   `getBrief` and **open tracking** (`markBriefOpened`, idempotent). `briefs` tRPC router

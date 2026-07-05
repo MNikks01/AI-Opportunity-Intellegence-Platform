@@ -33,6 +33,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/briefs" style={{ color: "var(--fg-muted)" }}>
               Briefs
             </a>
+            <a href="/billing" style={{ color: "var(--fg-muted)" }}>
+              Billing
+            </a>
           </nav>
         </header>
         <div style={{ maxWidth: 1040, margin: "0 auto", padding: "24px" }}>{children}</div>
