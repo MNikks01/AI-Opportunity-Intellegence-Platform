@@ -44,6 +44,16 @@ const BAND_FROM_DB: Record<$Enums.ScoreBand, ScoreBand> = {
 };
 
 // ── writes ───────────────────────────────────────────────────────────────────
+/** Active (non-deleted) org ids — for system fan-out jobs (scheduler). Organization has no RLS. */
+export async function listActiveOrgIds(limit = 1000): Promise<string[]> {
+  const orgs = await prisma.organization.findMany({
+    where: { deletedAt: null },
+    select: { id: true },
+    take: limit,
+  });
+  return orgs.map((o) => o.id);
+}
+
 export async function ensureSource(key: string): Promise<string> {
   const source = await prisma.source.upsert({
     where: { key },
