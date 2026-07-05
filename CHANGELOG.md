@@ -16,6 +16,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Action-plan generators** (B-021) — turn a scored trend into a concrete "what to build" plan
+  (SaaS/API/content ideas, keywords, domains, product names, target audience, pricing, MVP scope, tech
+  stack). `@aioi/ai-sdk` `generateActionPlan` (deterministic Stub + LiteLLM, schema-validated),
+  `@aioi/ai-service` orchestration, `persistActionPlan`/`getActionPlan` + `getTrendBySlug` now includes
+  the plan, an admin-gated `trends.generateActionPlan` mutation, and a plan section on the trend detail
+  page. 3 tests. (Also fixes `@aioi/ai-service` `package.json` `main`/`types` so it's importable.)
 - **Redis read-model cache** (B-011) — new `@aioi/cache` package: cache-aside over ioredis with
   **graceful degradation** (a cache outage falls through to the source, never throws) and a lazy
   fail-fast client. The trends read endpoints (`trends.list` 60s, `trends.search`/`semanticSearch` 30s)

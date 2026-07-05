@@ -4,7 +4,12 @@
  * deterministic StubProvider used when no gateway/key is configured — so scoring runs, is testable,
  * and stays reproducible offline. Real calls should be traced (Langfuse) and cost-capped.
  */
-import { rawModelScoreSchema, type RawModelScore } from "@aioi/validation";
+import {
+  rawModelScoreSchema,
+  actionPlanContentSchema,
+  type RawModelScore,
+  type ActionPlanContent,
+} from "@aioi/validation";
 import type { ScoreDimension } from "@aioi/shared";
 
 export interface ScoreRequest {
@@ -18,9 +23,18 @@ export interface ScoreRequest {
   rubricAnchor: string;
 }
 
+export interface ActionPlanRequest {
+  trendTitle: string;
+  trendSummary?: string;
+  /** dimension → 0..100 score, to bias the plan (e.g. high monetization → more SaaS ideas). */
+  scores: Record<string, number>;
+  evidenceIds: string[];
+}
+
 export interface LLMProvider {
   readonly name: string;
   scoreDimension(req: ScoreRequest): Promise<RawModelScore>;
+  generateActionPlan(req: ActionPlanRequest): Promise<ActionPlanContent>;
 }
 
 /** FNV-1a — small, deterministic, dependency-free hash for the stub. */
@@ -55,6 +69,32 @@ export class StubProvider implements LLMProvider {
       evidence: req.evidenceIds.slice(0, 3),
     };
     return Promise.resolve(rawModelScoreSchema.parse(result));
+  }
+
+  generateActionPlan(req: ActionPlanRequest): Promise<ActionPlanContent> {
+    const t = req.trendTitle;
+    const slug =
+      t
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 24) || "trend";
+    const bare = slug.replace(/-/g, "");
+    const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+    const seed = hash(t);
+    const content: ActionPlanContent = {
+      saasIdeas: [`A managed ${t} platform`, `${t} analytics & monitoring dashboard`],
+      apiIdeas: [`A ${t} data API with usage-based pricing`],
+      contentIdeas: [`How ${t} is reshaping developer workflows`, `Top ${t} tools compared`],
+      keywords: [slug, `${slug}-tools`, `best-${slug}`],
+      domainNames: [`${slug}.dev`, `get${bare}.com`, `${bare}hq.io`],
+      productNames: [`${cap(bare)}ly`, `${cap(bare)}HQ`, `Open${cap(bare)}`],
+      targetAudience: `Developers and startups building with ${t}`,
+      pricingHint: `Freemium with a $${19 + (seed % 30)}/mo Pro tier`,
+      mvpScope: `A focused MVP: ingest ${t} signals, one core workflow, and a shareable dashboard.`,
+      techStack: ["Next.js", "tRPC", "PostgreSQL", "Redis"],
+    };
+    return Promise.resolve(actionPlanContentSchema.parse(content));
   }
 }
 
@@ -97,6 +137,36 @@ export class LiteLLMProvider implements LLMProvider {
     const content = data.choices?.[0]?.message?.content ?? "";
     // Strict validation; one repair pass could be added here before throwing.
     return rawModelScoreSchema.parse(JSON.parse(content));
+  }
+
+  async generateActionPlan(req: ActionPlanRequest): Promise<ActionPlanContent> {
+    const system =
+      "You are a pragmatic startup advisor. Given an AI trend and its opportunity scores, propose a " +
+      "concrete, buildable action plan. Return STRICT JSON matching this shape: " +
+      '{"saasIdeas":string[],"apiIdeas":string[],"contentIdeas":string[],"keywords":string[],' +
+      '"domainNames":string[],"productNames":string[],"targetAudience":string,"pricingHint":string,' +
+      '"mvpScope":string,"techStack":string[]}. saasIdeas must be non-empty.';
+    const user =
+      `Trend: ${req.trendTitle}\n${req.trendSummary ? `Summary: ${req.trendSummary}\n` : ""}` +
+      `Scores: ${JSON.stringify(req.scores)}\nEvidence ids: ${req.evidenceIds.join(", ")}`;
+
+    const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        model: this.model,
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: user },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const content = data.choices?.[0]?.message?.content ?? "";
+    return actionPlanContentSchema.parse(JSON.parse(content));
   }
 }
 
