@@ -17,7 +17,7 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 | B-007 | `@aioi/ai-sdk`: LiteLLM client + stub provider + structured output (Langfuse pending) | E2/AI | 5   | 🟡     |
 | B-008 | `scoreTrend()` per opportunity-scoring-engine (10 dims + composite + cache)           | E3    | 8   | ✅     |
 | B-009 | llm-eval-harness smoke: golden case + CI gate — _determinism smoke test only_         | AI    | 3   | 🟡     |
-| B-024 | Prisma-backed `SignalRepository` (repository.prisma.ts) wired to ingestion            | E2    | 3   | ⬜     |
+| B-024 | Prisma-backed `SignalRepository` (repository.prisma.ts) wired to ingestion            | E2    | 3   | ✅     |
 
 ## Next (Sprint 2) — read path + UI
 

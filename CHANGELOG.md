@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Prisma-backed ingestion** (B-024) — `PrismaSignalRepository` persists connector output to the
+  global `Signal` table, deduping via `createMany({ skipDuplicates })` (idempotent, returns the new
+  count); ensures the `Source` (+ legality tier) first. `createSignalRepository()` picks Prisma when a
+  DB is configured, else in-memory; `runHackerNewsIngestion` now defaults to it. 2 integration tests.
 - **Semantic trend search** (B-019) — `@aioi/ai-sdk` gains an `Embedder` (deterministic `StubEmbedder`
   + `LiteLLMEmbedder`, `EMBED_DIM=1536`); a pgvector `embedding` column + **HNSW cosine index** on
   Trend, backfilled on `persistScoredTrend`; `semanticSearchTrends(q)` (`<=>` cosine) + a public
