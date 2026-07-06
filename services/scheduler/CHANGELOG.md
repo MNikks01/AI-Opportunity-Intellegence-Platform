@@ -1,5 +1,34 @@
 # @aioi/scheduler
 
+## 0.5.0
+
+### Minor Changes
+
+- 7106e88: GitHub ingestion connector (official REST Search API): surfaces emerging AI repos (query + recency,
+  ranked by stars), normalizes to SourceRecords, dedupes via the shared SignalRepository. Works
+  unauthenticated; GITHUB_TOKEN raises the rate limit; GITHUB_QUERY tunes the search. Scheduled hourly.
+  Legality: OFFICIAL (public repos, required User-Agent, rate-limit aware).
+- a2ad9c5: Hugging Face ingestion connector (official Hub API): ingests top models (by HF_SORT, default likes),
+  normalizes to SourceRecords, dedupes via the shared SignalRepository. Works unauthenticated;
+  HUGGINGFACE_TOKEN raises the rate limit. Scheduled hourly. Legality: OFFICIAL (public models only).
+- 1894852: Product Hunt (GraphQL v2) and YouTube (Data API v3) ingestion connectors: normalize launches/videos to
+  SourceRecords, dedupe via the shared SignalRepository, scheduled hourly. Both no-op without their key
+  (PRODUCTHUNT_TOKEN / YOUTUBE_API_KEY) so CI stays green. Legality: OFFICIAL (public metadata only).
+  This completes the six planned data sources.
+
+### Patch Changes
+
+- Updated dependencies [7106e88]
+- Updated dependencies [a2ad9c5]
+- Updated dependencies [eddca5d]
+- Updated dependencies [1894852]
+- Updated dependencies [2126da2]
+- Updated dependencies [6035103]
+- Updated dependencies [3f93fd8]
+  - @aioi/ingestion-service@0.3.0
+  - @aioi/database@0.10.0
+  - @aioi/ai-service@0.2.1
+
 ## 0.4.0
 
 ### Minor Changes

@@ -1,5 +1,24 @@
 # @aioi/web
 
+## 0.6.0
+
+### Minor Changes
+
+- 3f93fd8: Connector health surface: `getSourceStats` (per-source signal counts + last-ingested time), an
+  admin-gated `sources.stats` tRPC endpoint, and a `/sources` page rendering it with the `@aioi/ui`
+  DataTable (source, signals, last ingested, legality tier).
+
+### Patch Changes
+
+- eddca5d: Per-source ingestion run tracking: each connector pass now records an IngestionRun (status + new-item
+  count + timing) via `recordIngestionRun`; `getSourceStats` includes the latest run per source, and the
+  /sources page shows a "Last run" column. Best-effort — recording never breaks an ingestion pass.
+- Updated dependencies [eddca5d]
+- Updated dependencies [2126da2]
+- Updated dependencies [6035103]
+- Updated dependencies [3f93fd8]
+  - @aioi/database@0.10.0
+
 ## 0.5.3
 
 ### Patch Changes
