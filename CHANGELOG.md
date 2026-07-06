@@ -16,6 +16,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **README rewrite** — reflects the real product: autonomous pipeline diagram, six connectors, the built feature set, real stack + monorepo layout, and a copy-paste quickstart.
 - **Autonomous scoring loop closed** — clustering created trends but left them unscored; now
   `scoreClusteredTrends` (via `listUnscoredTrends` + `persistScoresForTrend`) scores them with the
   opportunity engine (+ embedding + alert eval), and a scheduler **scoring job** runs after
