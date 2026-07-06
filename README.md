@@ -14,6 +14,11 @@ tells you _whether an AI opportunity is worth your time and money, and what to d
 🏗️ **In construction, phase by phase** (docs before code, no placeholders). See
 [docs/09-process/ROADMAP.md](docs/09-process/ROADMAP.md). Currently: **Phases 1–6 + TRD complete.**
 
+## Getting started
+
+Run the whole stack locally (green with no external keys): **[docs/10-setup/RUNNING_LOCALLY.md](docs/10-setup/RUNNING_LOCALLY.md)**.
+To activate real integrations, see where to get each key: **[docs/10-setup/ENV_SETUP.md](docs/10-setup/ENV_SETUP.md)**.
+
 ## Documentation
 
 Start at [docs/README.md](docs/README.md). Key docs:
