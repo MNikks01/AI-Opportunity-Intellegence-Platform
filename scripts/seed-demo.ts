@@ -3,6 +3,7 @@
  * Run: DATABASE_URL=... pnpm exec tsx scripts/seed-demo.ts
  */
 import { scoreTrend } from "../services/ai-service/src/index";
+import { StubProvider } from "../packages/ai-sdk/src/index";
 import { persistScoredTrend } from "../packages/database/src/index";
 import type { TrendLike } from "../packages/shared/src/index";
 
@@ -36,7 +37,9 @@ const trend: TrendLike = {
 };
 
 async function main() {
-  const scores = await scoreTrend(trend);
+  // Seed with the deterministic Stub so it always works offline — no LLM/keys required. (Real
+  // scoring runs in the pipeline; re-embed later with scripts/reembed-trends.ts once a key is set.)
+  const scores = await scoreTrend(trend, { provider: new StubProvider() });
   const id = await persistScoredTrend(trend, scores);
   console.warn(`Seeded trend ${trend.slug} (${id}) with ${scores.length} scores.`);
   process.exit(0);

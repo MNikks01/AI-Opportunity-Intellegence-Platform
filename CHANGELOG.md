@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Local-dev onboarding fixes** — `pnpm dev` now sets `--concurrency=25` (18 persistent dev tasks
+  exceeded turbo's default 10); `scripts/seed-demo.ts` scores with the Stub so it works offline with no
+  keys; and RUNNING_LOCALLY now configures/sources `.env` **before** `docker compose up` (via
+  `--env-file .env`) so the LiteLLM container gets AI keys at boot — fixes a `LiteLLM 401` on seed.
 - **README rewrite** — reflects the real product: autonomous pipeline diagram, six connectors, the built feature set, real stack + monorepo layout, and a copy-paste quickstart.
 - **Autonomous scoring loop closed** — clustering created trends but left them unscored; now
   `scoreClusteredTrends` (via `listUnscoredTrends` + `persistScoresForTrend`) scores them with the
