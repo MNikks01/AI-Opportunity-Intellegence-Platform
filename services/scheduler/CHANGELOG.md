@@ -1,5 +1,21 @@
 # @aioi/scheduler
 
+## 0.6.0
+
+### Minor Changes
+
+- 773471d: Close the autonomous loop: clustered trends are now scored. `listUnscoredTrends` +
+  `persistScoresForTrend` (@aioi/database) and `scoreClusteredTrends` (@aioi/ai-service) score
+  clustering's unscored trends with the opportunity engine (+ embedding + alert eval); a scheduler
+  scoring job runs after clustering. Pipeline is now end-to-end: ingest → cluster → score → alerts/briefs.
+
+### Patch Changes
+
+- Updated dependencies [773471d]
+  - @aioi/ai-service@0.4.0
+  - @aioi/database@0.11.0
+  - @aioi/ingestion-service@0.3.2
+
 ## 0.5.1
 
 ### Patch Changes
