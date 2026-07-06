@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **LLM eval harness** (B-009) — `runEvalHarness` runs a golden trend through scoring +
+  action-plan generation and asserts invariants + determinism (10 dims, schema-valid, in-range,
+  evidence-grounded, composite opportunity, non-empty plan). A test runs it, so a regression in AI
+  logic fails CI. Layers quality thresholds on top when a real provider is configured.
 - **UI components** (B-012) — `@aioi/ui` gains `Button` (primary/secondary/ghost) and a generic,
   accessible, responsive `DataTable` (`Column<T>` render fns + empty state). Vitest now collects
   `.test.tsx` (render tests via `renderToStaticMarkup`). 3 tests.
