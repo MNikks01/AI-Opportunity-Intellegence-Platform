@@ -12,7 +12,7 @@ import {
   runProductHuntIngestion,
   runYouTubeIngestion,
 } from "@aioi/ingestion-service";
-import { clusterRecentSignals } from "@aioi/ai-service";
+import { clusterRecentSignals, scoreClusteredTrends } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
 import { logger } from "@aioi/logger";
 
@@ -58,6 +58,12 @@ export async function runClusteringJob() {
   return result;
 }
 
+export async function runScoringJob() {
+  const result = await scoreClusteredTrends();
+  logger.info(result, "scheduler: scoring job complete");
+  return result;
+}
+
 export async function runDailyBriefsJob(
   orgIds?: string[],
 ): Promise<{ orgs: number; generated: number; emailed: number }> {
@@ -90,5 +96,6 @@ export const JOB = {
   productHuntIngestion: "ingestion:producthunt",
   youtubeIngestion: "ingestion:youtube",
   clustering: "clustering:signals",
+  scoring: "scoring:trends",
   dailyBriefs: "briefs:daily",
 } as const;
