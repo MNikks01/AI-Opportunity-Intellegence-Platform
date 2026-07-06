@@ -1,5 +1,33 @@
 # @aioi/ingestion-service
 
+## 0.3.0
+
+### Minor Changes
+
+- 7106e88: GitHub ingestion connector (official REST Search API): surfaces emerging AI repos (query + recency,
+  ranked by stars), normalizes to SourceRecords, dedupes via the shared SignalRepository. Works
+  unauthenticated; GITHUB_TOKEN raises the rate limit; GITHUB_QUERY tunes the search. Scheduled hourly.
+  Legality: OFFICIAL (public repos, required User-Agent, rate-limit aware).
+- a2ad9c5: Hugging Face ingestion connector (official Hub API): ingests top models (by HF_SORT, default likes),
+  normalizes to SourceRecords, dedupes via the shared SignalRepository. Works unauthenticated;
+  HUGGINGFACE_TOKEN raises the rate limit. Scheduled hourly. Legality: OFFICIAL (public models only).
+- 1894852: Product Hunt (GraphQL v2) and YouTube (Data API v3) ingestion connectors: normalize launches/videos to
+  SourceRecords, dedupe via the shared SignalRepository, scheduled hourly. Both no-op without their key
+  (PRODUCTHUNT_TOKEN / YOUTUBE_API_KEY) so CI stays green. Legality: OFFICIAL (public metadata only).
+  This completes the six planned data sources.
+
+### Patch Changes
+
+- eddca5d: Per-source ingestion run tracking: each connector pass now records an IngestionRun (status + new-item
+  count + timing) via `recordIngestionRun`; `getSourceStats` includes the latest run per source, and the
+  /sources page shows a "Last run" column. Best-effort — recording never breaks an ingestion pass.
+- Updated dependencies [eddca5d]
+- Updated dependencies [2126da2]
+- Updated dependencies [6035103]
+- Updated dependencies [3f93fd8]
+  - @aioi/database@0.10.0
+  - @aioi/ai-sdk@0.3.0
+
 ## 0.2.0
 
 ### Minor Changes

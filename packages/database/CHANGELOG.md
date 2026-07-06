@@ -1,5 +1,32 @@
 # @aioi/database
 
+## 0.10.0
+
+### Minor Changes
+
+- eddca5d: Per-source ingestion run tracking: each connector pass now records an IngestionRun (status + new-item
+  count + timing) via `recordIngestionRun`; `getSourceStats` includes the latest run per source, and the
+  /sources page shows a "Last run" column. Best-effort — recording never breaks an ingestion pass.
+- 6035103: Add `reembedAllTrends` + a `scripts/reembed-trends.ts` ops command to re-embed all existing trends with
+  the currently-configured embedder — run after switching on a real embed model so trends created with
+  the Stub become semantically searchable. Batched; a failed batch is logged and skipped.
+- 3f93fd8: Connector health surface: `getSourceStats` (per-source signal counts + last-ingested time), an
+  admin-gated `sources.stats` tRPC endpoint, and a `/sources` page rendering it with the `@aioi/ui`
+  DataTable (source, signals, last ingested, legality tier).
+
+### Patch Changes
+
+- 2126da2: Production-harden real embeddings: LiteLLMEmbedder now requests `dimensions: EMBED_DIM` (guarantees the
+  pgvector column matches any model), unit-normalizes each vector, preserves input order, retries
+  transient 429/5xx, and fails loudly on a count/dimension mismatch. Embedding backfill in
+  `persistScoredTrend` is best-effort (a provider outage no longer fails scoring). Adds a LiteLLM proxy
+  routing config so `text-embedding-3-small` + `claude-opus-4-8` resolve. With an OpenAI key, clustering
+
+  - semantic search become genuinely semantic; stub otherwise (CI green).
+
+- Updated dependencies [2126da2]
+  - @aioi/ai-sdk@0.3.0
+
 ## 0.9.0
 
 ### Minor Changes

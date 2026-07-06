@@ -1,5 +1,22 @@
 # @aioi/api
 
+## 0.8.0
+
+### Minor Changes
+
+- 3f93fd8: Connector health surface: `getSourceStats` (per-source signal counts + last-ingested time), an
+  admin-gated `sources.stats` tRPC endpoint, and a `/sources` page rendering it with the `@aioi/ui`
+  DataTable (source, signals, last ingested, legality tier).
+
+### Patch Changes
+
+- Updated dependencies [eddca5d]
+- Updated dependencies [2126da2]
+- Updated dependencies [6035103]
+- Updated dependencies [3f93fd8]
+  - @aioi/database@0.10.0
+  - @aioi/ai-service@0.2.1
+
 ## 0.7.0
 
 ### Minor Changes
