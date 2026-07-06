@@ -7,6 +7,7 @@ import type { $Enums, Prisma } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
 import { bandForValue } from "@aioi/shared";
 import { getEmbedder } from "@aioi/ai-sdk";
+import { logger } from "@aioi/logger";
 import { prisma } from "./client";
 import { evaluateTrendAllOrgs } from "./alerts";
 
@@ -169,10 +170,19 @@ export async function persistScoredTrend(trend: TrendLike, scores: Score[]): Pro
     });
   }
 
-  // Backfill the semantic embedding (B-019) so the trend is searchable by meaning.
-  const [embedding] = await getEmbedder().embed([`${trend.title}\n${trend.summary ?? ""}`]);
-  if (embedding) {
-    await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(embedding)}::vector WHERE id = ${dbTrend.id}::uuid`;
+  // Backfill the semantic embedding (B-019) so the trend is searchable by meaning. Best-effort: a
+  // real-embedder outage/misconfig must not fail scoring persistence — the trend is simply not
+  // semantically searchable until re-embedded.
+  try {
+    const [embedding] = await getEmbedder().embed([`${trend.title}\n${trend.summary ?? ""}`]);
+    if (embedding) {
+      await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(embedding)}::vector WHERE id = ${dbTrend.id}::uuid`;
+    }
+  } catch (err) {
+    logger.warn(
+      { err, trendId: dbTrend.id },
+      "embedding backfill failed (trend persisted without it)",
+    );
   }
 
   // Auto-evaluate alerts for every org watching this trend (B-017 pipeline). No-op if unwatched.
