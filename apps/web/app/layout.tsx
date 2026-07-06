@@ -74,6 +74,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/billing" style={{ color: "var(--fg-muted)" }}>
               Billing
             </a>
+            <a href="/sources" style={{ color: "var(--fg-muted)" }}>
+              Sources
+            </a>
             {clerkEnabled && <AuthControls />}
           </nav>
         </header>

@@ -51,9 +51,14 @@ clustering, semantic search all run, but with placeholder values). Add them for 
 1. Get **at least one** provider key (OpenAI is simplest — it covers both embeddings and chat).
 2. Put it in `.env`. Docker compose passes `OPENAI_API_KEY`/`ANTHROPIC_API_KEY`/`GEMINI_API_KEY` into
    the LiteLLM container.
-3. Restart the LiteLLM container so it picks up the key. Scoring/embeddings now hit the real model via
-   `LITELLM_BASE_URL`.
-4. Set `AIOI_SCORING_MODEL` / `AIOI_EMBED_MODEL` (optional overrides) if you want specific models.
+3. Restart the LiteLLM container so it picks up the key. The proxy is config-driven
+   (`infra/docker/litellm.config.yaml`) and already routes `text-embedding-3-small` +
+   `claude-opus-4-8`. Scoring/embeddings now hit the real model via `LITELLM_BASE_URL` —
+   **clustering + semantic search become genuinely semantic**.
+4. Set `AIOI_SCORING_MODEL` / `AIOI_EMBED_MODEL` (optional overrides). Embeddings always request
+   `dimensions: 1536` to match the pgvector column, so use a 1536-capable embed model.
+5. **Re-embed existing trends** (they were embedded with the Stub) so search/clustering go semantic:
+   `pnpm exec tsx scripts/reembed-trends.ts`.
 
 ---
 
@@ -124,19 +129,20 @@ compose stack also runs **Mailhog** (`http://localhost:8025`) if you wire an SMT
 
 ## 7. Data-source connectors — Optional (per connector)
 
-Only needed to ingest from that source. **HackerNews needs no key** and is always on. **Reddit is
-implemented** — set its keys to enable it. The rest are forward-looking placeholders (no connector
-yet). See the `data-source-integration` skill — official/licensed sources only.
+**All six connectors are implemented**: HackerNews (always on) + GitHub + Hugging Face (no key needed;
+a token raises limits) and Reddit + Product Hunt + YouTube (each needs its key, else no-ops). Every one
+is official-API, legality-classified, and rate-limit aware. See the `data-source-integration` skill —
+official/licensed sources only.
 
-| Variable                                    | Where to get it                                                                                                                                                                                                                 |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GITHUB_TOKEN`                              | github.com → Settings → **Developer settings → Personal access tokens** → _fine-grained token_ (public read is enough).                                                                                                         |
-| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | reddit.com/prefs/apps → _create app_ (type **script**; redirect uri `http://localhost:3001`) → client id is under the app name, secret is the `secret` field. **Wired**: the connector then ingests hot posts (app-only OAuth). |
-| `REDDIT_USER_AGENT`                         | Optional. Reddit requires a descriptive UA; defaults to `web:aioi:v1.0 (…)`. Set your own if you like.                                                                                                                          |
-| `REDDIT_SUBREDDITS`                         | Optional comma-separated list; defaults to `MachineLearning,LocalLLaMA,artificial,OpenAI,SaaS`.                                                                                                                                 |
-| `PRODUCTHUNT_TOKEN`                         | api.producthunt.com/v2/oauth/applications → create an app → **Developer Token**.                                                                                                                                                |
-| `YOUTUBE_API_KEY`                           | console.cloud.google.com → enable **YouTube Data API v3** → **Credentials → API key**.                                                                                                                                          |
-| `HUGGINGFACE_TOKEN`                         | huggingface.co → Settings → **Access Tokens** → _New token_ (read).                                                                                                                                                             |
+| Variable                                    | Where to get it                                                                                                                                                                                                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN` / `GITHUB_QUERY`             | Optional. github.com → Settings → **Developer settings → Personal access tokens** → _fine-grained token_ (public read). **Wired**: ingests emerging AI repos (Search API); token raises 60→5000 req/h. `GITHUB_QUERY` tunes the search (default `topic:llm`). |
+| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | reddit.com/prefs/apps → _create app_ (type **script**; redirect uri `http://localhost:3001`) → client id is under the app name, secret is the `secret` field. **Wired**: the connector then ingests hot posts (app-only OAuth).                               |
+| `REDDIT_USER_AGENT`                         | Optional. Reddit requires a descriptive UA; defaults to `web:aioi:v1.0 (…)`. Set your own if you like.                                                                                                                                                        |
+| `REDDIT_SUBREDDITS`                         | Optional comma-separated list; defaults to `MachineLearning,LocalLLaMA,artificial,OpenAI,SaaS`.                                                                                                                                                               |
+| `PRODUCTHUNT_TOKEN`                         | api.producthunt.com/v2/oauth/applications → create an app → **Developer Token**. **Wired**: ingests top launches (GraphQL v2); no-ops without it.                                                                                                             |
+| `YOUTUBE_API_KEY` / `YOUTUBE_QUERY`         | console.cloud.google.com → enable **YouTube Data API v3** → **Credentials → API key**. **Wired**: ingests AI videos (Search); no-ops without it. `YOUTUBE_QUERY` tunes the search (default `AI tools`).                                                       |
+| `HUGGINGFACE_TOKEN` / `HF_SORT`             | Optional. huggingface.co → Settings → **Access Tokens** → _New token_ (read). **Wired**: ingests top models (Hub API); works unauthenticated, token raises the limit. `HF_SORT` = likes \| downloads \| createdAt.                                            |
 
 ---
 

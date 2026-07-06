@@ -10,6 +10,10 @@ import {
   runDailyBriefsJob,
   runIngestionJob,
   runRedditIngestionJob,
+  runGitHubIngestionJob,
+  runHuggingFaceIngestionJob,
+  runProductHuntIngestionJob,
+  runYouTubeIngestionJob,
 } from "./jobs";
 
 const QUEUE_NAME = "aioi-scheduler";
@@ -29,6 +33,29 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
     {},
     { repeat: { pattern: "15,45 * * * *" }, jobId: JOB.redditIngestion },
   );
+  // GitHub hourly at :50 (Search API is rate-limited; a token raises the ceiling).
+  await queue.add(
+    JOB.githubIngestion,
+    {},
+    { repeat: { pattern: "50 * * * *" }, jobId: JOB.githubIngestion },
+  );
+  // Hugging Face hourly at :20.
+  await queue.add(
+    JOB.huggingfaceIngestion,
+    {},
+    { repeat: { pattern: "20 * * * *" }, jobId: JOB.huggingfaceIngestion },
+  );
+  // Product Hunt + YouTube hourly (no-op without their keys).
+  await queue.add(
+    JOB.productHuntIngestion,
+    {},
+    { repeat: { pattern: "35 * * * *" }, jobId: JOB.productHuntIngestion },
+  );
+  await queue.add(
+    JOB.youtubeIngestion,
+    {},
+    { repeat: { pattern: "40 * * * *" }, jobId: JOB.youtubeIngestion },
+  );
   await queue.add(JOB.clustering, {}, { repeat: { pattern: "5 * * * *" }, jobId: JOB.clustering });
   await queue.add(
     JOB.dailyBriefs,
@@ -41,6 +68,10 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
     async (job) => {
       if (job.name === JOB.ingestion) return runIngestionJob();
       if (job.name === JOB.redditIngestion) return runRedditIngestionJob();
+      if (job.name === JOB.githubIngestion) return runGitHubIngestionJob();
+      if (job.name === JOB.huggingfaceIngestion) return runHuggingFaceIngestionJob();
+      if (job.name === JOB.productHuntIngestion) return runProductHuntIngestionJob();
+      if (job.name === JOB.youtubeIngestion) return runYouTubeIngestionJob();
       if (job.name === JOB.clustering) return runClusteringJob();
       if (job.name === JOB.dailyBriefs) return runDailyBriefsJob();
       logger.warn({ name: job.name }, "scheduler: unknown job");

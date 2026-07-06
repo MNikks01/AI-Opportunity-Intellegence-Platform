@@ -16,6 +16,33 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Per-source ingestion run stats** — each connector pass records an `IngestionRun` (status +
+  new-item count + timing) via `recordIngestionRun`; `getSourceStats` now includes the latest run per
+  source and the `/sources` page shows a **Last run** column. Best-effort (never breaks a pass). 1 test.
+- **Re-embed backfill** — `reembedAllTrends` + `scripts/reembed-trends.ts`: re-embed every
+  existing trend with the current embedder (batched, resilient). Run it after enabling a real embed
+  model so trends created with the Stub become semantically searchable. 1 test.
+- **Connector health surface** — `getSourceStats` (per-source signal counts + last-ingested
+  time), an admin-gated `sources.stats` tRPC endpoint, and a `/sources` page rendering it with the
+  `@aioi/ui` `DataTable` (source · signals · last ingested · legality tier). 2 tests.
+- **Real embeddings, production-hardened** — `LiteLLMEmbedder` now requests `dimensions: 1536`
+  (matches the pgvector column for any model), unit-normalizes, preserves order, retries 429/5xx, and
+  fails loudly on a count/dim mismatch; embedding backfill is best-effort (a provider outage no longer
+  fails scoring). Adds `infra/docker/litellm.config.yaml` so the proxy routes the embed + chat models.
+  With `OPENAI_API_KEY`, clustering + semantic search become genuinely semantic (Stub otherwise). 5 tests.
+- **Product Hunt + YouTube ingestion connectors** — official Product Hunt GraphQL v2 (top
+  launches) and YouTube Data API v3 (AI video search, `YOUTUBE_QUERY`). Normalize to SourceRecords,
+  dedupe via the shared SignalRepository, scheduled hourly; both **no-op without their key** so CI
+  stays green. Legality: OFFICIAL. Completes the **six** planned connectors (HN, Reddit, GitHub, HF,
+  Product Hunt, YouTube). 8 tests.
+- **Hugging Face ingestion connector** — official Hub API: ingests the top models
+  (`HF_SORT`, default `likes`), normalizes to SourceRecords, dedupes via the shared SignalRepository.
+  Works **unauthenticated**; `HUGGINGFACE_TOKEN` raises the limit. Scheduled hourly. Legality:
+  OFFICIAL (public models only). 4 tests.
+- **GitHub ingestion connector** — official REST **Search API**: surfaces *emerging* AI repos
+  (`GITHUB_QUERY`, default `topic:llm`, filtered to recently-created, ranked by stars), normalizes to
+  SourceRecords, dedupes via the shared SignalRepository. Works **unauthenticated**; `GITHUB_TOKEN`
+  raises the rate limit. Scheduled hourly; 403/429 rate-limit backoff. Legality: OFFICIAL. 5 tests.
 - **Reddit ingestion connector** — official Reddit Data API over **app-only OAuth**
   (client_credentials): fetches hot posts from `REDDIT_SUBREDDITS` (default: AI/SaaS subs), normalizes
   to SourceRecords, dedupes via the shared SignalRepository, and is scheduled at :15/:45. No-ops

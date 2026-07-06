@@ -7,6 +7,7 @@ import type { $Enums, Prisma } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
 import { bandForValue } from "@aioi/shared";
 import { getEmbedder } from "@aioi/ai-sdk";
+import { logger } from "@aioi/logger";
 import { prisma } from "./client";
 import { evaluateTrendAllOrgs } from "./alerts";
 
@@ -169,10 +170,19 @@ export async function persistScoredTrend(trend: TrendLike, scores: Score[]): Pro
     });
   }
 
-  // Backfill the semantic embedding (B-019) so the trend is searchable by meaning.
-  const [embedding] = await getEmbedder().embed([`${trend.title}\n${trend.summary ?? ""}`]);
-  if (embedding) {
-    await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(embedding)}::vector WHERE id = ${dbTrend.id}::uuid`;
+  // Backfill the semantic embedding (B-019) so the trend is searchable by meaning. Best-effort: a
+  // real-embedder outage/misconfig must not fail scoring persistence — the trend is simply not
+  // semantically searchable until re-embedded.
+  try {
+    const [embedding] = await getEmbedder().embed([`${trend.title}\n${trend.summary ?? ""}`]);
+    if (embedding) {
+      await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(embedding)}::vector WHERE id = ${dbTrend.id}::uuid`;
+    }
+  } catch (err) {
+    logger.warn(
+      { err, trendId: dbTrend.id },
+      "embedding backfill failed (trend persisted without it)",
+    );
   }
 
   // Auto-evaluate alerts for every org watching this trend (B-017 pipeline). No-op if unwatched.
@@ -181,6 +191,37 @@ export async function persistScoredTrend(trend: TrendLike, scores: Score[]): Pro
   await evaluateTrendAllOrgs({ trendId: dbTrend.id, title: trend.title, scores: scoreMap });
 
   return dbTrend.id;
+}
+
+/**
+ * Re-embed every trend with the currently-configured embedder (batched). Run this after switching on
+ * a real embed model so existing trends (created with the Stub) become semantically searchable. A
+ * failed batch is logged and skipped, never aborting the whole backfill.
+ */
+export async function reembedAllTrends(
+  batchSize = 64,
+): Promise<{ total: number; embedded: number }> {
+  const embedder = getEmbedder();
+  const trends = await prisma.trend.findMany({ select: { id: true, title: true, summary: true } });
+  let embedded = 0;
+  for (let i = 0; i < trends.length; i += batchSize) {
+    const batch = trends.slice(i, i + batchSize);
+    let vectors: number[][];
+    try {
+      vectors = await embedder.embed(batch.map((t) => `${t.title}\n${t.summary ?? ""}`));
+    } catch (err) {
+      logger.warn({ err, from: i, size: batch.length }, "reembed batch failed (skipped)");
+      continue;
+    }
+    for (let j = 0; j < batch.length; j++) {
+      const v = vectors[j];
+      if (!v) continue;
+      await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(v)}::vector WHERE id = ${batch[j]!.id}::uuid`;
+      embedded += 1;
+    }
+  }
+  logger.info({ total: trends.length, embedded, embedder: embedder.name }, "reembed complete");
+  return { total: trends.length, embedded };
 }
 
 // ── reads (return API/domain shape) ──────────────────────────────────────────

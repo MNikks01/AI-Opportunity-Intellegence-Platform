@@ -28,6 +28,14 @@ function hashEmbed(text: string, dim = EMBED_DIM): number[] {
   return v.map((x) => x / norm);
 }
 
+/** Scale a vector to unit length (the cosine paths — clustering, pgvector `<=>` — assume this). */
+function unitNormalize(v: number[]): number[] {
+  const norm = Math.sqrt(v.reduce((s, x) => s + x * x, 0)) || 1;
+  return v.map((x) => x / norm);
+}
+
+const defaultSleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
 export class StubEmbedder implements Embedder {
   readonly name = "stub";
   embed(texts: string[]): Promise<number[][]> {
@@ -35,24 +43,54 @@ export class StubEmbedder implements Embedder {
   }
 }
 
-/** Production embedder via a LiteLLM gateway (OpenAI-compatible /embeddings). */
+/**
+ * Production embedder via a LiteLLM gateway (OpenAI-compatible `/embeddings`). Requests `dimensions:
+ * EMBED_DIM` so output always matches the pgvector column regardless of model; unit-normalizes each
+ * vector; preserves input order; retries transient 429/5xx; and fails loudly on a dimension/count
+ * mismatch rather than corrupting the index.
+ */
 export class LiteLLMEmbedder implements Embedder {
   readonly name = "litellm";
   constructor(
     private readonly baseUrl: string,
     private readonly model = process.env.AIOI_EMBED_MODEL ?? "text-embedding-3-small",
     private readonly fetchImpl: typeof fetch = fetch,
+    private readonly sleep: (ms: number) => Promise<void> = defaultSleep,
+    private readonly maxRetries = 3,
   ) {}
 
   async embed(texts: string[]): Promise<number[][]> {
-    const res = await this.fetchImpl(`${this.baseUrl}/embeddings`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ model: this.model, input: texts }),
-    });
-    if (!res.ok) throw new Error(`LiteLLM embeddings error ${res.status}`);
-    const data = (await res.json()) as { data?: Array<{ embedding: number[] }> };
-    return (data.data ?? []).map((d) => d.embedding);
+    if (texts.length === 0) return [];
+    let attempt = 0;
+    for (;;) {
+      const res = await this.fetchImpl(`${this.baseUrl}/embeddings`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ model: this.model, input: texts, dimensions: EMBED_DIM }),
+      });
+      if (res.status === 429 || res.status >= 500) {
+        if (attempt >= this.maxRetries)
+          throw new Error(`LiteLLM embeddings error ${res.status} after ${attempt} retries`);
+        await this.sleep(2 ** attempt * 200 + Math.floor(Math.random() * 100));
+        attempt += 1;
+        continue;
+      }
+      if (!res.ok) throw new Error(`LiteLLM embeddings error ${res.status}`);
+      const data = (await res.json()) as {
+        data?: Array<{ embedding: number[]; index?: number }>;
+      };
+      const rows = data.data ?? [];
+      if (rows.length !== texts.length)
+        throw new Error(`LiteLLM embeddings: expected ${texts.length} vectors, got ${rows.length}`);
+      return rows
+        .slice()
+        .sort((a, b) => (a.index ?? 0) - (b.index ?? 0))
+        .map((d) => {
+          if (d.embedding.length !== EMBED_DIM)
+            throw new Error(`LiteLLM embeddings: dim ${d.embedding.length} != ${EMBED_DIM}`);
+          return unitNormalize(d.embedding);
+        });
+    }
   }
 }
 
