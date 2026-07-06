@@ -14,12 +14,20 @@ export {
   fetchSubreddits,
   type RedditPost,
 } from "./connectors/reddit";
+// Selective re-export: github shares names (FetchDeps/IngestResult/normalize) with hackernews.
+export {
+  GITHUB_SOURCE_KEY,
+  DEFAULT_GITHUB_QUERY,
+  fetchRepositories,
+  type GitHubRepo,
+} from "./connectors/github";
 export * from "./repository";
 export * from "./repository.prisma";
 
 import { logger } from "@aioi/logger";
 import { fetchTopStories } from "./connectors/hackernews";
 import { fetchSubreddits, redditConfigured, subredditsFromEnv } from "./connectors/reddit";
+import { fetchRepositories } from "./connectors/github";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -58,6 +66,23 @@ export async function runRedditIngestion(
   const inserted = await repo.upsertMany(records);
   logger.info(
     { source: "reddit", fetched: records.length, inserted, skipped },
+    "ingestion pass complete",
+  );
+  return { fetched: records.length, inserted, skipped };
+}
+
+/**
+ * Run one GitHub ingestion pass (emerging AI repos via the Search API). Works unauthenticated;
+ * GITHUB_TOKEN just raises the rate limit. Always safe to schedule.
+ */
+export async function runGitHubIngestion(
+  limit = 30,
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const { records, skipped } = await fetchRepositories(limit);
+  const inserted = await repo.upsertMany(records);
+  logger.info(
+    { source: "github", fetched: records.length, inserted, skipped },
     "ingestion pass complete",
   );
   return { fetched: records.length, inserted, skipped };

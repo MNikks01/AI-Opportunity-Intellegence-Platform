@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **GitHub ingestion connector** — official REST **Search API**: surfaces *emerging* AI repos
+  (`GITHUB_QUERY`, default `topic:llm`, filtered to recently-created, ranked by stars), normalizes to
+  SourceRecords, dedupes via the shared SignalRepository. Works **unauthenticated**; `GITHUB_TOKEN`
+  raises the rate limit. Scheduled hourly; 403/429 rate-limit backoff. Legality: OFFICIAL. 5 tests.
 - **Reddit ingestion connector** — official Reddit Data API over **app-only OAuth**
   (client_credentials): fetches hot posts from `REDDIT_SUBREDDITS` (default: AI/SaaS subs), normalizes
   to SourceRecords, dedupes via the shared SignalRepository, and is scheduled at :15/:45. No-ops
