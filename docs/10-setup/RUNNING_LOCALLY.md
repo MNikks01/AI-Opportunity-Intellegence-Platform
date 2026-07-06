@@ -62,7 +62,7 @@ set -a; source .env; set +a
 
 ## 4. Migrate the database
 
-Applies all 12 migrations (schema + RLS policies + pgvector/HNSW) using the **owner** `DATABASE_URL`:
+Applies all migrations (schema + RLS policies + pgvector/HNSW) using the **owner** `DATABASE_URL`:
 
 ```bash
 pnpm --filter @aioi/database exec prisma migrate deploy

@@ -11,8 +11,11 @@ tells you _whether an AI opportunity is worth your time and money, and what to d
 
 ## Status
 
-🏗️ **In construction, phase by phase** (docs before code, no placeholders). See
-[docs/09-process/ROADMAP.md](docs/09-process/ROADMAP.md). Currently: **Phases 1–6 + TRD complete.**
+✅ **Feature-complete and released.** Built docs-before-code, phase by phase. The full stack runs
+end-to-end — ingest → cluster → score (eval-gated) → embed → alerts → briefs, with search, watchlists,
+billing, Clerk auth, RBAC, RLS, audit, and GDPR — behind adapter+Stub seams so it runs green with **no
+external keys** and activates each integration on config. **162 tests.** See
+[ROADMAP](docs/09-process/ROADMAP.md) · get started below.
 
 ## Getting started
 
