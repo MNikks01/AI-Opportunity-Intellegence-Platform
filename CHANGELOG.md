@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Real embeddings, production-hardened** — `LiteLLMEmbedder` now requests `dimensions: 1536`
+  (matches the pgvector column for any model), unit-normalizes, preserves order, retries 429/5xx, and
+  fails loudly on a count/dim mismatch; embedding backfill is best-effort (a provider outage no longer
+  fails scoring). Adds `infra/docker/litellm.config.yaml` so the proxy routes the embed + chat models.
+  With `OPENAI_API_KEY`, clustering + semantic search become genuinely semantic (Stub otherwise). 5 tests.
 - **Product Hunt + YouTube ingestion connectors** — official Product Hunt GraphQL v2 (top
   launches) and YouTube Data API v3 (AI video search, `YOUTUBE_QUERY`). Normalize to SourceRecords,
   dedupe via the shared SignalRepository, scheduled hourly; both **no-op without their key** so CI

@@ -51,9 +51,12 @@ clustering, semantic search all run, but with placeholder values). Add them for 
 1. Get **at least one** provider key (OpenAI is simplest — it covers both embeddings and chat).
 2. Put it in `.env`. Docker compose passes `OPENAI_API_KEY`/`ANTHROPIC_API_KEY`/`GEMINI_API_KEY` into
    the LiteLLM container.
-3. Restart the LiteLLM container so it picks up the key. Scoring/embeddings now hit the real model via
-   `LITELLM_BASE_URL`.
-4. Set `AIOI_SCORING_MODEL` / `AIOI_EMBED_MODEL` (optional overrides) if you want specific models.
+3. Restart the LiteLLM container so it picks up the key. The proxy is config-driven
+   (`infra/docker/litellm.config.yaml`) and already routes `text-embedding-3-small` +
+   `claude-opus-4-8`. Scoring/embeddings now hit the real model via `LITELLM_BASE_URL` —
+   **clustering + semantic search become genuinely semantic**.
+4. Set `AIOI_SCORING_MODEL` / `AIOI_EMBED_MODEL` (optional overrides). Embeddings always request
+   `dimensions: 1536` to match the pgvector column, so use a 1536-capable embed model.
 
 ---
 

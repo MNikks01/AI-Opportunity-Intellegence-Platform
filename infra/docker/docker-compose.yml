@@ -53,14 +53,16 @@ services:
 
   litellm:
     image: ghcr.io/berriai/litellm:main-latest
-    command: ["--port", "4000"]
+    command: ["--config", "/app/config.yaml", "--port", "4000"]
     ports:
       - "4000:4000"
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY:-}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       GEMINI_API_KEY: ${GEMINI_API_KEY:-}
-    # config mounted in a follow-up; defaults route by model id for local dev.
+    volumes:
+      - ./litellm.config.yaml:/app/config.yaml:ro
+    # Routes text-embedding-3-small + claude-opus-4-8 to their providers using the keys above.
 
 volumes:
   pgdata:

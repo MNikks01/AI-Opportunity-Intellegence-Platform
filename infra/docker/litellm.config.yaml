@@ -1,0 +1,26 @@
+# LiteLLM proxy routing for local dev. Model names here match the app defaults
+# (AIOI_SCORING_MODEL / AIOI_EMBED_MODEL in @aioi/ai-sdk). Keys come from the container env
+# (passed through by docker-compose). With no keys set, the app uses its Stub provider/embedder and
+# never calls the proxy — so this file is inert until you add a provider key.
+model_list:
+  # Embeddings (semantic search + clustering). text-embedding-3-* supports the `dimensions` param
+  # the app sends, so vectors always match the pgvector(1536) column.
+  - model_name: text-embedding-3-small
+    litellm_params:
+      model: openai/text-embedding-3-small
+      api_key: os.environ/OPENAI_API_KEY
+
+  # Scoring + action plans (default chat model).
+  - model_name: claude-opus-4-8
+    litellm_params:
+      model: anthropic/claude-opus-4-8
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # Handy fallbacks if you set AIOI_SCORING_MODEL.
+  - model_name: gpt-4o-mini
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+litellm_settings:
+  drop_params: true # ignore provider-unsupported params instead of erroring

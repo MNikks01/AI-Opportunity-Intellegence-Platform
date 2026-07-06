@@ -233,6 +233,9 @@ importers:
       '@aioi/billing':
         specifier: workspace:*
         version: link:../billing
+      '@aioi/logger':
+        specifier: workspace:*
+        version: link:../logger
       '@aioi/shared':
         specifier: workspace:*
         version: link:../shared
