@@ -55,8 +55,10 @@ clustering, semantic search all run, but with placeholder values). Add them for 
    (`infra/docker/litellm.config.yaml`) and already routes `text-embedding-3-small` +
    `claude-opus-4-8`. Scoring/embeddings now hit the real model via `LITELLM_BASE_URL` —
    **clustering + semantic search become genuinely semantic**.
-4. Set `AIOI_SCORING_MODEL` / `AIOI_EMBED_MODEL` (optional overrides). Embeddings always request
-   `dimensions: 1536` to match the pgvector column, so use a 1536-capable embed model.
+4. Scoring auto-picks a model matching your key (Anthropic → `claude-opus-4-8`, OpenAI →
+   `gpt-4o-mini`); override with `AIOI_SCORING_MODEL`. Embeddings use `text-embedding-3-small` (needs
+   an OpenAI key) and always request `dimensions: 1536` to match the pgvector column. Any model you
+   name must exist in `infra/docker/litellm.config.yaml`.
 5. **Re-embed existing trends** (they were embedded with the Stub) so search/clustering go semantic:
    `pnpm exec tsx scripts/reembed-trends.ts`.
 
