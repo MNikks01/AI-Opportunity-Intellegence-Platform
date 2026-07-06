@@ -4,7 +4,13 @@
  */
 import { Queue, Worker, type ConnectionOptions } from "bullmq";
 import { logger } from "@aioi/logger";
-import { JOB, runClusteringJob, runDailyBriefsJob, runIngestionJob } from "./jobs";
+import {
+  JOB,
+  runClusteringJob,
+  runDailyBriefsJob,
+  runIngestionJob,
+  runRedditIngestionJob,
+} from "./jobs";
 
 const QUEUE_NAME = "aioi-scheduler";
 
@@ -16,8 +22,13 @@ function connection(): ConnectionOptions {
 export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }> {
   const queue = new Queue(QUEUE_NAME, { connection: connection() });
 
-  // Ingestion every 30 min; clustering hourly; daily briefs at 07:00 UTC.
+  // HN every 30 min; Reddit at :15 past each half-hour (no-op without keys); clustering hourly; briefs 07:00 UTC.
   await queue.add(JOB.ingestion, {}, { repeat: { pattern: "*/30 * * * *" }, jobId: JOB.ingestion });
+  await queue.add(
+    JOB.redditIngestion,
+    {},
+    { repeat: { pattern: "15,45 * * * *" }, jobId: JOB.redditIngestion },
+  );
   await queue.add(JOB.clustering, {}, { repeat: { pattern: "5 * * * *" }, jobId: JOB.clustering });
   await queue.add(
     JOB.dailyBriefs,
@@ -29,6 +40,7 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
     QUEUE_NAME,
     async (job) => {
       if (job.name === JOB.ingestion) return runIngestionJob();
+      if (job.name === JOB.redditIngestion) return runRedditIngestionJob();
       if (job.name === JOB.clustering) return runClusteringJob();
       if (job.name === JOB.dailyBriefs) return runDailyBriefsJob();
       logger.warn({ name: job.name }, "scheduler: unknown job");

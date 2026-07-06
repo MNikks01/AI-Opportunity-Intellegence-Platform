@@ -124,16 +124,19 @@ compose stack also runs **Mailhog** (`http://localhost:8025`) if you wire an SMT
 
 ## 7. Data-source connectors — Optional (per connector)
 
-Only needed to ingest from that source. **HackerNews needs no key.** See the `data-source-integration`
-skill — official/licensed sources only.
+Only needed to ingest from that source. **HackerNews needs no key** and is always on. **Reddit is
+implemented** — set its keys to enable it. The rest are forward-looking placeholders (no connector
+yet). See the `data-source-integration` skill — official/licensed sources only.
 
-| Variable                                    | Where to get it                                                                                                         |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `GITHUB_TOKEN`                              | github.com → Settings → **Developer settings → Personal access tokens** → _fine-grained token_ (public read is enough). |
-| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | reddit.com/prefs/apps → _create app_ (type **script**) → id under the name, secret shown once. Official API only.       |
-| `PRODUCTHUNT_TOKEN`                         | api.producthunt.com/v2/oauth/applications → create an app → **Developer Token**.                                        |
-| `YOUTUBE_API_KEY`                           | console.cloud.google.com → enable **YouTube Data API v3** → **Credentials → API key**.                                  |
-| `HUGGINGFACE_TOKEN`                         | huggingface.co → Settings → **Access Tokens** → _New token_ (read).                                                     |
+| Variable                                    | Where to get it                                                                                                                                                                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GITHUB_TOKEN`                              | github.com → Settings → **Developer settings → Personal access tokens** → _fine-grained token_ (public read is enough).                                                                                                         |
+| `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | reddit.com/prefs/apps → _create app_ (type **script**; redirect uri `http://localhost:3001`) → client id is under the app name, secret is the `secret` field. **Wired**: the connector then ingests hot posts (app-only OAuth). |
+| `REDDIT_USER_AGENT`                         | Optional. Reddit requires a descriptive UA; defaults to `web:aioi:v1.0 (…)`. Set your own if you like.                                                                                                                          |
+| `REDDIT_SUBREDDITS`                         | Optional comma-separated list; defaults to `MachineLearning,LocalLLaMA,artificial,OpenAI,SaaS`.                                                                                                                                 |
+| `PRODUCTHUNT_TOKEN`                         | api.producthunt.com/v2/oauth/applications → create an app → **Developer Token**.                                                                                                                                                |
+| `YOUTUBE_API_KEY`                           | console.cloud.google.com → enable **YouTube Data API v3** → **Credentials → API key**.                                                                                                                                          |
+| `HUGGINGFACE_TOKEN`                         | huggingface.co → Settings → **Access Tokens** → _New token_ (read).                                                                                                                                                             |
 
 ---
 

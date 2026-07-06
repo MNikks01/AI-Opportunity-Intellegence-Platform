@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Reddit ingestion connector** — official Reddit Data API over **app-only OAuth**
+  (client_credentials): fetches hot posts from `REDDIT_SUBREDDITS` (default: AI/SaaS subs), normalizes
+  to SourceRecords, dedupes via the shared SignalRepository, and is scheduled at :15/:45. No-ops
+  without `REDDIT_CLIENT_ID`/`SECRET` (CI stays green). Legality: OFFICIAL — public listings only,
+  required User-Agent, no scraping/PII. 9 tests.
 - **Setup docs** — `docs/10-setup/ENV_SETUP.md` (where to get each API key, step by step) and
   `docs/10-setup/RUNNING_LOCALLY.md` (run the whole stack manually).
 - **LLM eval harness** (B-009) — `runEvalHarness` runs a golden trend through scoring +
