@@ -1,5 +1,23 @@
 # @aioi/scheduler
 
+## 0.3.0
+
+### Minor Changes
+
+- bc95bde: Signal → Trend clustering (B-006): `clusterSignals` (embed + greedy cosine, deterministic offline via
+  the StubEmbedder) + `clusterRecentSignals` orchestration, `listUnclusteredSignals`/
+  `createTrendFromSignalIds` in `@aioi/database`, and an hourly scheduler clustering job. Connects
+  ingestion → trends.
+
+### Patch Changes
+
+- Updated dependencies [c4ac5c2]
+- Updated dependencies [da375de]
+- Updated dependencies [bc95bde]
+  - @aioi/ai-service@0.2.0
+  - @aioi/database@0.9.0
+  - @aioi/ingestion-service@0.1.5
+
 ## 0.2.0
 
 ### Minor Changes

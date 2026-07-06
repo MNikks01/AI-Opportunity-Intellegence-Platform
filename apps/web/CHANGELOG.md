@@ -1,5 +1,15 @@
 # @aioi/web
 
+## 0.5.3
+
+### Patch Changes
+
+- Updated dependencies [da375de]
+- Updated dependencies [bc95bde]
+- Updated dependencies [537a036]
+  - @aioi/database@0.9.0
+  - @aioi/ui@0.1.0
+
 ## 0.5.2
 
 ### Patch Changes
