@@ -124,10 +124,10 @@ compose stack also runs **Mailhog** (`http://localhost:8025`) if you wire an SMT
 
 ## 7. Data-source connectors — Optional (per connector)
 
-**HackerNews** (always on), **GitHub**, and **Reddit** connectors are **implemented**. HackerNews and
-GitHub need no key (GitHub works unauthenticated — a token just raises the rate limit); Reddit needs
-its two keys. The rest are forward-looking placeholders (no connector yet). See the
-`data-source-integration` skill — official/licensed sources only.
+**All six connectors are implemented**: HackerNews (always on) + GitHub + Hugging Face (no key needed;
+a token raises limits) and Reddit + Product Hunt + YouTube (each needs its key, else no-ops). Every one
+is official-API, legality-classified, and rate-limit aware. See the `data-source-integration` skill —
+official/licensed sources only.
 
 | Variable                                    | Where to get it                                                                                                                                                                                                                                               |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -135,8 +135,8 @@ its two keys. The rest are forward-looking placeholders (no connector yet). See 
 | `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | reddit.com/prefs/apps → _create app_ (type **script**; redirect uri `http://localhost:3001`) → client id is under the app name, secret is the `secret` field. **Wired**: the connector then ingests hot posts (app-only OAuth).                               |
 | `REDDIT_USER_AGENT`                         | Optional. Reddit requires a descriptive UA; defaults to `web:aioi:v1.0 (…)`. Set your own if you like.                                                                                                                                                        |
 | `REDDIT_SUBREDDITS`                         | Optional comma-separated list; defaults to `MachineLearning,LocalLLaMA,artificial,OpenAI,SaaS`.                                                                                                                                                               |
-| `PRODUCTHUNT_TOKEN`                         | api.producthunt.com/v2/oauth/applications → create an app → **Developer Token**.                                                                                                                                                                              |
-| `YOUTUBE_API_KEY`                           | console.cloud.google.com → enable **YouTube Data API v3** → **Credentials → API key**.                                                                                                                                                                        |
+| `PRODUCTHUNT_TOKEN`                         | api.producthunt.com/v2/oauth/applications → create an app → **Developer Token**. **Wired**: ingests top launches (GraphQL v2); no-ops without it.                                                                                                             |
+| `YOUTUBE_API_KEY` / `YOUTUBE_QUERY`         | console.cloud.google.com → enable **YouTube Data API v3** → **Credentials → API key**. **Wired**: ingests AI videos (Search); no-ops without it. `YOUTUBE_QUERY` tunes the search (default `AI tools`).                                                       |
 | `HUGGINGFACE_TOKEN` / `HF_SORT`             | Optional. huggingface.co → Settings → **Access Tokens** → _New token_ (read). **Wired**: ingests top models (Hub API); works unauthenticated, token raises the limit. `HF_SORT` = likes \| downloads \| createdAt.                                            |
 
 ---

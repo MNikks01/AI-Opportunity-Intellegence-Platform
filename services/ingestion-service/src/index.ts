@@ -27,6 +27,20 @@ export {
   fetchModels,
   type HfModel,
 } from "./connectors/huggingface";
+export {
+  PRODUCTHUNT_SOURCE_KEY,
+  productHuntConfigured,
+  fetchTopPosts,
+  type ProductHuntPost,
+} from "./connectors/producthunt";
+export {
+  YOUTUBE_SOURCE_KEY,
+  DEFAULT_YOUTUBE_QUERY,
+  youtubeConfigured,
+  youtubeQuery,
+  fetchVideos,
+  type YouTubeItem,
+} from "./connectors/youtube";
 export * from "./repository";
 export * from "./repository.prisma";
 
@@ -35,6 +49,8 @@ import { fetchTopStories } from "./connectors/hackernews";
 import { fetchSubreddits, redditConfigured, subredditsFromEnv } from "./connectors/reddit";
 import { fetchRepositories } from "./connectors/github";
 import { fetchModels } from "./connectors/huggingface";
+import { fetchTopPosts, productHuntConfigured } from "./connectors/producthunt";
+import { fetchVideos, youtubeConfigured } from "./connectors/youtube";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -107,6 +123,42 @@ export async function runHuggingFaceIngestion(
   const inserted = await repo.upsertMany(records);
   logger.info(
     { source: "huggingface", fetched: records.length, inserted, skipped },
+    "ingestion pass complete",
+  );
+  return { fetched: records.length, inserted, skipped };
+}
+
+/** Run one Product Hunt ingestion pass. No-ops without PRODUCTHUNT_TOKEN. */
+export async function runProductHuntIngestion(
+  limit = 20,
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  if (!productHuntConfigured()) {
+    logger.info({ source: "producthunt" }, "ingestion skipped: producthunt not configured");
+    return { fetched: 0, inserted: 0, skipped: 0 };
+  }
+  const { records, skipped } = await fetchTopPosts(limit);
+  const inserted = await repo.upsertMany(records);
+  logger.info(
+    { source: "producthunt", fetched: records.length, inserted, skipped },
+    "ingestion pass complete",
+  );
+  return { fetched: records.length, inserted, skipped };
+}
+
+/** Run one YouTube ingestion pass. No-ops without YOUTUBE_API_KEY. */
+export async function runYouTubeIngestion(
+  limit = 25,
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  if (!youtubeConfigured()) {
+    logger.info({ source: "youtube" }, "ingestion skipped: youtube not configured");
+    return { fetched: 0, inserted: 0, skipped: 0 };
+  }
+  const { records, skipped } = await fetchVideos(limit);
+  const inserted = await repo.upsertMany(records);
+  logger.info(
+    { source: "youtube", fetched: records.length, inserted, skipped },
     "ingestion pass complete",
   );
   return { fetched: records.length, inserted, skipped };
