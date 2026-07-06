@@ -23,10 +23,26 @@ pnpm install
 
 ---
 
-## 2. Start local infrastructure
+## 2. Configure environment (before Docker)
 
 ```bash
-docker compose -f infra/docker/docker-compose.yml up -d
+cp .env.example .env
+set -a; source .env; set +a
+```
+
+The defaults already point at the Docker services. **The Node services read `process.env` (no dotenv
+auto-load)**, so export `.env` into your shell — and do it **before** starting Docker, so the LiteLLM
+container picks up any AI keys at boot.
+
+> The Next.js web app auto-loads `.env`; the API/scheduler (and `docker compose` interpolation) use the
+> shell export.
+
+---
+
+## 3. Start local infrastructure
+
+```bash
+docker compose --env-file .env -f infra/docker/docker-compose.yml up -d
 ```
 
 Brings up:
@@ -39,24 +55,11 @@ Brings up:
 | Mailhog (email)      | 1025 (SMTP) | `http://localhost:8025`                                 |
 | LiteLLM (AI gateway) | 4000        | —                                                       |
 
-Wait for Postgres to be healthy: `docker compose -f infra/docker/docker-compose.yml ps`.
+`--env-file .env` passes your AI keys to the LiteLLM container. Wait for Postgres to be healthy:
+`docker compose -f infra/docker/docker-compose.yml ps`.
 
----
-
-## 3. Configure environment
-
-```bash
-cp .env.example .env
-```
-
-The defaults already point at the Docker services. **The Node services read `process.env` (no dotenv
-auto-load)**, so export `.env` into your shell before running them:
-
-```bash
-set -a; source .env; set +a
-```
-
-> The Next.js web app auto-loads `.env`; only the API/scheduler need the shell export.
+> Added or changed an AI key after starting? Recreate the gateway so it reloads:
+> `docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --force-recreate litellm`.
 
 ---
 
@@ -157,14 +160,16 @@ exported from `@aioi/scheduler`.
 
 ## Troubleshooting
 
-| Symptom                                                    | Fix                                                                                     |
-| ---------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `password authentication failed for user "aioi_app"`       | Run step 5 (grant login), or unset `APP_DATABASE_URL`.                                  |
-| `invalid input syntax for type uuid: ""` on a tenant query | You're on an old migration — run step 4 (the `harden_rls_null_org` migration fixes it). |
-| API/scheduler can't see env vars                           | You didn't `source .env` in that shell (step 3).                                        |
-| Migrations fail to connect                                 | Postgres not healthy yet — wait, then retry step 4.                                     |
-| Semantic search / scores look random                       | No AI keys — you're in stub mode. Add a provider key (ENV_SETUP §2) + restart LiteLLM.  |
-| Ports already in use                                       | Stop conflicting services or change ports in compose / `PORT` env.                      |
+| Symptom                                                    | Fix                                                                                                                                                                                                             |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `password authentication failed for user "aioi_app"`       | Run step 5 (grant login), or unset `APP_DATABASE_URL`.                                                                                                                                                          |
+| `invalid input syntax for type uuid: ""` on a tenant query | You're on an old migration — run step 4 (the `harden_rls_null_org` migration fixes it).                                                                                                                         |
+| API/scheduler can't see env vars                           | You didn't `source .env` in that shell (step 2).                                                                                                                                                                |
+| Migrations fail to connect                                 | Postgres not healthy yet — wait, then retry step 4.                                                                                                                                                             |
+| `LiteLLM error 401` (e.g. from a script)                   | The gateway started without your key. Recreate it: `docker compose --env-file .env -f infra/docker/docker-compose.yml up -d --force-recreate litellm`. (`seed-demo` itself is stub-only and never needs a key.) |
+| `pnpm dev` → "persistent tasks … concurrency"              | Fixed on `main` (dev runs at `--concurrency=25`). On an older checkout, run `pnpm turbo run dev --concurrency=25` or start services individually.                                                               |
+| Semantic search / scores look random                       | No AI keys — you're in stub mode. Add a provider key (ENV_SETUP §2) + recreate LiteLLM.                                                                                                                         |
+| Ports already in use                                       | Stop conflicting services or change ports in compose / `PORT` env.                                                                                                                                              |
 
 ---
 
