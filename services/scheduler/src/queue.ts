@@ -7,6 +7,7 @@ import { logger } from "@aioi/logger";
 import {
   JOB,
   runClusteringJob,
+  runScoringJob,
   runDailyBriefsJob,
   runIngestionJob,
   runRedditIngestionJob,
@@ -57,6 +58,8 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
     { repeat: { pattern: "40 * * * *" }, jobId: JOB.youtubeIngestion },
   );
   await queue.add(JOB.clustering, {}, { repeat: { pattern: "5 * * * *" }, jobId: JOB.clustering });
+  // Score freshly-clustered trends 10 min after clustering.
+  await queue.add(JOB.scoring, {}, { repeat: { pattern: "15 * * * *" }, jobId: JOB.scoring });
   await queue.add(
     JOB.dailyBriefs,
     {},
@@ -73,6 +76,7 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
       if (job.name === JOB.productHuntIngestion) return runProductHuntIngestionJob();
       if (job.name === JOB.youtubeIngestion) return runYouTubeIngestionJob();
       if (job.name === JOB.clustering) return runClusteringJob();
+      if (job.name === JOB.scoring) return runScoringJob();
       if (job.name === JOB.dailyBriefs) return runDailyBriefsJob();
       logger.warn({ name: job.name }, "scheduler: unknown job");
       return null;

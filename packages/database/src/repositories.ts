@@ -224,6 +224,76 @@ export async function reembedAllTrends(
   return { total: trends.length, embedded };
 }
 
+/** Trends with no scorecard yet (created by clustering) — candidates for the scoring job. */
+export async function listUnscoredTrends(limit = 25) {
+  return prisma.trend.findMany({
+    where: { scores: { none: {} } },
+    take: limit,
+    orderBy: { lastSignalAt: "desc" },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      summary: true,
+      status: true,
+      signals: {
+        select: {
+          signal: {
+            select: { externalId: true, url: true, title: true, source: { select: { key: true } } },
+          },
+        },
+      },
+    },
+  });
+}
+
+/** Write a scorecard for an EXISTING trend (the clustering→scoring path), + embedding + alert eval. */
+export async function persistScoresForTrend(
+  trend: { id: string; title: string; summary: string | null },
+  scores: Score[],
+): Promise<void> {
+  for (const s of scores) {
+    await prisma.score.upsert({
+      where: {
+        trendId_dimension_rubricVersion: {
+          trendId: trend.id,
+          dimension: DIM_TO_DB[s.dimension]!,
+          rubricVersion: s.rubricVersion,
+        },
+      },
+      create: {
+        trendId: trend.id,
+        dimension: DIM_TO_DB[s.dimension]!,
+        value: s.value,
+        band: BAND_TO_DB[s.band]!,
+        confidence: s.confidence,
+        rationale: s.rationale,
+        evidence: s.evidence,
+        rubricVersion: s.rubricVersion,
+      },
+      update: {
+        value: s.value,
+        band: BAND_TO_DB[s.band]!,
+        confidence: s.confidence,
+        rationale: s.rationale,
+      },
+    });
+  }
+
+  try {
+    const [embedding] = await getEmbedder().embed([`${trend.title}\n${trend.summary ?? ""}`]);
+    if (embedding) {
+      await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(embedding)}::vector WHERE id = ${trend.id}::uuid`;
+    }
+  } catch (err) {
+    logger.warn({ err, trendId: trend.id }, "embedding backfill failed (scored without it)");
+  }
+
+  const scoreMap: Record<string, number> = {};
+  for (const s of scores) scoreMap[s.dimension] = s.value;
+  await evaluateTrendAllOrgs({ trendId: trend.id, title: trend.title, scores: scoreMap });
+}
+
 // ── reads (return API/domain shape) ──────────────────────────────────────────
 export interface TrendView {
   id: string;
