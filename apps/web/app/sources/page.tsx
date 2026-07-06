@@ -24,6 +24,20 @@ const columns: Array<Column<SourceStat>> = [
     render: (r) => (r.lastFetchedAt ? new Date(r.lastFetchedAt).toLocaleString() : "—"),
   },
   {
+    key: "lastRun",
+    header: "Last run",
+    render: (r) =>
+      r.lastRun ? (
+        <span>
+          <Badge band={r.lastRun.status === "SUCCEEDED" ? "high" : "low"}>{r.lastRun.status}</Badge>{" "}
+          +{r.lastRun.itemCount} new
+          {r.lastRun.finishedAt ? ` · ${new Date(r.lastRun.finishedAt).toLocaleString()}` : ""}
+        </span>
+      ) : (
+        "—"
+      ),
+  },
+  {
     key: "legality",
     header: "Legality",
     render: (r) => <Badge band={tierBand(r.legalityTier)}>{r.legalityTier}</Badge>,

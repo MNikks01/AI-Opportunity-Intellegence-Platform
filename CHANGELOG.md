@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Per-source ingestion run stats** — each connector pass records an `IngestionRun` (status +
+  new-item count + timing) via `recordIngestionRun`; `getSourceStats` now includes the latest run per
+  source and the `/sources` page shows a **Last run** column. Best-effort (never breaks a pass). 1 test.
 - **Re-embed backfill** — `reembedAllTrends` + `scripts/reembed-trends.ts`: re-embed every
   existing trend with the current embedder (batched, resilient). Run it after enabling a real embed
   model so trends created with the Stub become semantically searchable. 1 test.
