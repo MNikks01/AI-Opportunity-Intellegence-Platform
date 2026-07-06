@@ -9,6 +9,8 @@ import {
   runRedditIngestion,
   runGitHubIngestion,
   runHuggingFaceIngestion,
+  runProductHuntIngestion,
+  runYouTubeIngestion,
 } from "@aioi/ingestion-service";
 import { clusterRecentSignals } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
@@ -35,6 +37,18 @@ export async function runGitHubIngestionJob(limit = 30) {
 export async function runHuggingFaceIngestionJob(limit = 30) {
   const result = await runHuggingFaceIngestion(limit);
   logger.info(result, "scheduler: huggingface ingestion job complete");
+  return result;
+}
+
+export async function runProductHuntIngestionJob(limit = 20) {
+  const result = await runProductHuntIngestion(limit);
+  logger.info(result, "scheduler: producthunt ingestion job complete");
+  return result;
+}
+
+export async function runYouTubeIngestionJob(limit = 25) {
+  const result = await runYouTubeIngestion(limit);
+  logger.info(result, "scheduler: youtube ingestion job complete");
   return result;
 }
 
@@ -73,6 +87,8 @@ export const JOB = {
   redditIngestion: "ingestion:reddit",
   githubIngestion: "ingestion:github",
   huggingfaceIngestion: "ingestion:huggingface",
+  productHuntIngestion: "ingestion:producthunt",
+  youtubeIngestion: "ingestion:youtube",
   clustering: "clustering:signals",
   dailyBriefs: "briefs:daily",
 } as const;

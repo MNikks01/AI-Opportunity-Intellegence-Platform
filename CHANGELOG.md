@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Product Hunt + YouTube ingestion connectors** — official Product Hunt GraphQL v2 (top
+  launches) and YouTube Data API v3 (AI video search, `YOUTUBE_QUERY`). Normalize to SourceRecords,
+  dedupe via the shared SignalRepository, scheduled hourly; both **no-op without their key** so CI
+  stays green. Legality: OFFICIAL. Completes the **six** planned connectors (HN, Reddit, GitHub, HF,
+  Product Hunt, YouTube). 8 tests.
 - **Hugging Face ingestion connector** — official Hub API: ingests the top models
   (`HF_SORT`, default `likes`), normalizes to SourceRecords, dedupes via the shared SignalRepository.
   Works **unauthenticated**; `HUGGINGFACE_TOKEN` raises the limit. Scheduled hourly. Legality:
