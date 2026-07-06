@@ -137,7 +137,7 @@ its two keys. The rest are forward-looking placeholders (no connector yet). See 
 | `REDDIT_SUBREDDITS`                         | Optional comma-separated list; defaults to `MachineLearning,LocalLLaMA,artificial,OpenAI,SaaS`.                                                                                                                                                               |
 | `PRODUCTHUNT_TOKEN`                         | api.producthunt.com/v2/oauth/applications → create an app → **Developer Token**.                                                                                                                                                                              |
 | `YOUTUBE_API_KEY`                           | console.cloud.google.com → enable **YouTube Data API v3** → **Credentials → API key**.                                                                                                                                                                        |
-| `HUGGINGFACE_TOKEN`                         | huggingface.co → Settings → **Access Tokens** → _New token_ (read).                                                                                                                                                                                           |
+| `HUGGINGFACE_TOKEN` / `HF_SORT`             | Optional. huggingface.co → Settings → **Access Tokens** → _New token_ (read). **Wired**: ingests top models (Hub API); works unauthenticated, token raises the limit. `HF_SORT` = likes \| downloads \| createdAt.                                            |
 
 ---
 

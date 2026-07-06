@@ -11,6 +11,7 @@ import {
   runIngestionJob,
   runRedditIngestionJob,
   runGitHubIngestionJob,
+  runHuggingFaceIngestionJob,
 } from "./jobs";
 
 const QUEUE_NAME = "aioi-scheduler";
@@ -36,6 +37,12 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
     {},
     { repeat: { pattern: "50 * * * *" }, jobId: JOB.githubIngestion },
   );
+  // Hugging Face hourly at :20.
+  await queue.add(
+    JOB.huggingfaceIngestion,
+    {},
+    { repeat: { pattern: "20 * * * *" }, jobId: JOB.huggingfaceIngestion },
+  );
   await queue.add(JOB.clustering, {}, { repeat: { pattern: "5 * * * *" }, jobId: JOB.clustering });
   await queue.add(
     JOB.dailyBriefs,
@@ -49,6 +56,7 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
       if (job.name === JOB.ingestion) return runIngestionJob();
       if (job.name === JOB.redditIngestion) return runRedditIngestionJob();
       if (job.name === JOB.githubIngestion) return runGitHubIngestionJob();
+      if (job.name === JOB.huggingfaceIngestion) return runHuggingFaceIngestionJob();
       if (job.name === JOB.clustering) return runClusteringJob();
       if (job.name === JOB.dailyBriefs) return runDailyBriefsJob();
       logger.warn({ name: job.name }, "scheduler: unknown job");

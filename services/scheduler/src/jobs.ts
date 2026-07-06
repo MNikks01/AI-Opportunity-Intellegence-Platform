@@ -8,6 +8,7 @@ import {
   runHackerNewsIngestion,
   runRedditIngestion,
   runGitHubIngestion,
+  runHuggingFaceIngestion,
 } from "@aioi/ingestion-service";
 import { clusterRecentSignals } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
@@ -28,6 +29,12 @@ export async function runRedditIngestionJob(limitPerSub = 25) {
 export async function runGitHubIngestionJob(limit = 30) {
   const result = await runGitHubIngestion(limit);
   logger.info(result, "scheduler: github ingestion job complete");
+  return result;
+}
+
+export async function runHuggingFaceIngestionJob(limit = 30) {
+  const result = await runHuggingFaceIngestion(limit);
+  logger.info(result, "scheduler: huggingface ingestion job complete");
   return result;
 }
 
@@ -65,6 +72,7 @@ export const JOB = {
   ingestion: "ingestion:hackernews",
   redditIngestion: "ingestion:reddit",
   githubIngestion: "ingestion:github",
+  huggingfaceIngestion: "ingestion:huggingface",
   clustering: "clustering:signals",
   dailyBriefs: "briefs:daily",
 } as const;

@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Hugging Face ingestion connector** — official Hub API: ingests the top models
+  (`HF_SORT`, default `likes`), normalizes to SourceRecords, dedupes via the shared SignalRepository.
+  Works **unauthenticated**; `HUGGINGFACE_TOKEN` raises the limit. Scheduled hourly. Legality:
+  OFFICIAL (public models only). 4 tests.
 - **GitHub ingestion connector** — official REST **Search API**: surfaces *emerging* AI repos
   (`GITHUB_QUERY`, default `topic:llm`, filtered to recently-created, ranked by stars), normalizes to
   SourceRecords, dedupes via the shared SignalRepository. Works **unauthenticated**; `GITHUB_TOKEN`
