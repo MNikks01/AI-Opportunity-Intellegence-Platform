@@ -1,5 +1,23 @@
 # @aioi/ai-service
 
+## 0.2.0
+
+### Minor Changes
+
+- c4ac5c2: LLM eval harness golden gate (B-009): `runEvalHarness` scores/plans a golden trend and checks
+  invariants + determinism (10 dims, schema-valid, in-range, evidence-grounded, composite opportunity,
+  schema-valid non-empty action plan, deterministic). A test runs it so a regression in AI logic fails CI.
+- bc95bde: Signal → Trend clustering (B-006): `clusterSignals` (embed + greedy cosine, deterministic offline via
+  the StubEmbedder) + `clusterRecentSignals` orchestration, `listUnclusteredSignals`/
+  `createTrendFromSignalIds` in `@aioi/database`, and an hourly scheduler clustering job. Connects
+  ingestion → trends.
+
+### Patch Changes
+
+- Updated dependencies [da375de]
+- Updated dependencies [bc95bde]
+  - @aioi/database@0.9.0
+
 ## 0.1.3
 
 ### Patch Changes

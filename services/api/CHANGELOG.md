@@ -1,5 +1,22 @@
 # @aioi/api
 
+## 0.7.0
+
+### Minor Changes
+
+- da375de: GDPR export/delete (B-023): `exportOrgData` (org-scoped portability, no secrets) + `deleteOrg`
+  (right-to-erasure hard delete, cascades) and a `gdpr` tRPC router (export admin-gated; deleteOrg
+  owner-only). Also hardens all RLS policies with `NULLIF(current_setting('app.current_org',true),'')`
+  so an unset/empty org fails closed instead of throwing `''::uuid` on pooled connections.
+
+### Patch Changes
+
+- Updated dependencies [c4ac5c2]
+- Updated dependencies [da375de]
+- Updated dependencies [bc95bde]
+  - @aioi/ai-service@0.2.0
+  - @aioi/database@0.9.0
+
 ## 0.6.1
 
 ### Patch Changes

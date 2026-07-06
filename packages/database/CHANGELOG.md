@@ -1,5 +1,18 @@
 # @aioi/database
 
+## 0.9.0
+
+### Minor Changes
+
+- da375de: GDPR export/delete (B-023): `exportOrgData` (org-scoped portability, no secrets) + `deleteOrg`
+  (right-to-erasure hard delete, cascades) and a `gdpr` tRPC router (export admin-gated; deleteOrg
+  owner-only). Also hardens all RLS policies with `NULLIF(current_setting('app.current_org',true),'')`
+  so an unset/empty org fails closed instead of throwing `''::uuid` on pooled connections.
+- bc95bde: Signal → Trend clustering (B-006): `clusterSignals` (embed + greedy cosine, deterministic offline via
+  the StubEmbedder) + `clusterRecentSignals` orchestration, `listUnclusteredSignals`/
+  `createTrendFromSignalIds` in `@aioi/database`, and an hourly scheduler clustering job. Connects
+  ingestion → trends.
+
 ## 0.8.0
 
 ### Minor Changes
