@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Fix Clerk auth on Next.js 16** — Next 16 replaced the `middleware.ts` convention with
+  `proxy.ts`; renamed the file so `clerkMiddleware()` is detected again (fixes "auth() … can't detect
+  clerkMiddleware()" + the 404). `<SignInButton>` now uses Clerk's default button (a custom child
+  tripped a "multiple children" error). Verified: `GET /` → 307 to the Clerk sign-in page.
 - **Local-dev onboarding fixes** — `pnpm dev` now sets `--concurrency=25` (18 persistent dev tasks
   exceeded turbo's default 10); `scripts/seed-demo.ts` scores with the Stub so it works offline with no
   keys; and RUNNING_LOCALLY now configures/sources `.env` **before** `docker compose up` (via

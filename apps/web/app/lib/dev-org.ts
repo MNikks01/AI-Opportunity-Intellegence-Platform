@@ -15,7 +15,7 @@ export const getDevOrg = cache(
     workspaceId: string | null;
   }> => {
     if (clerkEnabled) {
-      // Sign-in is enforced by middleware; resolve the signed-in user (no dev fallback in auth mode).
+      // Sign-in is enforced by the proxy (proxy.ts); resolve the signed-in user (no dev fallback).
       const resolved = await resolveClerkOrg();
       if (!resolved) throw new Error("Unauthenticated");
       return resolved;
