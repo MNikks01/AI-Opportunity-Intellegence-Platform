@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **UI components** (B-012) — `@aioi/ui` gains `Button` (primary/secondary/ghost) and a generic,
+  accessible, responsive `DataTable` (`Column<T>` render fns + empty state). Vitest now collects
+  `.test.tsx` (render tests via `renderToStaticMarkup`). 3 tests.
 - **GDPR export/delete** (B-023) — `exportOrgData` (org-scoped data portability, secrets
   excluded) + `deleteOrg` (right-to-erasure hard delete, cascades) and a `gdpr` tRPC router (export
   admin-gated; deleteOrg owner-only). Also **hardens all RLS policies** with
