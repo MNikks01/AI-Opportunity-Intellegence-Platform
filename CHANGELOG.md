@@ -16,6 +16,8 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Setup docs** — `docs/10-setup/ENV_SETUP.md` (where to get each API key, step by step) and
+  `docs/10-setup/RUNNING_LOCALLY.md` (run the whole stack manually).
 - **LLM eval harness** (B-009) — `runEvalHarness` runs a golden trend through scoring +
   action-plan generation and asserts invariants + determinism (10 dims, schema-valid, in-range,
   evidence-grounded, composite opportunity, non-empty plan). A test runs it, so a regression in AI
