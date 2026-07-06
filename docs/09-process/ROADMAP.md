@@ -46,19 +46,23 @@ legal templates (privacy/terms/cookie), risk register, changelog.
 
 ## Current position
 
-**Phases 1–22 complete; Phase 23 implementation through Sprint 2 read-path + UI.** The full stack
-now runs end-to-end and **renders in the browser**: ingest (live HN) → score (10-dim + composite) →
-persist (Postgres) → serve (`@aioi/api` tRPC + REST) → render (`apps/web` Next.js RSC + `@aioi/ui`).
-Implemented + verified: `@aioi/shared`, `validation`, `logger`, `ai-sdk` (LiteLLM + stub),
-`ai-service` (scoring), `ingestion-service` (HN connector), `database` (Prisma repos, 23 tables,
-pgvector), `api` (Fastify tRPC+REST), `ui` (tokens + components), `web` (Trends dashboard + detail).
-**13/13 tests green; all packages strict-typecheck clean; Trends dashboard + Trend Detail scorecard
-confirmed rendering real data in-browser.**
+**Phases 1–22 complete; Phase 23 implementation feature-complete and released.** The platform runs
+end-to-end and renders in the browser. **162 tests green; all 24 workspaces strict-typecheck clean;
+released via Changesets on `main`.**
 
-Next up: **auth** (`@aioi/auth` Clerk adapter + RBAC + tenant guard, B-014) so the app is gated and
-multi-tenant; then the **retention loop** (watchlists/alerts/daily brief) and remaining Sprint-1
-quality items (real embedding clustering B-006, `llm-eval-harness` golden gate B-009, Langfuse
-tracing). Cross-cutting docs (TESTING_STRATEGY, CI/CD, security/threat-model, observability) alongside.
+Autonomous pipeline (scheduler-driven): ingest (live HN) → **cluster signals → trends** (embed +
+cosine, B-006) → score (10-dim + composite, eval-gated B-009) → embed (pgvector) → auto-evaluate
+alerts → daily briefs (in-app **and emailed**). Product surfaces: keyword + semantic search,
+watchlists, alerts/notifications, action-plan generators, briefs, billing (Stripe checkout +
+webhooks). Auth & compliance: Clerk (frontend + verifier + webhook + enforced sign-in) + API keys,
+RBAC (ADR-0002), Postgres **RLS** (ADR-0003, hardened), audit logging, **GDPR export/erasure** (B-023).
+Foundation: `@aioi/ui` design system, Redis cache, CI/CD, GitFlow. Every external integration (Clerk,
+Stripe, Resend, LiteLLM) is behind an adapter+Stub, so CI stays green with no keys and each activates
+on config — see [../10-setup/ENV_SETUP.md](../10-setup/ENV_SETUP.md) and
+[../10-setup/RUNNING_LOCALLY.md](../10-setup/RUNNING_LOCALLY.md).
+
+Remaining (by design): Langfuse tracing (B-007, keys-gated) and the deferred major migrations —
+Prisma 7 (B-025) and TypeScript 6 (B-026).
 
 ## Working agreements (apply every phase)
 

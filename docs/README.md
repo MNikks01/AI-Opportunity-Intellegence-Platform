@@ -16,13 +16,22 @@ The `docs/` tree evolves phase by phase per [ROADMAP](09-process/ROADMAP.md). St
 | `07-security/`     | Security guide, threat model, RBAC, permissions                                   |
 | `08-quality/`      | Code guidelines, style guide, testing strategy, performance                       |
 | `09-process/`      | Roadmap, milestones, sprint plan, backlog, risk register, release process         |
+| `10-setup/`        | **Getting started**: env setup (where to get keys) + running the platform locally |
 | `adr/`             | Architecture Decision Records (ADR-0001 = core stack)                             |
 | `diagrams/`        | ERD, sequence, flowcharts, component, infrastructure diagrams                     |
 | `legal/`           | Privacy Policy, Terms, Cookie Policy templates                                    |
 
 ## Completed so far
 
-- Phases 1–6 (Discovery → PRD) + the TRD baseline + ADR-0001.
+- Phases 1–22 (Discovery → design → data/API → infra → standards → planning), all documented.
+- Phase 23 implementation: **feature-complete and released** — full stack running end-to-end, 162
+  tests. See the [ROADMAP current position](09-process/ROADMAP.md#current-position).
+- ADRs: 0001 core stack · 0002 auth/RBAC · 0003 row-level security.
+
+## Getting started
+
+- [Running the platform locally](10-setup/RUNNING_LOCALLY.md) — boots green with no external keys.
+- [Environment setup](10-setup/ENV_SETUP.md) — where to obtain each API key.
 
 ## Read order for a new contributor
 
