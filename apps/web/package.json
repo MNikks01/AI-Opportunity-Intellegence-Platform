@@ -1,6 +1,6 @@
 {
   "name": "@aioi/web",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "private": true,
   "description": "Authenticated product app (dashboards, trend detail, workspace).",
   "scripts": {
