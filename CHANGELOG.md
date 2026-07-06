@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Re-embed backfill** — `reembedAllTrends` + `scripts/reembed-trends.ts`: re-embed every
+  existing trend with the current embedder (batched, resilient). Run it after enabling a real embed
+  model so trends created with the Stub become semantically searchable. 1 test.
 - **Connector health surface** — `getSourceStats` (per-source signal counts + last-ingested
   time), an admin-gated `sources.stats` tRPC endpoint, and a `/sources` page rendering it with the
   `@aioi/ui` `DataTable` (source · signals · last ingested · legality tier). 2 tests.

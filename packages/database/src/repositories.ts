@@ -193,6 +193,37 @@ export async function persistScoredTrend(trend: TrendLike, scores: Score[]): Pro
   return dbTrend.id;
 }
 
+/**
+ * Re-embed every trend with the currently-configured embedder (batched). Run this after switching on
+ * a real embed model so existing trends (created with the Stub) become semantically searchable. A
+ * failed batch is logged and skipped, never aborting the whole backfill.
+ */
+export async function reembedAllTrends(
+  batchSize = 64,
+): Promise<{ total: number; embedded: number }> {
+  const embedder = getEmbedder();
+  const trends = await prisma.trend.findMany({ select: { id: true, title: true, summary: true } });
+  let embedded = 0;
+  for (let i = 0; i < trends.length; i += batchSize) {
+    const batch = trends.slice(i, i + batchSize);
+    let vectors: number[][];
+    try {
+      vectors = await embedder.embed(batch.map((t) => `${t.title}\n${t.summary ?? ""}`));
+    } catch (err) {
+      logger.warn({ err, from: i, size: batch.length }, "reembed batch failed (skipped)");
+      continue;
+    }
+    for (let j = 0; j < batch.length; j++) {
+      const v = vectors[j];
+      if (!v) continue;
+      await prisma.$executeRaw`UPDATE "Trend" SET embedding = ${vectorLiteral(v)}::vector WHERE id = ${batch[j]!.id}::uuid`;
+      embedded += 1;
+    }
+  }
+  logger.info({ total: trends.length, embedded, embedder: embedder.name }, "reembed complete");
+  return { total: trends.length, embedded };
+}
+
 // ── reads (return API/domain shape) ──────────────────────────────────────────
 export interface TrendView {
   id: string;

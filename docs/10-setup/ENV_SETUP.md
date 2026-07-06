@@ -57,6 +57,8 @@ clustering, semantic search all run, but with placeholder values). Add them for 
    **clustering + semantic search become genuinely semantic**.
 4. Set `AIOI_SCORING_MODEL` / `AIOI_EMBED_MODEL` (optional overrides). Embeddings always request
    `dimensions: 1536` to match the pgvector column, so use a 1536-capable embed model.
+5. **Re-embed existing trends** (they were embedded with the Stub) so search/clustering go semantic:
+   `pnpm exec tsx scripts/reembed-trends.ts`.
 
 ---
 
