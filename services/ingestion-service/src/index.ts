@@ -21,6 +21,12 @@ export {
   fetchRepositories,
   type GitHubRepo,
 } from "./connectors/github";
+export {
+  HUGGINGFACE_SOURCE_KEY,
+  DEFAULT_HF_SORT,
+  fetchModels,
+  type HfModel,
+} from "./connectors/huggingface";
 export * from "./repository";
 export * from "./repository.prisma";
 
@@ -28,6 +34,7 @@ import { logger } from "@aioi/logger";
 import { fetchTopStories } from "./connectors/hackernews";
 import { fetchSubreddits, redditConfigured, subredditsFromEnv } from "./connectors/reddit";
 import { fetchRepositories } from "./connectors/github";
+import { fetchModels } from "./connectors/huggingface";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -83,6 +90,23 @@ export async function runGitHubIngestion(
   const inserted = await repo.upsertMany(records);
   logger.info(
     { source: "github", fetched: records.length, inserted, skipped },
+    "ingestion pass complete",
+  );
+  return { fetched: records.length, inserted, skipped };
+}
+
+/**
+ * Run one Hugging Face ingestion pass (top models by likes). Works unauthenticated; a token raises
+ * the rate limit. Always safe to schedule.
+ */
+export async function runHuggingFaceIngestion(
+  limit = 30,
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const { records, skipped } = await fetchModels(limit);
+  const inserted = await repo.upsertMany(records);
+  logger.info(
+    { source: "huggingface", fetched: records.length, inserted, skipped },
     "ingestion pass complete",
   );
   return { fetched: records.length, inserted, skipped };
