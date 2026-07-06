@@ -5,12 +5,19 @@
  */
 import { generateDailyBrief, listActiveOrgIds, listOrgMemberEmails } from "@aioi/database";
 import { runHackerNewsIngestion } from "@aioi/ingestion-service";
+import { clusterRecentSignals } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
 import { logger } from "@aioi/logger";
 
 export async function runIngestionJob(limit = 30) {
   const result = await runHackerNewsIngestion(limit);
   logger.info(result, "scheduler: ingestion job complete");
+  return result;
+}
+
+export async function runClusteringJob() {
+  const result = await clusterRecentSignals();
+  logger.info(result, "scheduler: clustering job complete");
   return result;
 }
 
@@ -40,5 +47,6 @@ export async function runDailyBriefsJob(
 
 export const JOB = {
   ingestion: "ingestion:hackernews",
+  clustering: "clustering:signals",
   dailyBriefs: "briefs:daily",
 } as const;

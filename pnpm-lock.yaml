@@ -471,6 +471,9 @@ importers:
 
   services/scheduler:
     dependencies:
+      '@aioi/ai-service':
+        specifier: workspace:*
+        version: link:../ai-service
       '@aioi/database':
         specifier: workspace:*
         version: link:../../packages/database

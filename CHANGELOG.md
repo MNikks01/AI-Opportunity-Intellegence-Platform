@@ -16,6 +16,22 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **LLM eval harness** (B-009) — `runEvalHarness` runs a golden trend through scoring +
+  action-plan generation and asserts invariants + determinism (10 dims, schema-valid, in-range,
+  evidence-grounded, composite opportunity, non-empty plan). A test runs it, so a regression in AI
+  logic fails CI. Layers quality thresholds on top when a real provider is configured.
+- **UI components** (B-012) — `@aioi/ui` gains `Button` (primary/secondary/ghost) and a generic,
+  accessible, responsive `DataTable` (`Column<T>` render fns + empty state). Vitest now collects
+  `.test.tsx` (render tests via `renderToStaticMarkup`). 3 tests.
+- **GDPR export/delete** (B-023) — `exportOrgData` (org-scoped data portability, secrets
+  excluded) + `deleteOrg` (right-to-erasure hard delete, cascades) and a `gdpr` tRPC router (export
+  admin-gated; deleteOrg owner-only). Also **hardens all RLS policies** with
+  `NULLIF(current_setting('app.current_org',true),'')` so an unset/empty org context fails closed
+  instead of throwing `''::uuid` on pooled connections. 4 tests.
+- **Signal → Trend clustering** (B-006) — connects ingestion to trends: `clusterSignals` (embed +
+  greedy cosine; deterministic offline via the StubEmbedder) + `clusterRecentSignals` orchestration;
+  `@aioi/database` `listUnclusteredSignals`/`createTrendFromSignalIds`; and an hourly scheduler
+  clustering job. Swaps to real semantic clustering with a real embedder. 3 tests.
 - **Email delivery** — new `@aioi/email`: an `EmailProvider` seam (Stub outbox + **Resend**) with
   brief/alert templates. The scheduler's daily-brief job now **emails each org's members**
   (`@aioi/database` `listOrgMemberEmails`) — captured by the Stub outbox offline, sent via Resend when

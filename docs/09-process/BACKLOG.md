@@ -6,29 +6,29 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 
 ## Now (Sprint 0–1) — critical path
 
-| ID    | Item                                                                                  | Epic  | SP  | Status |
-| ----- | ------------------------------------------------------------------------------------- | ----- | --- | ------ |
-| B-001 | `pnpm install` + Turbo pipeline runs green                                            | infra | 2   | ✅     |
-| B-002 | `@aioi/shared`: core domain types (SourceRecord, Trend, Score enums)                  | E2    | 2   | ✅     |
-| B-003 | `@aioi/validation`: Zod schemas (SourceRecord, Score) mirroring score.schema.json     | E2    | 3   | ✅     |
-| B-004 | `@aioi/database`: Prisma migrate (23 tables, pgvector+pgcrypto) + client              | E2    | 3   | ✅     |
-| B-005 | HN ingestion connector + MSW tests (happy/429/malformed/empty/idempotent)             | E2    | 5   | ✅     |
-| B-006 | Signal→Trend clustering (embed + heuristic) — _trivial demo clustering only_          | E2    | 5   | 🟡     |
-| B-007 | `@aioi/ai-sdk`: LiteLLM client + stub provider + structured output (Langfuse pending) | E2/AI | 5   | 🟡     |
-| B-008 | `scoreTrend()` per opportunity-scoring-engine (10 dims + composite + cache)           | E3    | 8   | ✅     |
-| B-009 | llm-eval-harness smoke: golden case + CI gate — _determinism smoke test only_         | AI    | 3   | 🟡     |
-| B-024 | Prisma-backed `SignalRepository` (repository.prisma.ts) wired to ingestion            | E2    | 3   | ✅     |
+| ID    | Item                                                                                  | Epic  | SP  | Status                                                               |
+| ----- | ------------------------------------------------------------------------------------- | ----- | --- | -------------------------------------------------------------------- |
+| B-001 | `pnpm install` + Turbo pipeline runs green                                            | infra | 2   | ✅                                                                   |
+| B-002 | `@aioi/shared`: core domain types (SourceRecord, Trend, Score enums)                  | E2    | 2   | ✅                                                                   |
+| B-003 | `@aioi/validation`: Zod schemas (SourceRecord, Score) mirroring score.schema.json     | E2    | 3   | ✅                                                                   |
+| B-004 | `@aioi/database`: Prisma migrate (23 tables, pgvector+pgcrypto) + client              | E2    | 3   | ✅                                                                   |
+| B-005 | HN ingestion connector + MSW tests (happy/429/malformed/empty/idempotent)             | E2    | 5   | ✅                                                                   |
+| B-006 | Signal->Trend clustering (embed + heuristic)                                          | E2    | 5   | done (embed + greedy cosine + scheduler job; real embedder swaps in) |
+| B-007 | `@aioi/ai-sdk`: LiteLLM client + stub provider + structured output (Langfuse pending) | E2/AI | 5   | 🟡                                                                   |
+| B-008 | `scoreTrend()` per opportunity-scoring-engine (10 dims + composite + cache)           | E3    | 8   | ✅                                                                   |
+| B-009 | llm-eval-harness: golden case + CI gate                                               | AI    | 3   | done (golden invariants + determinism gate in CI)                    |
+| B-024 | Prisma-backed `SignalRepository` (repository.prisma.ts) wired to ingestion            | E2    | 3   | ✅                                                                   |
 
 ## Next (Sprint 2) — read path + UI
 
-| ID    | Item                                                                              | Epic | SP  | Status                                             |
-| ----- | --------------------------------------------------------------------------------- | ---- | --- | -------------------------------------------------- |
-| B-010 | `@aioi/api` Fastify + tRPC `trends.list/bySlug`; REST `/api/v1/trends`            | E2   | 5   | ✅                                                 |
-| B-011 | Redis read-model cache for dashboards                                             | perf | 3   | ✅                                                 |
-| B-012 | `@aioi/ui` tokens + core components (Card, Badge, ScoreBar, Scorecard, TrendCard) | UI   | 8   | 🟡 (DataTable/Button pending)                      |
-| B-013 | `apps/web` Trend Dashboard + Trend Detail (RSC, real data)                        | E2   | 8   | ✅                                                 |
-| B-014 | `@aioi/auth` Clerk adapter + RBAC guard + tenant guard                            | E1   | 5   | ✅ (adapter+RBAC+guard+RLS+API-key+Clerk verifier) |
-| B-015 | Personal workspace bootstrap on signup                                            | E5   | 3   | ✅ (bootstrapUser + Clerk user.created webhook)    |
+| ID    | Item                                                                   | Epic | SP  | Status                                                              |
+| ----- | ---------------------------------------------------------------------- | ---- | --- | ------------------------------------------------------------------- |
+| B-010 | `@aioi/api` Fastify + tRPC `trends.list/bySlug`; REST `/api/v1/trends` | E2   | 5   | ✅                                                                  |
+| B-011 | Redis read-model cache for dashboards                                  | perf | 3   | ✅                                                                  |
+| B-012 | `@aioi/ui` tokens + core components                                    | UI   | 8   | done (Card/Badge/ScoreBar/Scorecard/TrendCard + Button + DataTable) |
+| B-013 | `apps/web` Trend Dashboard + Trend Detail (RSC, real data)             | E2   | 8   | ✅                                                                  |
+| B-014 | `@aioi/auth` Clerk adapter + RBAC guard + tenant guard                 | E1   | 5   | ✅ (adapter+RBAC+guard+RLS+API-key+Clerk verifier)                  |
+| B-015 | Personal workspace bootstrap on signup                                 | E5   | 3   | ✅ (bootstrapUser + Clerk user.created webhook)                     |
 
 ## Later (Sprint 3+) — retention + monetization
 
@@ -41,7 +41,7 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 | B-020 | Billing Free/Pro via Stripe + entitlements                                                               | E8    | 8   | 🟡 (entitlements + plan persistence + enforcement + API + web; Stripe checkout/webhooks next)       |
 | B-021 | Action-plan generators (SaaS/API/content/GTM)                                                            | E3    | 8   | 🟡 (generator + persist + API + web + tests; richer fields + eval next)                             |
 | B-022 | Audit logging middleware (all mutations)                                                                 | E9    | 3   | ✅                                                                                                  |
-| B-023 | GDPR export/delete jobs                                                                                  | E9    | 5   | ⬜                                                                                                  |
+| B-023 | GDPR export/delete jobs                                                                                  | E9    | 5   | done (export + hard delete + RLS hardening)                                                         |
 | B-025 | Prisma 5→7 migration (breaking client/generator; ignored in dependabot until done)                       | infra | 5   | ⬜                                                                                                  |
 | B-026 | TypeScript 5→6 migration (fails typecheck; ignored in dependabot until done)                             | infra | 3   | ⬜                                                                                                  |
 | B-027 | Runtime connects as a non-superuser DB role (`aioi_app`) + `APP_DATABASE_URL` so RLS enforces (ADR-0003) | infra | 3   | ✅                                                                                                  |
