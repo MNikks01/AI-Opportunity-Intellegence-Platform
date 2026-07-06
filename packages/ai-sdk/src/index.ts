@@ -170,11 +170,22 @@ export class LiteLLMProvider implements LLMProvider {
   }
 }
 
+/**
+ * Default chat model that matches the configured provider key, so one key "just works" (AIOI_SCORING_MODEL
+ * always wins). Anthropic → claude-opus-4-8, OpenAI → gpt-4o-mini — both routed by the LiteLLM config.
+ */
+export function defaultChatModel(env: NodeJS.ProcessEnv = process.env): string {
+  if (env.AIOI_SCORING_MODEL) return env.AIOI_SCORING_MODEL;
+  if (env.ANTHROPIC_API_KEY) return "claude-opus-4-8";
+  if (env.OPENAI_API_KEY) return "gpt-4o-mini";
+  return "claude-opus-4-8";
+}
+
 /** Returns LiteLLM when a gateway is configured, else the deterministic stub. */
 export function getProvider(env: NodeJS.ProcessEnv = process.env): LLMProvider {
   const base = env.LITELLM_BASE_URL;
   const hasKey = Boolean(env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY ?? env.GEMINI_API_KEY);
-  if (base && hasKey) return new LiteLLMProvider(base);
+  if (base && hasKey) return new LiteLLMProvider(base, defaultChatModel(env));
   return new StubProvider();
 }
 

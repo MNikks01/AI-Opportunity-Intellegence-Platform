@@ -22,12 +22,23 @@ function cosine(a: number[], b: number[]): number {
   return dot; // embeddings are unit-length, so dot product == cosine similarity
 }
 
+/**
+ * Cosine threshold for merging a signal into a cluster. The default (0.5) suits real embeddings —
+ * measured cosine between differently-worded posts about the same topic is ~0.55, while unrelated
+ * topics sit ~0.2, so 0.5 separates them cleanly. (The Stub embedder gives ~1.0 for identical text and
+ * ~0 otherwise, so it clusters correctly at this threshold too.) Override with CLUSTER_THRESHOLD.
+ */
+export function clusterThreshold(): number {
+  const n = process.env.CLUSTER_THRESHOLD ? Number(process.env.CLUSTER_THRESHOLD) : NaN;
+  return Number.isFinite(n) ? n : 0.5;
+}
+
 export async function clusterSignals(
   signals: SignalInput[],
   opts: { threshold?: number; embedder?: Embedder } = {},
 ): Promise<Cluster[]> {
   if (signals.length === 0) return [];
-  const threshold = opts.threshold ?? 0.72;
+  const threshold = opts.threshold ?? clusterThreshold();
   const embedder = opts.embedder ?? getEmbedder();
   const vectors = await embedder.embed(signals.map((s) => s.text));
 

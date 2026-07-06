@@ -16,6 +16,15 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Scoring model auto-selection** — `getProvider` now picks a chat model matching your provider
+  key (`defaultChatModel`: Anthropic → `claude-opus-4-8`, OpenAI → `gpt-4o-mini`; `AIOI_SCORING_MODEL`
+  wins). Fixes a footgun where an OpenAI-only key returned a real provider that called the
+  Anthropic-default model and 401'd. Verified live: OpenAI-only → gpt-4o-mini → 10 real scores. 2 tests.
+- **Clustering threshold tuned for real embeddings** — default cosine threshold 0.72 → **0.5**
+  (env `CLUSTER_THRESHOLD`). With real embeddings, differently-worded cross-source signals about the
+  same topic (~0.55 cosine) now merge into one trend while unrelated (~0.2) stay separate; verified
+  end-to-end against OpenAI embeddings. Also quotes special values in `.env.example` so `source .env`
+  works. 1 test.
 - **Per-source ingestion run stats** — each connector pass records an `IngestionRun` (status +
   new-item count + timing) via `recordIngestionRun`; `getSourceStats` now includes the latest run per
   source and the `/sources` page shows a **Last run** column. Best-effort (never breaks a pass). 1 test.
