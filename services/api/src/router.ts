@@ -36,6 +36,7 @@ import {
   revokeApiKey,
   exportOrgData,
   deleteOrg,
+  getSourceStats,
 } from "@aioi/database";
 import { entitlementsFor, PlanLimitError } from "@aioi/billing";
 import { getBillingProvider } from "./stripe";
@@ -318,6 +319,14 @@ export const appRouter = router({
         authorize(ctx.auth, "org:delete");
         return deleteOrg(ctx.auth.orgId);
       }),
+  }),
+
+  sources: router({
+    // Connector health — per-source signal counts + last-ingested time (system view, admin).
+    stats: protectedProcedure.query(({ ctx }) => {
+      authorize(ctx.auth, "admin:access");
+      return getSourceStats();
+    }),
   }),
 });
 

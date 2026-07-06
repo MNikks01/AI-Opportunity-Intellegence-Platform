@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Connector health surface** — `getSourceStats` (per-source signal counts + last-ingested
+  time), an admin-gated `sources.stats` tRPC endpoint, and a `/sources` page rendering it with the
+  `@aioi/ui` `DataTable` (source · signals · last ingested · legality tier). 2 tests.
 - **Real embeddings, production-hardened** — `LiteLLMEmbedder` now requests `dimensions: 1536`
   (matches the pgvector column for any model), unit-normalizes, preserves order, retries 429/5xx, and
   fails loudly on a count/dim mismatch; embedding backfill is best-effort (a provider outage no longer
