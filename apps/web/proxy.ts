@@ -1,3 +1,5 @@
+// Next.js 16 request middleware lives in `proxy.ts` (the former `middleware.ts` convention). Clerk
+// hooks into this file, so it must be named `proxy.ts` for `clerkMiddleware()` to be detected.
 import { clerkMiddleware } from "@clerk/nextjs/server";
 
 // When Clerk is configured, require authentication for every app route (unauthenticated → sign-in).
@@ -8,7 +10,7 @@ export default enabled
   ? clerkMiddleware(async (auth) => {
       await auth.protect();
     })
-  : function middleware() {};
+  : function proxy() {};
 
 export const config = {
   matcher: ["/((?!_next|.*\\..*).*)", "/(api|trpc)(.*)"],
