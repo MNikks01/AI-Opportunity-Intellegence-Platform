@@ -3,6 +3,7 @@ import { afterAll, describe, expect, it } from "vitest";
 import { prisma } from "./client";
 import { ensureSource } from "./repositories";
 import { getSourceStats } from "./source-stats";
+import { recordIngestionRun } from "./ingestion-runs";
 
 const hasDb = Boolean(process.env.DATABASE_URL);
 const key = `sourcestat-${randomUUID().slice(0, 8)}`;
@@ -23,11 +24,16 @@ describe.skipIf(!hasDb)("getSourceStats (integration)", () => {
       data: { sourceId, externalId: "s2", title: "b", raw: {}, fetchedAt: newer },
     });
 
+    // record an ingestion run so lastRun is populated
+    await recordIngestionRun(key, { fetched: 5, inserted: 2, skipped: 1 });
+
     const stats = await getSourceStats();
     const row = stats.find((s) => s.source === key);
     expect(row).toBeDefined();
     expect(row!.signalCount).toBe(2);
     expect(row!.legalityTier).toBe("OFFICIAL");
     expect(row!.lastFetchedAt?.toISOString()).toBe(newer.toISOString());
+    expect(row!.lastRun?.status).toBe("SUCCEEDED");
+    expect(row!.lastRun?.itemCount).toBe(2); // inserted count
   });
 });

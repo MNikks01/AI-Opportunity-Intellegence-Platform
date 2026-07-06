@@ -45,6 +45,7 @@ export * from "./repository";
 export * from "./repository.prisma";
 
 import { logger } from "@aioi/logger";
+import { recordIngestionRun } from "@aioi/database";
 import { fetchTopStories } from "./connectors/hackernews";
 import { fetchSubreddits, redditConfigured, subredditsFromEnv } from "./connectors/reddit";
 import { fetchRepositories } from "./connectors/github";
@@ -64,13 +65,13 @@ export async function runHackerNewsIngestion(
   limit = 30,
   repo: SignalRepository = createSignalRepository(),
 ): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
   const { records, skipped } = await fetchTopStories(limit);
   const inserted = await repo.upsertMany(records);
-  logger.info(
-    { source: "hackernews", fetched: records.length, inserted, skipped },
-    "ingestion pass complete",
-  );
-  return { fetched: records.length, inserted, skipped };
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "hackernews", ...result }, "ingestion pass complete");
+  await recordIngestionRun("hackernews", result, startedAt);
+  return result;
 }
 
 /**
@@ -85,13 +86,13 @@ export async function runRedditIngestion(
     logger.info({ source: "reddit" }, "ingestion skipped: reddit not configured");
     return { fetched: 0, inserted: 0, skipped: 0 };
   }
+  const startedAt = new Date();
   const { records, skipped } = await fetchSubreddits(subredditsFromEnv(), limitPerSub);
   const inserted = await repo.upsertMany(records);
-  logger.info(
-    { source: "reddit", fetched: records.length, inserted, skipped },
-    "ingestion pass complete",
-  );
-  return { fetched: records.length, inserted, skipped };
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "reddit", ...result }, "ingestion pass complete");
+  await recordIngestionRun("reddit", result, startedAt);
+  return result;
 }
 
 /**
@@ -102,13 +103,13 @@ export async function runGitHubIngestion(
   limit = 30,
   repo: SignalRepository = createSignalRepository(),
 ): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
   const { records, skipped } = await fetchRepositories(limit);
   const inserted = await repo.upsertMany(records);
-  logger.info(
-    { source: "github", fetched: records.length, inserted, skipped },
-    "ingestion pass complete",
-  );
-  return { fetched: records.length, inserted, skipped };
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "github", ...result }, "ingestion pass complete");
+  await recordIngestionRun("github", result, startedAt);
+  return result;
 }
 
 /**
@@ -119,13 +120,13 @@ export async function runHuggingFaceIngestion(
   limit = 30,
   repo: SignalRepository = createSignalRepository(),
 ): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
   const { records, skipped } = await fetchModels(limit);
   const inserted = await repo.upsertMany(records);
-  logger.info(
-    { source: "huggingface", fetched: records.length, inserted, skipped },
-    "ingestion pass complete",
-  );
-  return { fetched: records.length, inserted, skipped };
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "huggingface", ...result }, "ingestion pass complete");
+  await recordIngestionRun("huggingface", result, startedAt);
+  return result;
 }
 
 /** Run one Product Hunt ingestion pass. No-ops without PRODUCTHUNT_TOKEN. */
@@ -137,13 +138,13 @@ export async function runProductHuntIngestion(
     logger.info({ source: "producthunt" }, "ingestion skipped: producthunt not configured");
     return { fetched: 0, inserted: 0, skipped: 0 };
   }
+  const startedAt = new Date();
   const { records, skipped } = await fetchTopPosts(limit);
   const inserted = await repo.upsertMany(records);
-  logger.info(
-    { source: "producthunt", fetched: records.length, inserted, skipped },
-    "ingestion pass complete",
-  );
-  return { fetched: records.length, inserted, skipped };
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "producthunt", ...result }, "ingestion pass complete");
+  await recordIngestionRun("producthunt", result, startedAt);
+  return result;
 }
 
 /** Run one YouTube ingestion pass. No-ops without YOUTUBE_API_KEY. */
@@ -155,11 +156,11 @@ export async function runYouTubeIngestion(
     logger.info({ source: "youtube" }, "ingestion skipped: youtube not configured");
     return { fetched: 0, inserted: 0, skipped: 0 };
   }
+  const startedAt = new Date();
   const { records, skipped } = await fetchVideos(limit);
   const inserted = await repo.upsertMany(records);
-  logger.info(
-    { source: "youtube", fetched: records.length, inserted, skipped },
-    "ingestion pass complete",
-  );
-  return { fetched: records.length, inserted, skipped };
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "youtube", ...result }, "ingestion pass complete");
+  await recordIngestionRun("youtube", result, startedAt);
+  return result;
 }
