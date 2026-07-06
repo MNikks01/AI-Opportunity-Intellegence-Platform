@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
-import { clusterSignals } from "./clustering";
+import { afterEach, describe, expect, it } from "vitest";
+import { clusterSignals, clusterThreshold } from "./clustering";
 
 // Pure — uses the deterministic StubEmbedder (identical text → identical vector → same cluster;
 // distinct text → ~orthogonal → separate clusters).
@@ -20,5 +20,22 @@ describe("clusterSignals", () => {
     expect(await clusterSignals([])).toEqual([]);
     const [c] = await clusterSignals([{ id: "x", text: "Agentic RAG frameworks" }]);
     expect(c!.label).toBe("Agentic RAG frameworks");
+  });
+});
+
+describe("clusterThreshold", () => {
+  const saved = process.env.CLUSTER_THRESHOLD;
+  afterEach(() => {
+    if (saved === undefined) delete process.env.CLUSTER_THRESHOLD;
+    else process.env.CLUSTER_THRESHOLD = saved;
+  });
+
+  it("defaults to 0.5 and honors a valid CLUSTER_THRESHOLD", () => {
+    delete process.env.CLUSTER_THRESHOLD;
+    expect(clusterThreshold()).toBe(0.5);
+    process.env.CLUSTER_THRESHOLD = "0.72";
+    expect(clusterThreshold()).toBe(0.72);
+    process.env.CLUSTER_THRESHOLD = "not-a-number";
+    expect(clusterThreshold()).toBe(0.5); // falls back
   });
 });
