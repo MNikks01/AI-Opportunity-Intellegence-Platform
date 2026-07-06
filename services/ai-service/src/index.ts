@@ -5,3 +5,4 @@
 export * from "./scoring";
 export * from "./action-plan";
 export * from "./clustering";
+export * from "./eval";
