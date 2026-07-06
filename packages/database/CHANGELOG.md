@@ -1,5 +1,12 @@
 # @aioi/database
 
+## 0.10.1
+
+### Patch Changes
+
+- Updated dependencies [6ae6fa5]
+  - @aioi/ai-sdk@0.4.0
+
 ## 0.10.0
 
 ### Minor Changes
