@@ -12,22 +12,7 @@ function AuthControls() {
   return (
     <>
       <SignedOut>
-        <SignInButton mode="modal">
-          <button
-            style={{
-              padding: "6px 14px",
-              borderRadius: "8px",
-              border: "1px solid var(--primary)",
-              background: "var(--primary)",
-              color: "#fff",
-              fontWeight: 600,
-              cursor: "pointer",
-              fontSize: "0.8125rem",
-            }}
-          >
-            Sign in
-          </button>
-        </SignInButton>
+        <SignInButton mode="modal" />
       </SignedOut>
       <SignedIn>
         <UserButton afterSignOutUrl="/trends" />
