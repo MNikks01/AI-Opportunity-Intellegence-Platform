@@ -1,5 +1,13 @@
 # @aioi/database
 
+## 0.12.0
+
+### Minor Changes
+
+- ed24c47: `listTrendsPage({ source, status, sort, page, pageSize })` — browse trends filtered by source (`Source.key`)
+  and status, sorted by recency or any score dimension (highest first), with pagination. Dimension-sort
+  orders ids via composable, injection-safe raw SQL then hydrates. Backs the trends browse controls.
+
 ## 0.11.3
 
 ### Patch Changes
