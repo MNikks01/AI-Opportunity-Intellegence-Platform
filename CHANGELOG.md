@@ -16,6 +16,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **All sources in the refresh + faster cadence + responsive UI** — the scheduled refresh now runs
+  every **3h** (was 6h), ingests **all six sources** (Reddit/Product Hunt/YouTube activate when their
+  key secret is set; HN/GitHub/HF always), and `demo-data.ts` runs them all resiliently. The web app is
+  now **mobile + tablet responsive** (device-width viewport, nav collapses to a scrollable row ≤720px,
+  fluid trend grid, tighter mobile padding).
 - **Direct-provider AI (no gateway) + real-score cron** — `@aioi/ai-sdk` now sends a bearer token
   from `AIOI_LLM_API_KEY`, so `LITELLM_BASE_URL=https://api.openai.com/v1` calls OpenAI directly (real
   embeddings + scoring) in serverless/CI. The refresh-data workflow uses it: add an `OPENAI_API_KEY`
