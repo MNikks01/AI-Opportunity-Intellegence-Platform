@@ -5,6 +5,9 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
+  // "native" for local dev; "rhel-openssl-3.0.x" for serverless Linux runtimes (Vercel/Lambda) so the
+  // query engine binary exists in production. Add more targets here for other deploy platforms.
+  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
 }
 
 datasource db {

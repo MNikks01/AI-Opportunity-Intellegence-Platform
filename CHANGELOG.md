@@ -16,6 +16,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Prisma serverless engine** — add `rhel-openssl-3.0.x` to `binaryTargets` so Prisma runs on Vercel/Lambda (query-engine binary present in prod).
 - **Free deploy path** — `docs/10-setup/DEPLOY.md`: ship a public demo for $0 on **Vercel + Neon**
   (web + Postgres/pgvector). The web app runs standalone on a single `DATABASE_URL` (no api/Redis/keys)
   — verified: builds without DB connectivity, serves all pages green. New `scripts/demo-data.ts` loads
