@@ -1,5 +1,11 @@
 # @aioi/web
 
+## 0.6.5
+
+### Patch Changes
+
+- @aioi/database@0.11.2
+
 ## 0.6.4
 
 ### Patch Changes
