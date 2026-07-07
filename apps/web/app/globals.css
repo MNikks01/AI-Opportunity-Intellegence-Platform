@@ -63,6 +63,108 @@
   }
 }
 
+/* Trends browse controls (source radios + sort) */
+.trend-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px 28px;
+  margin: 0 0 24px;
+}
+.trend-sources {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+.trend-sources legend,
+.trend-sort > span {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+  padding: 0;
+  margin-bottom: 8px;
+}
+.trend-radios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.trend-radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  background: var(--bg);
+  cursor: pointer;
+  user-select: none;
+}
+.trend-radio input {
+  margin: 0;
+  accent-color: var(--primary);
+}
+.trend-radio.is-active {
+  border-color: var(--primary);
+  color: var(--fg);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+.trend-sort {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 0;
+}
+.trend-sort select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.85rem;
+}
+
+/* Pagination */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 28px 0 8px;
+  font-size: 0.9rem;
+}
+.pagination-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  text-decoration: none;
+}
+.pagination-link:hover {
+  border-color: var(--primary);
+}
+.pagination-link.is-current {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-weight: 600;
+}
+.pagination-link.is-disabled {
+  color: var(--fg-muted);
+  opacity: 0.5;
+  pointer-events: none;
+}
+.pagination-gap {
+  padding: 0 4px;
+  color: var(--fg-muted);
+}
+
 /* Never let content force horizontal page scroll on small screens. */
 @media (max-width: 720px) {
   img,

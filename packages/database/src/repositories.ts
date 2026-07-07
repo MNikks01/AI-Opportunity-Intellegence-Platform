@@ -3,9 +3,10 @@
  * enums (UPPER_SNAKE). Services depend on these functions, not on Prisma directly.
  */
 import { randomUUID } from "node:crypto";
-import type { $Enums, Prisma } from "@prisma/client";
+import type { $Enums } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
-import { bandForValue, sanitizeText } from "@aioi/shared";
+import { bandForValue, sanitizeText, SCORE_DIMENSIONS } from "@aioi/shared";
 import { getEmbedder } from "@aioi/ai-sdk";
 import { logger } from "@aioi/logger";
 import { prisma } from "./client";
@@ -330,20 +331,121 @@ function toScore(row: {
   };
 }
 
-export async function listTrends(limit = 25): Promise<TrendView[]> {
-  const rows = await prisma.trend.findMany({
-    take: limit,
-    orderBy: { lastSignalAt: "desc" },
-    include: { scores: true },
-  });
-  return rows.map((t) => ({
+type TrendRow = {
+  id: string;
+  slug: string;
+  title: string;
+  summary: string | null;
+  status: $Enums.TrendStatus;
+  scores: Parameters<typeof toScore>[0][];
+};
+
+function toTrendView(t: TrendRow): TrendView {
+  return {
     id: t.id,
     slug: t.slug,
     title: t.title,
     summary: t.summary,
     status: t.status as TrendStatus,
     scores: t.scores.map(toScore),
-  }));
+  };
+}
+
+export async function listTrends(limit = 25): Promise<TrendView[]> {
+  const rows = await prisma.trend.findMany({
+    take: limit,
+    orderBy: { lastSignalAt: "desc" },
+    include: { scores: true },
+  });
+  return rows.map(toTrendView);
+}
+
+/** "recent" (newest) or any score dimension (sorts by that dimension's value, highest first). */
+export type TrendSort = "recent" | ScoreDimension;
+const TREND_STATUSES: readonly TrendStatus[] = ["EARLY", "ACTIVE", "FADING", "ARCHIVED"];
+
+export interface TrendPage {
+  trends: TrendView[];
+  total: number;
+  page: number;
+  pageSize: number;
+  pageCount: number;
+}
+
+/**
+ * Browse trends with optional source (`Source.key`) + status filters, sort (newest or by any score
+ * dimension, highest first), and 1-based pagination (B-012 follow-up). Dimension-sort needs a Score row,
+ * which is a to-many relation Prisma can't `orderBy`, so it orders ids via composable raw SQL then
+ * hydrates. Trends are global (public). All interpolated values are bound params (injection-safe).
+ */
+export async function listTrendsPage(opts: {
+  source?: string;
+  status?: string;
+  sort?: string;
+  page?: number;
+  pageSize?: number;
+}): Promise<TrendPage> {
+  const page = Math.max(1, Math.floor(opts.page ?? 1));
+  const pageSize = Math.min(60, Math.max(1, Math.floor(opts.pageSize ?? 24)));
+  const offset = (page - 1) * pageSize;
+  const source = opts.source?.trim() || undefined;
+  const status = TREND_STATUSES.includes(opts.status as TrendStatus)
+    ? (opts.status as $Enums.TrendStatus)
+    : undefined;
+  const sortDim = SCORE_DIMENSIONS.includes(opts.sort as ScoreDimension)
+    ? (opts.sort as ScoreDimension)
+    : null;
+
+  const where: Prisma.TrendWhereInput = {
+    ...(source ? { signals: { some: { signal: { source: { key: source } } } } } : {}),
+    ...(status ? { status } : {}),
+  };
+
+  const total = await prisma.trend.count({ where });
+
+  let trends: TrendView[];
+  if (sortDim) {
+    // Order ids by the chosen dimension's score (NULLS last), then recency, with source/status filters.
+    const filters: Prisma.Sql[] = [];
+    if (source) {
+      filters.push(Prisma.sql`EXISTS (
+        SELECT 1 FROM "TrendSignal" ts
+        JOIN "Signal" sig ON sig.id = ts."signalId"
+        JOIN "Source" src ON src.id = sig."sourceId"
+        WHERE ts."trendId" = t.id AND src.key = ${source})`);
+    }
+    if (status) filters.push(Prisma.sql`t.status::text = ${status}`);
+    const whereSql = filters.length
+      ? Prisma.sql`WHERE ${Prisma.join(filters, " AND ")}`
+      : Prisma.empty;
+    const idRows = await prisma.$queryRaw<{ id: string }[]>(Prisma.sql`
+      SELECT t.id FROM "Trend" t
+      LEFT JOIN "Score" s ON s."trendId" = t.id AND s.dimension::text = ${sortDim.toUpperCase()}
+      ${whereSql}
+      ORDER BY s.value DESC NULLS LAST, t."lastSignalAt" DESC NULLS LAST
+      LIMIT ${pageSize} OFFSET ${offset}`);
+    const ids = idRows.map((r) => r.id);
+    const rows = await prisma.trend.findMany({
+      where: { id: { in: ids } },
+      include: { scores: true },
+    });
+    const byId = new Map(rows.map((r) => [r.id, r]));
+    trends = ids.flatMap((id) => {
+      const r = byId.get(id);
+      return r ? [toTrendView(r)] : [];
+    });
+  } else {
+    const rows = await prisma.trend.findMany({
+      where,
+      orderBy: { lastSignalAt: "desc" },
+      skip: offset,
+      take: pageSize,
+      include: { scores: true },
+    });
+    trends = rows.map(toTrendView);
+  }
+
+  return { trends, total, page, pageSize, pageCount: Math.max(1, Math.ceil(total / pageSize)) };
 }
 
 export async function getTrendBySlug(slug: string): Promise<TrendView | null> {
