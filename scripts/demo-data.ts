@@ -1,20 +1,37 @@
 /**
- * Populate a (demo) database with real trends: ingest the three keyless sources → cluster → score.
- * Scoring uses the Stub unless OPENAI_API_KEY (+ LITELLM_BASE_URL) are set, in which case it's real.
+ * Populate a (demo) database with real trends: ingest every configured source → cluster → score.
+ * Key-gated sources (Reddit/Product Hunt/YouTube) no-op unless their keys are set, so this is safe to
+ * run/schedule unconditionally. Scoring uses the Stub unless OPENAI_API_KEY (+ LITELLM_BASE_URL) or
+ * AIOI_LLM_API_KEY are set, in which case it's real.
  * Run: DATABASE_URL=… [APP_DATABASE_URL=…] pnpm exec tsx scripts/demo-data.ts
  */
 import {
   runHackerNewsIngestion,
   runGitHubIngestion,
   runHuggingFaceIngestion,
+  runRedditIngestion,
+  runProductHuntIngestion,
+  runYouTubeIngestion,
 } from "../services/ingestion-service/src/index";
 import { clusterRecentSignals, scoreClusteredTrends } from "../services/ai-service/src/index";
 
+/** Run one source; a failure (bad key, rate limit) is logged and skipped so others still run. */
+async function ingest(name: string, fn: () => Promise<unknown>): Promise<void> {
+  try {
+    console.log(`  ${name}:`, await fn());
+  } catch (e) {
+    console.log(`  ${name}: skipped (${e instanceof Error ? e.message : String(e)})`);
+  }
+}
+
 async function main() {
-  console.log("ingesting (HackerNews, GitHub, Hugging Face)…");
-  console.log("  hackernews:", await runHackerNewsIngestion(40));
-  console.log("  github:", await runGitHubIngestion(20));
-  console.log("  huggingface:", await runHuggingFaceIngestion(20));
+  console.log("ingesting (all configured sources)…");
+  await ingest("hackernews", () => runHackerNewsIngestion(40));
+  await ingest("github", () => runGitHubIngestion(20));
+  await ingest("huggingface", () => runHuggingFaceIngestion(20));
+  await ingest("reddit", () => runRedditIngestion(20));
+  await ingest("producthunt", () => runProductHuntIngestion(20));
+  await ingest("youtube", () => runYouTubeIngestion(20));
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
