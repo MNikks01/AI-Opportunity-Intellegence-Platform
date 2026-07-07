@@ -485,6 +485,33 @@ export function getActionPlan(trendId: string) {
   return prisma.actionPlan.findUnique({ where: { trendId } });
 }
 
+/** A source item backing a trend — the original post/repo/video/model + its link (B-021 detail view). */
+export interface TrendResource {
+  id: string;
+  source: string;
+  title: string | null;
+  url: string | null;
+  publishedAt: Date | null;
+}
+
+/** The signals that make up a trend, with their source + link, newest first. Global tables (public). */
+export async function getTrendResources(trendId: string, limit = 60): Promise<TrendResource[]> {
+  const rows = await prisma.trendSignal.findMany({
+    where: { trendId },
+    take: limit,
+    include: { signal: { include: { source: { select: { key: true } } } } },
+  });
+  return rows
+    .map((r) => ({
+      id: r.signal.id,
+      source: r.signal.source.key,
+      title: r.signal.title,
+      url: r.signal.url,
+      publishedAt: r.signal.publishedAt,
+    }))
+    .sort((a, b) => (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0));
+}
+
 /**
  * Keyword full-text search over trends (B-019). Uses the STORED `searchVector` (GIN-indexed) with
  * `plainto_tsquery`, ranked by `ts_rank` then recency. Returns the same `TrendView` shape as

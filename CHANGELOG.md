@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Richer trend detail: sources & links + scoring rationale** — the trend page now lists the source
+  items backing it (badge + external link + date) via `getTrendResources()`, a "backed by N signals
+  across M sources" line, and per-dimension scoring rationales.
 - **Trends browse: filter by source + status, sort by any dimension, numbered pagination** —
   the trends page gains source radio buttons (only connectors with data), a status filter, a sort
   selector (Newest / highest of any score dimension), and numbered pagination. New `listTrendsPage()`

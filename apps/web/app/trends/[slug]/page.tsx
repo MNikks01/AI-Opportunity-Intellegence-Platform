@@ -1,8 +1,40 @@
-import { getTrendBySlug } from "@aioi/database";
+import { getTrendBySlug, getTrendResources } from "@aioi/database";
 import { Badge, Card, Scorecard } from "@aioi/ui";
 import { notFound } from "next/navigation";
 
 export const dynamic = "force-dynamic";
+
+const SOURCE_LABELS: Record<string, string> = {
+  hackernews: "HackerNews",
+  youtube: "YouTube",
+  github: "GitHub",
+  huggingface: "Hugging Face",
+  reddit: "Reddit",
+  producthunt: "Product Hunt",
+};
+const sourceLabel = (k: string) => SOURCE_LABELS[k] ?? k;
+
+const DIM_LABELS: Record<string, string> = {
+  opportunity: "Opportunity",
+  business: "Business",
+  developer: "Developer",
+  creator: "Creator",
+  seo: "SEO",
+  competition: "Competition",
+  monetization: "Monetization",
+  risk: "Risk",
+  difficulty: "Difficulty",
+  predicted_lifetime: "Predicted lifetime",
+};
+
+function fmtDate(d: Date | null): string {
+  if (!d) return "";
+  return new Date(d).toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
 
 type ActionPlan = {
   saasIdeas: string[];
@@ -50,6 +82,10 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
   const trend = await getTrendBySlug(slug);
   if (!trend) notFound();
   const plan = trend.actionPlan?.content as ActionPlan | undefined;
+  const resources = await getTrendResources(trend.id);
+  const sourceCount = new Set(resources.map((r) => r.source)).size;
+  // Sub-dimension rationales (opportunity's rationale already leads the scorecard).
+  const rationales = trend.scores.filter((s) => s.dimension !== "opportunity" && s.rationale);
 
   return (
     <main>
@@ -58,13 +94,64 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
       </a>
       <h1 style={{ fontSize: "1.75rem", margin: "8px 0 4px" }}>{trend.title}</h1>
       {trend.summary && (
-        <p style={{ color: "var(--fg-muted)", margin: "0 0 20px", maxWidth: 640 }}>
+        <p style={{ color: "var(--fg-muted)", margin: "0 0 8px", maxWidth: 640 }}>
           {trend.summary}
         </p>
       )}
+      <p className="trend-meta">
+        Backed by {resources.length} {resources.length === 1 ? "signal" : "signals"} across{" "}
+        {sourceCount} {sourceCount === 1 ? "source" : "sources"}.
+      </p>
       <div style={{ maxWidth: 560 }}>
         <Scorecard scores={trend.scores} />
       </div>
+
+      <h2 style={{ fontSize: "1.25rem", margin: "32px 0 8px" }}>Sources &amp; resources</h2>
+      {resources.length > 0 ? (
+        <Card>
+          <ul className="resource-list">
+            {resources.map((r) => (
+              <li key={r.id} className="resource-item">
+                <Badge>{sourceLabel(r.source)}</Badge>
+                {r.url ? (
+                  <a
+                    href={r.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="resource-link"
+                  >
+                    {r.title ?? r.url}
+                  </a>
+                ) : (
+                  <span className="resource-link">{r.title ?? "(untitled)"}</span>
+                )}
+                {r.publishedAt && <time className="resource-date">{fmtDate(r.publishedAt)}</time>}
+              </li>
+            ))}
+          </ul>
+        </Card>
+      ) : (
+        <div className="aioi-card" style={{ color: "var(--fg-muted)" }}>
+          No source items linked to this trend yet.
+        </div>
+      )}
+
+      {rationales.length > 0 && (
+        <>
+          <h2 style={{ fontSize: "1.25rem", margin: "32px 0 8px" }}>Scoring rationale</h2>
+          <Card>
+            {rationales.map((s) => (
+              <div key={s.dimension} className="rationale-row">
+                <div className="rationale-head">
+                  <strong>{DIM_LABELS[s.dimension] ?? s.dimension}</strong>
+                  <Badge band={s.band}>{s.value}</Badge>
+                </div>
+                <p className="rationale-text">{s.rationale}</p>
+              </div>
+            ))}
+          </Card>
+        </>
+      )}
 
       <h2 style={{ fontSize: "1.25rem", margin: "32px 0 8px" }}>Action plan</h2>
       {plan ? (
