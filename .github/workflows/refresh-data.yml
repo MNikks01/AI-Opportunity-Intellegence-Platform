@@ -1,18 +1,19 @@
 # Live data for the public demo: run the ingestion → cluster → score pipeline against the deployed
-# database on a schedule, so new trends keep appearing. Free (GitHub-hosted runner). Ingestion of the
-# three keyless sources (HN/GitHub/Hugging Face) is always real; scoring uses the Stub unless a real
-# AI endpoint is configured (see the optional secrets below).
+# database on a schedule (every 3h), so new trends keep appearing. Free (GitHub-hosted runner). The
+# three keyless sources (HN/GitHub/Hugging Face) always ingest; the rest activate when their key is set.
 #
-# Setup (one time): repo → Settings → Secrets and variables → Actions → New repository secret
-#   DEMO_DATABASE_URL = your Neon connection string (DIRECT host, no -pooler, no channel_binding), e.g.
-#                       postgresql://user:pw@ep-xxx.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&connect_timeout=30
-#   OPENAI_API_KEY    = (optional) your OpenAI key → real embeddings + scoring (direct, no gateway).
-#                       Without it, ingestion is still real but scoring uses the deterministic Stub.
+# Setup (repo → Settings → Secrets and variables → Actions → New repository secret):
+#   DEMO_DATABASE_URL     = Neon connection string (DIRECT host, no -pooler, no channel_binding), e.g.
+#                           postgresql://user:pw@ep-xxx.c-2…neon.tech/neondb?sslmode=require&connect_timeout=30
+#   OPENAI_API_KEY        = (optional) real embeddings + scoring, direct (no gateway). Else Stub scores.
+#   Optional source keys (widen ingestion): INGEST_GITHUB_TOKEN, HUGGINGFACE_TOKEN, YOUTUBE_API_KEY,
+#   REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, PRODUCTHUNT_TOKEN. (GITHUB_TOKEN is reserved by Actions, so
+#   the GitHub source key is passed as INGEST_GITHUB_TOKEN.)
 name: refresh-demo-data
 
 on:
   schedule:
-    - cron: "0 */6 * * *" # every 6 hours
+    - cron: "0 */3 * * *" # every 3 hours
   workflow_dispatch: {} # manual "Run workflow" button
 
 concurrency:
@@ -34,6 +35,13 @@ jobs:
         env:
           DATABASE_URL: ${{ secrets.DEMO_DATABASE_URL }}
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          # Optional source keys — set as repo secrets to widen ingestion beyond the 3 keyless sources.
+          GITHUB_TOKEN: ${{ secrets.INGEST_GITHUB_TOKEN }}
+          HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
+          REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
+          PRODUCTHUNT_TOKEN: ${{ secrets.PRODUCTHUNT_TOKEN }}
         run: |
           if [ -z "$DATABASE_URL" ]; then
             echo "::warning::DEMO_DATABASE_URL secret is not set — add it to enable the live refresh. Skipping."

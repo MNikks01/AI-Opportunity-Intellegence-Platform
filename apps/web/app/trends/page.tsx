@@ -26,7 +26,16 @@ export default async function TrendsPage({
           : `${trends.length} scored ${trends.length === 1 ? "trend" : "trends"} from the AI ecosystem.`}
       </p>
 
-      <form method="get" style={{ display: "flex", gap: "8px", margin: "0 0 24px", maxWidth: 640 }}>
+      <form
+        method="get"
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: "8px",
+          margin: "0 0 24px",
+          maxWidth: 640,
+        }}
+      >
         <input
           name="q"
           defaultValue={query}
@@ -96,7 +105,7 @@ export default async function TrendsPage({
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
             gap: "16px",
           }}
         >
