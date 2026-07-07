@@ -57,15 +57,20 @@ export class LiteLLMEmbedder implements Embedder {
     private readonly fetchImpl: typeof fetch = fetch,
     private readonly sleep: (ms: number) => Promise<void> = defaultSleep,
     private readonly maxRetries = 3,
+    // Optional bearer token — set when hitting a provider directly (e.g. https://api.openai.com/v1);
+    // leave unset for a LiteLLM proxy that injects the key itself.
+    private readonly apiKey?: string,
   ) {}
 
   async embed(texts: string[]): Promise<number[][]> {
     if (texts.length === 0) return [];
+    const headers: Record<string, string> = { "content-type": "application/json" };
+    if (this.apiKey) headers.authorization = `Bearer ${this.apiKey}`;
     let attempt = 0;
     for (;;) {
       const res = await this.fetchImpl(`${this.baseUrl}/embeddings`, {
         method: "POST",
-        headers: { "content-type": "application/json" },
+        headers,
         body: JSON.stringify({ model: this.model, input: texts, dimensions: EMBED_DIM }),
       });
       if (res.status === 429 || res.status >= 500) {
@@ -97,7 +102,18 @@ export class LiteLLMEmbedder implements Embedder {
 /** LiteLLM when a gateway + key are configured, else the deterministic stub. */
 export function getEmbedder(env: NodeJS.ProcessEnv = process.env): Embedder {
   const base = env.LITELLM_BASE_URL;
-  const hasKey = Boolean(env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY ?? env.GEMINI_API_KEY);
-  if (base && hasKey) return new LiteLLMEmbedder(base);
+  // AIOI_LLM_API_KEY lets base point straight at a provider (e.g. https://api.openai.com/v1) with no
+  // gateway — so real embeddings work in serverless/CI. OpenAI is needed for embeddings specifically.
+  const hasKey = Boolean(env.OPENAI_API_KEY ?? env.AIOI_LLM_API_KEY);
+  if (base && hasKey) {
+    return new LiteLLMEmbedder(
+      base,
+      env.AIOI_EMBED_MODEL ?? "text-embedding-3-small",
+      fetch,
+      undefined,
+      undefined,
+      env.AIOI_LLM_API_KEY,
+    );
+  }
   return new StubEmbedder();
 }

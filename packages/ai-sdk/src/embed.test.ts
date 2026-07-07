@@ -66,6 +66,26 @@ describe("LiteLLMEmbedder", () => {
     expect(out[0]![0]!).toBeCloseTo(out[1]![0]!, 5); // both normalized → same per-component value
   });
 
+  it("sends an Authorization header only when an apiKey is given (direct provider)", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({ data: [embRow(0)] }));
+    await new LiteLLMEmbedder("http://x:4000", "m", fetchImpl).embed(["a"]);
+    expect((fetchImpl.mock.calls[0]![1].headers as Record<string, string>).authorization).toBe(
+      undefined,
+    );
+    const withKey = vi.fn().mockResolvedValue(jsonResponse({ data: [embRow(0)] }));
+    await new LiteLLMEmbedder(
+      "https://api.openai.com/v1",
+      "m",
+      withKey,
+      undefined,
+      undefined,
+      "sk-abc",
+    ).embed(["a"]);
+    expect((withKey.mock.calls[0]![1].headers as Record<string, string>).authorization).toBe(
+      "Bearer sk-abc",
+    );
+  });
+
   it("throws on a vector-count mismatch (guards the pgvector column)", async () => {
     const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({ data: [embRow(0)] }));
     const e = new LiteLLMEmbedder("http://x:4000", "m", fetchImpl);
