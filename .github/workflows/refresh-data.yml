@@ -1,0 +1,43 @@
+# Live data for the public demo: run the ingestion → cluster → score pipeline against the deployed
+# database on a schedule, so new trends keep appearing. Free (GitHub-hosted runner). Ingestion of the
+# three keyless sources (HN/GitHub/Hugging Face) is always real; scoring uses the Stub unless a real
+# AI endpoint is configured (see the optional secrets below).
+#
+# Setup (one time): repo → Settings → Secrets and variables → Actions → New repository secret
+#   DEMO_DATABASE_URL = your Neon connection string (the DIRECT host, no -pooler, no channel_binding),
+#                       e.g. postgresql://user:pw@ep-xxx.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&connect_timeout=30
+# Optional (real scores instead of Stub — requires an OpenAI-compatible endpoint reachable from CI):
+#   AIOI_LITELLM_BASE_URL, plus a provider key your gateway uses.
+name: refresh-demo-data
+
+on:
+  schedule:
+    - cron: "0 */6 * * *" # every 6 hours
+  workflow_dispatch: {} # manual "Run workflow" button
+
+concurrency:
+  group: refresh-demo-data
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Ingest → cluster → score
+        env:
+          DATABASE_URL: ${{ secrets.DEMO_DATABASE_URL }}
+          LITELLM_BASE_URL: ${{ secrets.AIOI_LITELLM_BASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::DEMO_DATABASE_URL secret is not set — add it to enable the live refresh. Skipping."
+            exit 0
+          fi
+          pnpm --filter @aioi/database exec prisma migrate deploy
+          pnpm exec tsx scripts/demo-data.ts

@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Live data (scheduled refresh)** — `.github/workflows/refresh-data.yml`: a free GitHub Actions
+  cron (every 6h + manual) runs `demo-data.ts` (ingest HN+GitHub+HF → cluster → score) against the
+  deployed DB, so new trends keep appearing. Enable by adding a `DEMO_DATABASE_URL` secret. Documented
+  in DEPLOY.md.
 - **Prisma serverless engine** — add `rhel-openssl-3.0.x` to `binaryTargets` so Prisma runs on Vercel/Lambda (query-engine binary present in prod).
 - **Free deploy path** — `docs/10-setup/DEPLOY.md`: ship a public demo for $0 on **Vercel + Neon**
   (web + Postgres/pgvector). The web app runs standalone on a single `DATABASE_URL` (no api/Redis/keys)

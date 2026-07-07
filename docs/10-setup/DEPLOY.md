@@ -79,14 +79,27 @@ Notifications · Briefs · Sources**, no login. 🎉
 
 ---
 
-## 4. Keep it fresh (optional, still free)
+## 4. Make it live — scheduled refresh (free)
 
-The demo is static data until you refresh it. Options:
+Out of the box the demo holds the one-time snapshot from step 2. To keep new trends flowing, a
+**GitHub Actions cron** re-runs the pipeline against your DB on a timer — no server, no cost.
 
-- **Re-run step 2** whenever you want new trends (cheap, from your laptop).
-- **Vercel Cron (free)** → add a route handler that runs `runHackerNewsIngestion` + `clusterRecentSignals`
-  - `scoreClusteredTrends`, and a `vercel.json` cron to hit it daily. (Scoring uses the Stub unless you
-    add `OPENAI_API_KEY` to Vercel env — that would cost OpenAI credits per run.)
+The workflow already exists: [`.github/workflows/refresh-demo-data`](../../.github/workflows/refresh-data.yml)
+(every 6 hours + a manual **Run workflow** button). Turn it on by adding **one secret**:
+
+1. Repo → **Settings → Secrets and variables → Actions → New repository secret**.
+2. Name **`DEMO_DATABASE_URL`**, value = your Neon **direct** string (no `-pooler`, no
+   `channel_binding`), e.g.
+   `postgresql://user:pw@ep-xxx.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&connect_timeout=30`.
+
+Each run ingests HackerNews + GitHub + Hugging Face (real, keyless), clusters, and scores — so fresh
+trends appear on the live site. Ingestion is always real; **scoring uses the Stub** unless you point it
+at an OpenAI-compatible endpoint (secrets `AIOI_LITELLM_BASE_URL` + your gateway's key). For real scores
+without hosting a gateway, the simplest route today is to re-run `scripts/demo-data.ts` from your laptop
+with your OpenAI key + local LiteLLM up.
+
+> Alternatives: **Vercel Cron** (a route handler + `vercel.json` cron — Hobby is ~1×/day, 60 s cap), or
+> deploy the real `@aioi/scheduler` worker (Fly/Render + Upstash Redis) for always-on ingestion.
 
 ---
 
