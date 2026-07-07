@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Direct-provider AI (no gateway) + real-score cron** — `@aioi/ai-sdk` now sends a bearer token
+  from `AIOI_LLM_API_KEY`, so `LITELLM_BASE_URL=https://api.openai.com/v1` calls OpenAI directly (real
+  embeddings + scoring) in serverless/CI. The refresh-data workflow uses it: add an `OPENAI_API_KEY`
+  secret → the scheduled refresh scores for real, fully autonomous. Verified live. 2 tests.
 - **Live data (scheduled refresh)** — `.github/workflows/refresh-data.yml`: a free GitHub Actions
   cron (every 6h + manual) runs `demo-data.ts` (ingest HN+GitHub+HF → cluster → score) against the
   deployed DB, so new trends keep appearing. Enable by adding a `DEMO_DATABASE_URL` secret. Documented
