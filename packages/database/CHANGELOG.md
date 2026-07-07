@@ -1,5 +1,17 @@
 # @aioi/database
 
+## 0.13.0
+
+### Minor Changes
+
+- fbccec0: Add `listTopTrendsNeedingPlan(limit, minOpportunity)` — highest-opportunity scored trends without an
+  action plan, backing auto action-plan generation.
+
+### Patch Changes
+
+- 05b9e7f: Surface a trend's action plan on its browse card: `TrendView.plan` carries a teaser (top SaaS idea +
+  product names) from the included action plan, and `TrendCard` renders a "💡 Build idea" block when present.
+
 ## 0.12.0
 
 ### Minor Changes

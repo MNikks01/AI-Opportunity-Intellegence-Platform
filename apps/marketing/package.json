@@ -1,6 +1,6 @@
 {
   "name": "@aioi/marketing",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "private": true,
   "description": "Public landing, pricing, blog, changelog, roadmap (SEO/ISR).",
   "//": "Stub app — not yet implemented. Build/lint/typecheck scripts are added when work starts (turbo skips packages without them).",

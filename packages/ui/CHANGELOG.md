@@ -1,5 +1,12 @@
 # @aioi/ui
 
+## 0.2.0
+
+### Minor Changes
+
+- 05b9e7f: Surface a trend's action plan on its browse card: `TrendView.plan` carries a teaser (top SaaS idea +
+  product names) from the included action plan, and `TrendCard` renders a "💡 Build idea" block when present.
+
 ## 0.1.1
 
 ### Patch Changes
