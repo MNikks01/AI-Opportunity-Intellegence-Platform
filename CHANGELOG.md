@@ -16,6 +16,8 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Action-plan teaser on trend cards** — browse cards now show a "💡 Build idea" block (top SaaS
+  idea + product-name chips) for trends that have a generated action plan; `listTrendsPage` includes it.
 - **Trends browse: filter by source + status, sort by any dimension, numbered pagination** —
   the trends page gains source radio buttons (only connectors with data), a status filter, a sort
   selector (Newest / highest of any score dimension), and numbered pagination. New `listTrendsPage()`

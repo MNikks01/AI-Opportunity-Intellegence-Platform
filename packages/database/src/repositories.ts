@@ -309,6 +309,8 @@ export interface TrendView {
   scores: Score[];
   /** Populated by getTrendBySlug (B-021); undefined in list views. */
   actionPlan?: { promptVersion: string; content: unknown } | null;
+  /** A compact action-plan teaser for list/card views (B-021), when a plan exists. */
+  plan?: { topIdea: string | null; productNames: string[] } | null;
 }
 
 function toScore(row: {
@@ -338,7 +340,17 @@ type TrendRow = {
   summary: string | null;
   status: $Enums.TrendStatus;
   scores: Parameters<typeof toScore>[0][];
+  actionPlan?: { content: unknown } | null;
 };
+
+function planTeaser(actionPlan?: { content: unknown } | null): TrendView["plan"] {
+  if (!actionPlan) return null;
+  const c = actionPlan.content as { saasIdeas?: string[]; productNames?: string[] } | undefined;
+  return {
+    topIdea: c?.saasIdeas?.[0] ?? null,
+    productNames: (c?.productNames ?? []).slice(0, 3),
+  };
+}
 
 function toTrendView(t: TrendRow): TrendView {
   return {
@@ -348,6 +360,7 @@ function toTrendView(t: TrendRow): TrendView {
     summary: t.summary,
     status: t.status as TrendStatus,
     scores: t.scores.map(toScore),
+    plan: planTeaser(t.actionPlan),
   };
 }
 
@@ -427,7 +440,7 @@ export async function listTrendsPage(opts: {
     const ids = idRows.map((r) => r.id);
     const rows = await prisma.trend.findMany({
       where: { id: { in: ids } },
-      include: { scores: true },
+      include: { scores: true, actionPlan: { select: { content: true } } },
     });
     const byId = new Map(rows.map((r) => [r.id, r]));
     trends = ids.flatMap((id) => {
@@ -440,7 +453,7 @@ export async function listTrendsPage(opts: {
       orderBy: { lastSignalAt: "desc" },
       skip: offset,
       take: pageSize,
-      include: { scores: true },
+      include: { scores: true, actionPlan: { select: { content: true } } },
     });
     trends = rows.map(toTrendView);
   }
