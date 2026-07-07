@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Auto action-plan generation** — the pipeline now generates + persists an action plan (SaaS/API/
+  content ideas, MVP, pricing, domains, keywords, tech stack) for the top-scoring trends without one,
+  completing ingest → cluster → score → **plan**. Idempotent (skips already-planned), Stub-or-real via
+  the AI SDK, wired into the scheduled refresh. New `generateActionPlansForTopTrends()`.
 - **Richer trend detail: sources & links + scoring rationale** — the trend page now lists the source
   items backing it (badge + external link + date) via `getTrendResources()`, a "backed by N signals
   across M sources" line, and per-dimension scoring rationales.

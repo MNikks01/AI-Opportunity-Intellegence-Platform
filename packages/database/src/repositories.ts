@@ -494,6 +494,37 @@ export interface TrendResource {
   publishedAt: Date | null;
 }
 
+/**
+ * Top scored trends that don't have an action plan yet (highest opportunity first) — the backlog for
+ * auto action-plan generation (B-021). `minOpportunity` skips low-value trends. Global tables (public).
+ */
+export async function listTopTrendsNeedingPlan(
+  limit = 10,
+  minOpportunity = 0,
+): Promise<{ id: string; title: string; summary: string | null; scores: Score[] }[]> {
+  const idRows = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT t.id
+    FROM "Trend" t
+    JOIN "Score" s ON s."trendId" = t.id AND s.dimension = 'OPPORTUNITY'
+    LEFT JOIN "ActionPlan" ap ON ap."trendId" = t.id
+    WHERE ap.id IS NULL AND s.value >= ${minOpportunity}
+    ORDER BY s.value DESC NULLS LAST, t."lastSignalAt" DESC NULLS LAST
+    LIMIT ${limit}`;
+  const ids = idRows.map((r) => r.id);
+  if (ids.length === 0) return [];
+  const rows = await prisma.trend.findMany({
+    where: { id: { in: ids } },
+    include: { scores: true },
+  });
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return ids.flatMap((id) => {
+    const t = byId.get(id);
+    return t
+      ? [{ id: t.id, title: t.title, summary: t.summary, scores: t.scores.map(toScore) }]
+      : [];
+  });
+}
+
 /** The signals that make up a trend, with their source + link, newest first. Global tables (public). */
 export async function getTrendResources(trendId: string, limit = 60): Promise<TrendResource[]> {
   const rows = await prisma.trendSignal.findMany({
