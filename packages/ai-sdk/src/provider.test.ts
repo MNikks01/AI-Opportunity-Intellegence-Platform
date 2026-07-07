@@ -15,6 +15,8 @@ describe("defaultChatModel", () => {
     expect(
       defaultChatModel({ OPENAI_API_KEY: "k", AIOI_SCORING_MODEL: "gpt-4o" } as NodeJS.ProcessEnv),
     ).toBe("gpt-4o");
+    // direct-provider key (no gateway) → OpenAI-compatible default
+    expect(defaultChatModel({ AIOI_LLM_API_KEY: "sk-x" } as NodeJS.ProcessEnv)).toBe("gpt-4o-mini");
   });
 });
 
@@ -24,6 +26,13 @@ describe("getProvider", () => {
     expect(
       getProvider({ LITELLM_BASE_URL: "http://x:4000", OPENAI_API_KEY: "k" } as NodeJS.ProcessEnv)
         .name,
+    ).toBe("litellm");
+    // AIOI_LLM_API_KEY alone enables LiteLLM (direct provider)
+    expect(
+      getProvider({
+        LITELLM_BASE_URL: "https://api.openai.com/v1",
+        AIOI_LLM_API_KEY: "sk-x",
+      } as NodeJS.ProcessEnv).name,
     ).toBe("litellm");
   });
 });

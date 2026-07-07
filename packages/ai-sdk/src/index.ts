@@ -108,7 +108,17 @@ export class LiteLLMProvider implements LLMProvider {
     private readonly baseUrl: string,
     private readonly model = process.env.AIOI_SCORING_MODEL ?? "claude-opus-4-8",
     private readonly fetchImpl: typeof fetch = fetch,
+    // Optional bearer token — set when hitting a provider directly (e.g. https://api.openai.com/v1);
+    // leave unset for a LiteLLM proxy that injects the key itself.
+    private readonly apiKey?: string,
   ) {}
+
+  private headers(): Record<string, string> {
+    return {
+      "content-type": "application/json",
+      ...(this.apiKey ? { authorization: `Bearer ${this.apiKey}` } : {}),
+    };
+  }
 
   async scoreDimension(req: ScoreRequest): Promise<RawModelScore> {
     const system =
@@ -121,7 +131,7 @@ export class LiteLLMProvider implements LLMProvider {
 
     const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: this.headers(),
       body: JSON.stringify({
         model: this.model,
         temperature: 0,
@@ -152,7 +162,7 @@ export class LiteLLMProvider implements LLMProvider {
 
     const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: this.headers(),
       body: JSON.stringify({
         model: this.model,
         temperature: 0.4,
@@ -178,14 +188,23 @@ export function defaultChatModel(env: NodeJS.ProcessEnv = process.env): string {
   if (env.AIOI_SCORING_MODEL) return env.AIOI_SCORING_MODEL;
   if (env.ANTHROPIC_API_KEY) return "claude-opus-4-8";
   if (env.OPENAI_API_KEY) return "gpt-4o-mini";
+  if (env.AIOI_LLM_API_KEY) return "gpt-4o-mini"; // direct OpenAI-compatible endpoint (no gateway)
   return "claude-opus-4-8";
 }
 
-/** Returns LiteLLM when a gateway is configured, else the deterministic stub. */
+/**
+ * LiteLLM when a gateway/provider is configured, else the deterministic stub. `AIOI_LLM_API_KEY` (an
+ * optional bearer token) lets `LITELLM_BASE_URL` point straight at a provider — e.g.
+ * `LITELLM_BASE_URL=https://api.openai.com/v1` + `AIOI_LLM_API_KEY=sk-…` — so real scoring works in
+ * serverless/CI without hosting a gateway.
+ */
 export function getProvider(env: NodeJS.ProcessEnv = process.env): LLMProvider {
   const base = env.LITELLM_BASE_URL;
-  const hasKey = Boolean(env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY ?? env.GEMINI_API_KEY);
-  if (base && hasKey) return new LiteLLMProvider(base, defaultChatModel(env));
+  const hasKey = Boolean(
+    env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY ?? env.GEMINI_API_KEY ?? env.AIOI_LLM_API_KEY,
+  );
+  if (base && hasKey)
+    return new LiteLLMProvider(base, defaultChatModel(env), fetch, env.AIOI_LLM_API_KEY);
   return new StubProvider();
 }
 
