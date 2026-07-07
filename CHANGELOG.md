@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Trends browse: filter by source + status, sort by any dimension, numbered pagination** —
+  the trends page gains source radio buttons (only connectors with data), a status filter, a sort
+  selector (Newest / highest of any score dimension), and numbered pagination. New `listTrendsPage()`
+  in `@aioi/database`; a client `TrendControls` updates the URL; responsive.
 - **All sources in the refresh + faster cadence + responsive UI** — the scheduled refresh now runs
   every **3h** (was 6h), ingests **all six sources** (Reddit/Product Hunt/YouTube activate when their
   key secret is set; HN/GitHub/HF always), and `demo-data.ts` runs them all resiliently. The web app is
