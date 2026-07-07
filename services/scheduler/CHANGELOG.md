@@ -1,5 +1,13 @@
 # @aioi/scheduler
 
+## 0.6.2
+
+### Patch Changes
+
+- @aioi/database@0.11.2
+- @aioi/ai-service@0.4.2
+- @aioi/ingestion-service@0.3.4
+
 ## 0.6.1
 
 ### Patch Changes

@@ -1,5 +1,12 @@
 # @aioi/api
 
+## 0.8.4
+
+### Patch Changes
+
+- @aioi/database@0.11.2
+- @aioi/ai-service@0.4.2
+
 ## 0.8.3
 
 ### Patch Changes
