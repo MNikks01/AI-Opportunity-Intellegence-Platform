@@ -79,3 +79,20 @@ export function bandForValue(value: number): ScoreBand {
   if (value >= 40) return "medium";
   return "low";
 }
+
+/**
+ * Make arbitrary third-party text safe to store in Postgres and to serialize through Prisma's engine.
+ * Strips: unpaired UTF-16 surrogates (e.g. an emoji truncated by `.slice()` — the query engine's JSON
+ * parser throws "unexpected end of hex escape" on these), NUL, and C0/C1 control chars (keeping \t\n\r).
+ * Collapses the result's surrounding whitespace. Safe on already-clean text (no-op).
+ */
+export function sanitizeText(input: string): string {
+  return (
+    input
+      .replace(/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/g, "") // lone high surrogate
+      .replace(/(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g, "") // lone low surrogate
+      // eslint-disable-next-line no-control-regex
+      .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, "")
+      .trim()
+  );
+}
