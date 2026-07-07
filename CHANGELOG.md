@@ -255,6 +255,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   clean; full loop (ingest → score → persist → serve → render) confirmed in-browser.
 
 ### Fixed
+- **Fix: pipeline crash on emoji/control chars in source text** — a title truncated mid-emoji left a
+  lone surrogate that made Prisma throw `unexpected end of hex escape` on `trend.create` (surfaced once
+  YouTube ingestion turned on). New `sanitizeText()` in `@aioi/shared`, applied on trend + signal writes.
 - UI: acronym score dimensions now render correctly (e.g. "SEO" instead of "Seo").
 
 ### Known issues / polish

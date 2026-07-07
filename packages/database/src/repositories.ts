@@ -5,7 +5,7 @@
 import { randomUUID } from "node:crypto";
 import type { $Enums, Prisma } from "@prisma/client";
 import type { Score, ScoreBand, ScoreDimension, TrendLike, TrendStatus } from "@aioi/shared";
-import { bandForValue } from "@aioi/shared";
+import { bandForValue, sanitizeText } from "@aioi/shared";
 import { getEmbedder } from "@aioi/ai-sdk";
 import { logger } from "@aioi/logger";
 import { prisma } from "./client";
@@ -62,8 +62,12 @@ export async function createTrendFromSignalIds(
   title: string,
   summary?: string,
 ): Promise<string> {
+  // Sanitize source-derived text: a title truncated mid-emoji leaves a lone surrogate that makes the
+  // Prisma engine throw "unexpected end of hex escape" on write (see sanitizeText).
+  const cleanTitle = sanitizeText(title) || "Untitled trend";
+  const cleanSummary = summary ? sanitizeText(summary) : summary;
   const base =
-    title
+    cleanTitle
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
@@ -71,8 +75,8 @@ export async function createTrendFromSignalIds(
   const trend = await prisma.trend.create({
     data: {
       slug: `${base}-${randomUUID().slice(0, 6)}`,
-      title,
-      summary,
+      title: cleanTitle,
+      summary: cleanSummary,
       status: "EARLY",
       lastSignalAt: new Date(),
     },

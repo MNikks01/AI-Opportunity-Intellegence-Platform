@@ -5,6 +5,7 @@
  * tier) is ensured first. Signal is a global table, so no org context is needed.
  */
 import type { SourceRecord } from "@aioi/shared";
+import { sanitizeText } from "@aioi/shared";
 import { prisma, ensureSource } from "@aioi/database";
 import type { Prisma } from "@aioi/database";
 import type { SignalRepository } from "./repository";
@@ -28,7 +29,7 @@ export class PrismaSignalRepository implements SignalRepository {
           sourceId,
           externalId: r.externalId,
           url: r.url,
-          title: r.title,
+          title: r.title ? sanitizeText(r.title) : r.title,
           raw: (r.raw ?? {}) as Prisma.InputJsonValue,
           publishedAt: r.publishedAt ? new Date(r.publishedAt) : null,
         })),
