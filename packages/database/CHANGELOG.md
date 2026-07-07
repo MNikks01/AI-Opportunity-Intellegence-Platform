@@ -1,5 +1,13 @@
 # @aioi/database
 
+## 0.11.3
+
+### Patch Changes
+
+- Updated dependencies [aa401cc]
+  - @aioi/shared@0.1.0
+  - @aioi/ai-sdk@0.5.1
+
 ## 0.11.2
 
 ### Patch Changes

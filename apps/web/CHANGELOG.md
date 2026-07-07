@@ -1,5 +1,14 @@
 # @aioi/web
 
+## 0.6.6
+
+### Patch Changes
+
+- Updated dependencies [aa401cc]
+  - @aioi/shared@0.1.0
+  - @aioi/database@0.11.3
+  - @aioi/ui@0.1.1
+
 ## 0.6.5
 
 ### Patch Changes
