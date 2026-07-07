@@ -1,6 +1,12 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, describe, expect, it } from "vitest";
-import { createTrendFromSignalIds, ensureSource, listTrendsPage, prisma } from "./index";
+import {
+  createTrendFromSignalIds,
+  ensureSource,
+  getTrendResources,
+  listTrendsPage,
+  prisma,
+} from "./index";
 
 const enabled = Boolean(process.env.DATABASE_URL);
 const sourceKey = `ltp-test-${randomUUID().slice(0, 8)}`;
@@ -15,7 +21,7 @@ describe.skipIf(!enabled)("listTrendsPage (integration)", () => {
   it("filters by source + status, sorts by any dimension, and paginates without overlap", async () => {
     const sourceId = await ensureSource(sourceKey);
     const [a, b] = await Promise.all([
-      prisma.signal.create({ data: { sourceId, externalId: "a", title: "alpha agent", raw: {} } }),
+      prisma.signal.create({ data: { sourceId, externalId: "a", title: "alpha agent", url: "https://example.com/a", raw: {} } }), // prettier-ignore
       prisma.signal.create({ data: { sourceId, externalId: "b", title: "beta agent", raw: {} } }),
     ]);
     const t1 = await createTrendFromSignalIds([a.id], "Alpha trend");
@@ -62,5 +68,12 @@ describe.skipIf(!enabled)("listTrendsPage (integration)", () => {
     expect(p1.pageCount).toBe(2);
     expect(p1.trends[0]!.id).toBe(t1);
     expect(p2.trends[0]!.id).toBe(t2);
+
+    // resources — the source item(s) with source key + link
+    const res = await getTrendResources(t1);
+    expect(res).toHaveLength(1);
+    expect(res[0]!.source).toBe(sourceKey);
+    expect(res[0]!.url).toBe("https://example.com/a");
+    expect(res[0]!.title).toBe("alpha agent");
   });
 });

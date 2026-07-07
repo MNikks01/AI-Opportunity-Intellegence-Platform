@@ -13,7 +13,11 @@ import {
   runProductHuntIngestion,
   runYouTubeIngestion,
 } from "../services/ingestion-service/src/index";
-import { clusterRecentSignals, scoreClusteredTrends } from "../services/ai-service/src/index";
+import {
+  clusterRecentSignals,
+  scoreClusteredTrends,
+  generateActionPlansForTopTrends,
+} from "../services/ai-service/src/index";
 
 /** Run one source; a failure (bad key, rate limit) is logged and skipped so others still run. */
 async function ingest(name: string, fn: () => Promise<unknown>): Promise<void> {
@@ -35,7 +39,8 @@ async function main() {
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
-  console.log("done — the demo DB now has scored trends.");
+  console.log("action plans…", await generateActionPlansForTopTrends({ limit: 15 }));
+  console.log("done — the demo DB now has scored trends with action plans.");
   process.exit(0);
 }
 

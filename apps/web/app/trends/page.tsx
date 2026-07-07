@@ -177,6 +177,7 @@ export default async function TrendsPage({
               title={t.title}
               summary={t.summary}
               scores={t.scores}
+              plan={t.plan}
             />
           ))}
         </div>

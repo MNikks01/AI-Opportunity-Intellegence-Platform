@@ -309,6 +309,8 @@ export interface TrendView {
   scores: Score[];
   /** Populated by getTrendBySlug (B-021); undefined in list views. */
   actionPlan?: { promptVersion: string; content: unknown } | null;
+  /** A compact action-plan teaser for list/card views (B-021), when a plan exists. */
+  plan?: { topIdea: string | null; productNames: string[] } | null;
 }
 
 function toScore(row: {
@@ -338,7 +340,17 @@ type TrendRow = {
   summary: string | null;
   status: $Enums.TrendStatus;
   scores: Parameters<typeof toScore>[0][];
+  actionPlan?: { content: unknown } | null;
 };
+
+function planTeaser(actionPlan?: { content: unknown } | null): TrendView["plan"] {
+  if (!actionPlan) return null;
+  const c = actionPlan.content as { saasIdeas?: string[]; productNames?: string[] } | undefined;
+  return {
+    topIdea: c?.saasIdeas?.[0] ?? null,
+    productNames: (c?.productNames ?? []).slice(0, 3),
+  };
+}
 
 function toTrendView(t: TrendRow): TrendView {
   return {
@@ -348,6 +360,7 @@ function toTrendView(t: TrendRow): TrendView {
     summary: t.summary,
     status: t.status as TrendStatus,
     scores: t.scores.map(toScore),
+    plan: planTeaser(t.actionPlan),
   };
 }
 
@@ -427,7 +440,7 @@ export async function listTrendsPage(opts: {
     const ids = idRows.map((r) => r.id);
     const rows = await prisma.trend.findMany({
       where: { id: { in: ids } },
-      include: { scores: true },
+      include: { scores: true, actionPlan: { select: { content: true } } },
     });
     const byId = new Map(rows.map((r) => [r.id, r]));
     trends = ids.flatMap((id) => {
@@ -440,7 +453,7 @@ export async function listTrendsPage(opts: {
       orderBy: { lastSignalAt: "desc" },
       skip: offset,
       take: pageSize,
-      include: { scores: true },
+      include: { scores: true, actionPlan: { select: { content: true } } },
     });
     trends = rows.map(toTrendView);
   }
@@ -483,6 +496,64 @@ export async function persistActionPlan(
 
 export function getActionPlan(trendId: string) {
   return prisma.actionPlan.findUnique({ where: { trendId } });
+}
+
+/** A source item backing a trend — the original post/repo/video/model + its link (B-021 detail view). */
+export interface TrendResource {
+  id: string;
+  source: string;
+  title: string | null;
+  url: string | null;
+  publishedAt: Date | null;
+}
+
+/**
+ * Top scored trends that don't have an action plan yet (highest opportunity first) — the backlog for
+ * auto action-plan generation (B-021). `minOpportunity` skips low-value trends. Global tables (public).
+ */
+export async function listTopTrendsNeedingPlan(
+  limit = 10,
+  minOpportunity = 0,
+): Promise<{ id: string; title: string; summary: string | null; scores: Score[] }[]> {
+  const idRows = await prisma.$queryRaw<{ id: string }[]>`
+    SELECT t.id
+    FROM "Trend" t
+    JOIN "Score" s ON s."trendId" = t.id AND s.dimension = 'OPPORTUNITY'
+    LEFT JOIN "ActionPlan" ap ON ap."trendId" = t.id
+    WHERE ap.id IS NULL AND s.value >= ${minOpportunity}
+    ORDER BY s.value DESC NULLS LAST, t."lastSignalAt" DESC NULLS LAST
+    LIMIT ${limit}`;
+  const ids = idRows.map((r) => r.id);
+  if (ids.length === 0) return [];
+  const rows = await prisma.trend.findMany({
+    where: { id: { in: ids } },
+    include: { scores: true },
+  });
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  return ids.flatMap((id) => {
+    const t = byId.get(id);
+    return t
+      ? [{ id: t.id, title: t.title, summary: t.summary, scores: t.scores.map(toScore) }]
+      : [];
+  });
+}
+
+/** The signals that make up a trend, with their source + link, newest first. Global tables (public). */
+export async function getTrendResources(trendId: string, limit = 60): Promise<TrendResource[]> {
+  const rows = await prisma.trendSignal.findMany({
+    where: { trendId },
+    take: limit,
+    include: { signal: { include: { source: { select: { key: true } } } } },
+  });
+  return rows
+    .map((r) => ({
+      id: r.signal.id,
+      source: r.signal.source.key,
+      title: r.signal.title,
+      url: r.signal.url,
+      publishedAt: r.signal.publishedAt,
+    }))
+    .sort((a, b) => (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0));
 }
 
 /**
