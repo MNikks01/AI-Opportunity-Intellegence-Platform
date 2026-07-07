@@ -1,5 +1,12 @@
 # @aioi/web
 
+## 0.6.7
+
+### Patch Changes
+
+- Updated dependencies [ed24c47]
+  - @aioi/database@0.12.0
+
 ## 0.6.6
 
 ### Patch Changes
