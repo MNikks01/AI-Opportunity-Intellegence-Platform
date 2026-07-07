@@ -12,17 +12,39 @@ const SOURCE_LABELS: Record<string, string> = {
 };
 const label = (k: string) => SOURCE_LABELS[k] ?? k;
 
+// Sort options — "Newest" plus the non-inverted score dimensions (highest first makes sense for these).
+const SORT_OPTIONS: { value: string; label: string }[] = [
+  { value: "recent", label: "Newest" },
+  { value: "opportunity", label: "Highest opportunity" },
+  { value: "business", label: "Highest business" },
+  { value: "developer", label: "Highest developer" },
+  { value: "creator", label: "Highest creator" },
+  { value: "monetization", label: "Highest monetization" },
+  { value: "seo", label: "Highest SEO" },
+  { value: "predicted_lifetime", label: "Longest predicted lifetime" },
+];
+
+const STATUS_OPTIONS: { value: string; label: string }[] = [
+  { value: "", label: "All statuses" },
+  { value: "EARLY", label: "Early" },
+  { value: "ACTIVE", label: "Active" },
+  { value: "FADING", label: "Fading" },
+  { value: "ARCHIVED", label: "Archived" },
+];
+
 /**
- * Browse controls for the trends page: radio buttons to filter by source and a sort select. Updates the
- * URL query (server component re-fetches), preserving any search term and resetting to page 1.
+ * Browse controls for the trends page: radio buttons to filter by source, plus status + sort selects.
+ * Updates the URL query (server component re-fetches), preserving any search term and resetting to page 1.
  */
 export function TrendControls({
   sources,
   source,
+  status,
   sort,
 }: {
   sources: string[];
   source: string;
+  status: string;
   sort: string;
 }) {
   const router = useRouter();
@@ -62,10 +84,24 @@ export function TrendControls({
       </fieldset>
 
       <label className="trend-sort">
+        <span>Status</span>
+        <select value={status} onChange={(e) => update({ status: e.target.value })}>
+          {STATUS_OPTIONS.map((o) => (
+            <option key={o.value || "all"} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      <label className="trend-sort">
         <span>Sort</span>
         <select value={sort} onChange={(e) => update({ sort: e.target.value })}>
-          <option value="recent">Newest</option>
-          <option value="score">Highest opportunity</option>
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
         </select>
       </label>
     </div>

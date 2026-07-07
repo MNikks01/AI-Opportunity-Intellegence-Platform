@@ -128,14 +128,19 @@
 /* Pagination */
 .pagination {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 6px;
   margin: 28px 0 8px;
   font-size: 0.9rem;
 }
 .pagination-link {
-  padding: 8px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 8px 12px;
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--fg);
@@ -144,12 +149,19 @@
 .pagination-link:hover {
   border-color: var(--primary);
 }
+.pagination-link.is-current {
+  border-color: var(--primary);
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-weight: 600;
+}
 .pagination-link.is-disabled {
   color: var(--fg-muted);
   opacity: 0.5;
   pointer-events: none;
 }
-.pagination-status {
+.pagination-gap {
+  padding: 0 4px;
   color: var(--fg-muted);
 }
 
