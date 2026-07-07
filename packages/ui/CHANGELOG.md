@@ -1,5 +1,12 @@
 # @aioi/ui
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [aa401cc]
+  - @aioi/shared@0.1.0
+
 ## 0.1.0
 
 ### Minor Changes

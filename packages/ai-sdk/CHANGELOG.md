@@ -1,5 +1,12 @@
 # @aioi/ai-sdk
 
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [aa401cc]
+  - @aioi/shared@0.1.0
+
 ## 0.5.0
 
 ### Minor Changes
