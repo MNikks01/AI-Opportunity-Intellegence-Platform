@@ -476,6 +476,42 @@ a.resource-link:hover {
   margin: 0 0 20px;
 }
 
+/* Trend card: stretched link + watch toggle */
+.trend-card {
+  position: relative;
+}
+.trend-card .trend-card-link {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+.trend-card-action {
+  position: relative;
+  z-index: 1;
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+.watch-toggle {
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.watch-toggle:hover {
+  border-color: var(--primary);
+  color: var(--fg);
+}
+.watch-toggle.is-on {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
 /* Add-to-watchlist control on the trend page */
 .watch-form {
   display: flex;

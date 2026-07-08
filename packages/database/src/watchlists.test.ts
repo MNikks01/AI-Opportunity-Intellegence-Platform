@@ -12,6 +12,9 @@ import {
   addWatchlistItem,
   removeWatchlistItem,
   listWatchlistItems,
+  getOrCreatePrimaryWatchlist,
+  listWatchedTargetIds,
+  removeWatchlistItemByTarget,
 } from "./watchlists";
 
 // Needs a live Postgres AND the restricted runtime role (APP_DATABASE_URL) for real isolation.
@@ -97,5 +100,21 @@ describe.skipIf(!enabled)("watchlists repository (integration)", () => {
     });
     await expect(listWatchlistItems(orgB, wl.id)).rejects.toBeInstanceOf(NotFoundError);
     await expect(removeWatchlistItem(orgB, wl.id, item.id)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("quick-watch: primary watchlist, watched set, and remove-by-target toggle", async () => {
+    const { orgId, workspaceId } = await tenant();
+    // no watchlist yet → creates a default; called again → same one (primary)
+    const first = await getOrCreatePrimaryWatchlist(orgId, workspaceId);
+    const again = await getOrCreatePrimaryWatchlist(orgId, workspaceId);
+    expect(again.id).toBe(first.id);
+
+    await addWatchlistItem(orgId, { watchlistId: first.id, targetType: "TREND", targetId: "t-1" });
+    expect(await listWatchedTargetIds(orgId, first.id)).toEqual(new Set(["t-1"]));
+
+    // remove by target (not item id), idempotent
+    await removeWatchlistItemByTarget(orgId, first.id, "TREND", "t-1");
+    await removeWatchlistItemByTarget(orgId, first.id, "TREND", "t-1"); // no throw
+    expect((await listWatchedTargetIds(orgId, first.id)).size).toBe(0);
   });
 });

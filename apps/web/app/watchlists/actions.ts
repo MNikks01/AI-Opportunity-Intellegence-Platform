@@ -10,9 +10,34 @@ import {
   createAlert,
   setAlertEnabled,
   deleteAlert,
+  getOrCreatePrimaryWatchlist,
+  removeWatchlistItemByTarget,
 } from "@aioi/database";
 import { createWatchlistSchema, watchlistItemSchema, createAlertSchema } from "@aioi/validation";
 import { getDevOrg } from "../lib/dev-org";
+
+/**
+ * One-click watch toggle for a trend (used on trend cards). Adds/removes the trend on the org's primary
+ * watchlist (created on demand), then refreshes the list in place.
+ */
+export async function toggleWatchAction(formData: FormData): Promise<void> {
+  const { organizationId, workspaceId } = await getDevOrg();
+  if (!workspaceId) return;
+  const trendId = String(formData.get("trendId") ?? "");
+  if (!trendId) return;
+  const watched = String(formData.get("watched") ?? "") === "true";
+  const wl = await getOrCreatePrimaryWatchlist(organizationId, workspaceId);
+  if (watched) {
+    await removeWatchlistItemByTarget(organizationId, wl.id, "TREND", trendId);
+  } else {
+    await addWatchlistItem(organizationId, {
+      watchlistId: wl.id,
+      targetType: "TREND",
+      targetId: trendId,
+    });
+  }
+  revalidatePath("/trends");
+}
 
 /** Add a trend to a watchlist from the trend page, then land the user on that watchlist. */
 export async function watchTrendAction(formData: FormData): Promise<void> {
