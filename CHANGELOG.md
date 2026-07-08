@@ -16,6 +16,16 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Public landing page** — `/` is now a real homepage (was a redirect): hero + CTA into /trends,
+  live stats (trends/signals/sources), the top opportunities right now, a four-step "how it works"
+  pipeline walkthrough, and the six official sources. Responsive + theme-aware.
+- **Rich resource cards for every source** — GitHub (stars/forks/language, owner, homepage + repo,
+  topics), YouTube (description, channel link, watch link), and Hugging Face (likes/downloads, pipeline,
+  author, tags) now render a full detail card like Product Hunt. One reusable renderer maps each source's
+  raw payload to a shared view.
+- **Rich Product Hunt items** — the connector now captures website, makers, topics, thumbnail, and
+  comments; the trend detail renders a full card per launch: tagline (what it is), description (the
+  problem), makers with profile links (who built it), product + Product Hunt links, and topic chips.
 - **Auto action-plan generation** — the pipeline now generates + persists an action plan (SaaS/API/
   content ideas, MVP, pricing, domains, keywords, tech stack) for the top-scoring trends without one,
   completing ingest → cluster → score → **plan**. Idempotent (skips already-planned), Stub-or-real via

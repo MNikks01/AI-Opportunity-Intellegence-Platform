@@ -15,6 +15,7 @@ const item: YouTubeItem = {
     description: "a walkthrough of agent frameworks",
     publishedAt: "2026-07-01T00:00:00Z",
     channelTitle: "AI Weekly",
+    channelId: "UC_ai_weekly",
   },
 };
 
@@ -47,6 +48,11 @@ describe("normalize", () => {
     });
     expect(r.text).toContain("agent frameworks");
     expect(r.publishedAt).toBe("2026-07-01T00:00:00Z");
+  });
+
+  it("preserves the channel id in raw (for the channel link)", () => {
+    const raw = normalize(item)!.raw as YouTubeItem;
+    expect(raw.snippet.channelId).toBe("UC_ai_weekly");
   });
 });
 

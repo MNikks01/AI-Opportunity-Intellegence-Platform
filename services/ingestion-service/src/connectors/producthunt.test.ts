@@ -12,8 +12,16 @@ const post: ProductHuntPost = {
   tagline: "build AI agents visually",
   description: "no-code agent builder",
   url: "https://www.producthunt.com/posts/agentforge",
+  website: "https://agentforge.dev",
   votesCount: 320,
+  commentsCount: 45,
   createdAt: "2026-07-05T00:00:00Z",
+  featuredAt: "2026-07-05T08:00:00Z",
+  thumbnail: { url: "https://ph.example/thumb.png" },
+  topics: { edges: [{ node: { name: "Artificial Intelligence" } }, { node: { name: "No-Code" } }] },
+  makers: [
+    { id: "u1", name: "Ada Lovelace", username: "ada", url: "https://producthunt.com/@ada" },
+  ],
 };
 
 function jsonResponse(body: unknown, init: { ok?: boolean; status?: number } = {}): Response {
@@ -33,11 +41,20 @@ describe("productHuntConfigured", () => {
 });
 
 describe("normalize", () => {
-  it("maps a post to a SourceRecord", () => {
+  it("maps a post to a SourceRecord with topics + makers in the text", () => {
     const r = normalize(post)!;
     expect(r).toMatchObject({ source: "producthunt", externalId: "42", title: "AgentForge" });
     expect(r.text).toContain("build AI agents visually");
     expect(r.text).toContain("no-code agent builder");
+    expect(r.text).toContain("Artificial Intelligence"); // topic
+    expect(r.text).toContain("Ada Lovelace"); // maker
+  });
+
+  it("preserves the full node in raw (website, makers, topics) for the detail view", () => {
+    const raw = normalize(post)!.raw as ProductHuntPost;
+    expect(raw.website).toBe("https://agentforge.dev");
+    expect(raw.makers?.[0]?.username).toBe("ada");
+    expect(raw.topics?.edges[0]?.node.name).toBe("Artificial Intelligence");
   });
 });
 

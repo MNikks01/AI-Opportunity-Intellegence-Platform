@@ -1,18 +1,9 @@
 import { getTrendBySlug, getTrendResources } from "@aioi/database";
 import { Badge, Card, Scorecard } from "@aioi/ui";
 import { notFound } from "next/navigation";
+import { ResourceItem } from "./ResourceItem";
 
 export const dynamic = "force-dynamic";
-
-const SOURCE_LABELS: Record<string, string> = {
-  hackernews: "HackerNews",
-  youtube: "YouTube",
-  github: "GitHub",
-  huggingface: "Hugging Face",
-  reddit: "Reddit",
-  producthunt: "Product Hunt",
-};
-const sourceLabel = (k: string) => SOURCE_LABELS[k] ?? k;
 
 const DIM_LABELS: Record<string, string> = {
   opportunity: "Opportunity",
@@ -26,15 +17,6 @@ const DIM_LABELS: Record<string, string> = {
   difficulty: "Difficulty",
   predicted_lifetime: "Predicted lifetime",
 };
-
-function fmtDate(d: Date | null): string {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 type ActionPlan = {
   saasIdeas: string[];
@@ -111,22 +93,7 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
         <Card>
           <ul className="resource-list">
             {resources.map((r) => (
-              <li key={r.id} className="resource-item">
-                <Badge>{sourceLabel(r.source)}</Badge>
-                {r.url ? (
-                  <a
-                    href={r.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="resource-link"
-                  >
-                    {r.title ?? r.url}
-                  </a>
-                ) : (
-                  <span className="resource-link">{r.title ?? "(untitled)"}</span>
-                )}
-                {r.publishedAt && <time className="resource-date">{fmtDate(r.publishedAt)}</time>}
-              </li>
+              <ResourceItem key={r.id} r={r} />
             ))}
           </ul>
         </Card>
