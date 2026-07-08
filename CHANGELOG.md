@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Notifications page polish** — each notification now links to the trend that matched (with its
+  opportunity score), shows a relative timestamp ("1m ago"), and unread vs read is visually distinct
+  (accent border vs dimmed).
 - **"Watching" filter on the trends page** — a toggle to show only the trends on your watchlist.
   `listTrendsPage` gains an optional `ids` restriction (composes with source/status/sort/pagination).
 - **One-click "Watch" toggle on trend cards** — add/remove a trend to your watchlist right from the
