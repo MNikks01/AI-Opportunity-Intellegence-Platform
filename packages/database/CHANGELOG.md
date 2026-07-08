@@ -1,5 +1,15 @@
 # @aioi/database
 
+## 0.14.1
+
+### Patch Changes
+
+- 0fc7986: One-click "Watch" toggle on trend cards. `TrendCard` gains an `action` slot rendered above a stretched
+  card link (so a button stays clickable). New data helpers: `getOrCreatePrimaryWatchlist`,
+  `listWatchedTargetIds`, `removeWatchlistItemByTarget`.
+- 25880d3: A "Watching" filter on the trends page shows only trends on your watchlist. `listTrendsPage` gains an
+  optional `ids` restriction (empty → empty page); the browse controls add a toggle.
+
 ## 0.14.0
 
 ### Minor Changes

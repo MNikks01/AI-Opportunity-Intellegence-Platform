@@ -1,6 +1,6 @@
 {
   "name": "@aioi/admin",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "description": "Internal admin panel (users/orgs/audit/flags/source-health) — role-gated.",
   "//": "Stub app — not yet implemented. Build/lint/typecheck scripts are added when work starts (turbo skips packages without them).",
