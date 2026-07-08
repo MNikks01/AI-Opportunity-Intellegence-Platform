@@ -102,7 +102,7 @@ export class StubProvider implements LLMProvider {
   }
 
   // Offline: entity discovery is left to the deterministic dictionary in @aioi/ai-service.
-  extractEntities(): Promise<ExtractedEntity[]> {
+  extractEntities(_text: string): Promise<ExtractedEntity[]> {
     return Promise.resolve([]);
   }
 }

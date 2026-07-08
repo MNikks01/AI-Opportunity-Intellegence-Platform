@@ -30,7 +30,7 @@ async function collect(p: {
 }
 
 function csvCell(v: unknown): string {
-  const s = v == null ? "" : String(v);
+  const s = v === null || v === undefined ? "" : String(v);
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
 
