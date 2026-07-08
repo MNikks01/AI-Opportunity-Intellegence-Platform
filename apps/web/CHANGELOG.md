@@ -1,5 +1,12 @@
 # @aioi/web
 
+## 0.8.1
+
+### Patch Changes
+
+- 99e036c: Polish the notifications page: each notification links to the trend that matched (with its opportunity
+  score), shows a relative timestamp, and read/unread state is visually distinct.
+
 ## 0.8.0
 
 ### Minor Changes
