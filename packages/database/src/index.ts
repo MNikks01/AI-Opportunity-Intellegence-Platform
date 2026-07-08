@@ -50,6 +50,17 @@ export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey } from "./api
 export { exportOrgData, deleteOrg } from "./gdpr";
 export { getSourceStats, type SourceStat } from "./source-stats";
 export {
+  upsertEntity,
+  linkTrendEntity,
+  listEntities,
+  getEntityById,
+  listTrendsForEntity,
+  listTrendsForEntityExtraction,
+  type EntityType,
+  type EntityListItem,
+  type EntityTrend,
+} from "./entities";
+export {
   recordIngestionRun,
   getLatestRuns,
   type RunResult,
