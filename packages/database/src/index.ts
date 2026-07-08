@@ -55,10 +55,13 @@ export {
   listEntities,
   getEntityById,
   listTrendsForEntity,
+  getTrendEntities,
+  getRelatedTrends,
   listTrendsForEntityExtraction,
   type EntityType,
   type EntityListItem,
   type EntityTrend,
+  type RelatedTrend,
 } from "./entities";
 export {
   recordIngestionRun,
