@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Richer daily briefs (+ generated in the cron)** — each top-opportunity trend in the brief now
+  shows its score band + build-idea teaser (from its action plan), and the scheduled refresh generates
+  a brief for the demo tenant so `/briefs` is populated on the live site.
 - **Watchlists: track trends end-to-end** — an "Add to watchlist" control on the trend page (pick a
   list, one click), and watchlist items now render the trend's title + opportunity score + link instead
   of a raw id (`getTrendsByIds`). Closes browse → track → alert. (Create/alerts/notifications already existed.)
