@@ -476,6 +476,41 @@ a.resource-link:hover {
   margin: 0 0 20px;
 }
 
+/* Add-to-watchlist control on the trend page */
+.watch-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 20px;
+}
+.watch-label {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+  font-weight: 600;
+}
+.watch-select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.85rem;
+}
+.watch-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--primary);
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.watch-btn:hover {
+  filter: brightness(1.08);
+}
+
 /* Never let content force horizontal page scroll on small screens. */
 @media (max-width: 720px) {
   img,

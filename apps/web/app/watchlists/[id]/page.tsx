@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import { getWatchlist, listAlerts } from "@aioi/database";
+import { getWatchlist, listAlerts, getTrendsByIds } from "@aioi/database";
 import { Badge, Card } from "@aioi/ui";
+import { bandForValue } from "@aioi/shared";
 import { getDevOrg } from "../../lib/dev-org";
 import {
   addItemAction,
@@ -36,6 +37,10 @@ export default async function WatchlistDetailPage({ params }: { params: Promise<
   const watchlist = await getWatchlist(organizationId, id).catch(() => null);
   if (!watchlist) notFound();
   const alerts = await listAlerts(organizationId, id);
+  // Resolve watched trends so items show a title + score + link instead of a raw id.
+  const trendMap = await getTrendsByIds(
+    watchlist.items.filter((i) => i.targetType === "TREND").map((i) => i.targetId),
+  );
 
   return (
     <main>
@@ -87,33 +92,52 @@ export default async function WatchlistDetailPage({ params }: { params: Promise<
         </div>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          {watchlist.items.map((item) => (
-            <Card key={item.id}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <Badge>{item.targetType}</Badge>
-                <code style={{ color: "var(--fg)", fontSize: "0.875rem" }}>{item.targetId}</code>
-                <form action={removeItemAction} style={{ marginLeft: "auto" }}>
-                  <input type="hidden" name="watchlistId" value={watchlist.id} />
-                  <input type="hidden" name="itemId" value={item.id} />
-                  <button
-                    type="submit"
-                    aria-label="Remove item"
-                    style={{
-                      padding: "4px 10px",
-                      borderRadius: "6px",
-                      border: "1px solid var(--border)",
-                      background: "transparent",
-                      color: "var(--fg-muted)",
-                      fontSize: "0.8125rem",
-                      cursor: "pointer",
-                    }}
-                  >
-                    Remove
-                  </button>
-                </form>
-              </div>
-            </Card>
-          ))}
+          {watchlist.items.map((item) => {
+            const trend = item.targetType === "TREND" ? trendMap.get(item.targetId) : undefined;
+            return (
+              <Card key={item.id}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                  <Badge>{item.targetType}</Badge>
+                  {trend ? (
+                    <>
+                      <a
+                        href={`/trends/${trend.slug}`}
+                        style={{ color: "var(--fg)", fontSize: "0.9rem", textDecoration: "none" }}
+                      >
+                        {trend.title}
+                      </a>
+                      {trend.opportunity !== null && (
+                        <Badge band={bandForValue(trend.opportunity)}>{trend.opportunity}</Badge>
+                      )}
+                    </>
+                  ) : (
+                    <code style={{ color: "var(--fg-muted)", fontSize: "0.8125rem" }}>
+                      {item.targetId}
+                    </code>
+                  )}
+                  <form action={removeItemAction} style={{ marginLeft: "auto" }}>
+                    <input type="hidden" name="watchlistId" value={watchlist.id} />
+                    <input type="hidden" name="itemId" value={item.id} />
+                    <button
+                      type="submit"
+                      aria-label="Remove item"
+                      style={{
+                        padding: "4px 10px",
+                        borderRadius: "6px",
+                        border: "1px solid var(--border)",
+                        background: "transparent",
+                        color: "var(--fg-muted)",
+                        fontSize: "0.8125rem",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </form>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       )}
 
