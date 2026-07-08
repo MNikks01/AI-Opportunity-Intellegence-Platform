@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Rich Product Hunt items** — the connector now captures website, makers, topics, thumbnail, and
+  comments; the trend detail renders a full card per launch: tagline (what it is), description (the
+  problem), makers with profile links (who built it), product + Product Hunt links, and topic chips.
 - **Auto action-plan generation** — the pipeline now generates + persists an action plan (SaaS/API/
   content ideas, MVP, pricing, domains, keywords, tech stack) for the top-scoring trends without one,
   completing ingest → cluster → score → **plan**. Idempotent (skips already-planned), Stub-or-real via

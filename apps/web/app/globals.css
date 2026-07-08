@@ -221,6 +221,72 @@ a.resource-link:hover {
   font-size: 0.85rem;
 }
 
+/* Product Hunt rich resource card */
+.resource-ph {
+  display: block;
+  padding: 14px 0;
+}
+.resource-ph-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+.resource-ph-name {
+  font-weight: 600;
+  color: var(--fg);
+  text-decoration: none;
+}
+.resource-ph-name:hover {
+  color: var(--primary);
+}
+.resource-ph-meta {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+.resource-ph-tagline {
+  margin-top: 6px;
+  font-size: 0.875rem;
+  color: var(--fg);
+}
+.resource-ph-desc {
+  margin: 6px 0 0;
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+  line-height: 1.5;
+}
+.resource-ph-line {
+  margin-top: 8px;
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+}
+.resource-ph-label {
+  font-weight: 600;
+}
+.resource-ph-line a,
+.resource-ph-links a {
+  color: var(--primary);
+  text-decoration: none;
+}
+.resource-ph-line a:hover,
+.resource-ph-links a:hover {
+  text-decoration: underline;
+}
+.resource-ph-links {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.resource-ph-topics {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
 /* Never let content force horizontal page scroll on small screens. */
 @media (max-width: 720px) {
   img,

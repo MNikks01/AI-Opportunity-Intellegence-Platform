@@ -505,6 +505,8 @@ export interface TrendResource {
   title: string | null;
   url: string | null;
   publishedAt: Date | null;
+  /** The connector's raw payload — powers source-specific detail (e.g. Product Hunt makers/website). */
+  raw: unknown;
 }
 
 /**
@@ -552,6 +554,7 @@ export async function getTrendResources(trendId: string, limit = 60): Promise<Tr
       title: r.signal.title,
       url: r.signal.url,
       publishedAt: r.signal.publishedAt,
+      raw: r.signal.raw,
     }))
     .sort((a, b) => (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0));
 }
