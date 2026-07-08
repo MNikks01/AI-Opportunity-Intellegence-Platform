@@ -1,5 +1,18 @@
 # @aioi/ai-service
 
+## 0.5.0
+
+### Minor Changes
+
+- 20f71a4: Entities directory: extract the recurring AI companies/models/tools/protocols from trends (curated
+  keyword dictionary, in the pipeline) and browse them at /entities → each links to the trends it appears
+  in. New `entities` data layer, `extractEntities`/`extractEntitiesForTrends`, and two pages + nav.
+
+### Patch Changes
+
+- Updated dependencies [20f71a4]
+  - @aioi/database@0.15.0
+
 ## 0.4.7
 
 ### Patch Changes
