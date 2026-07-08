@@ -92,9 +92,43 @@ export default async function TrendsPage({
     return qs ? `/trends?${qs}` : "/trends";
   };
 
+  // Export the current view (search or filtered browse) as CSV/JSON.
+  const exportHref = (format: "csv" | "json") => {
+    const u = new URLSearchParams();
+    if (query) u.set("q", query);
+    if (source) u.set("source", source);
+    if (status) u.set("status", status);
+    if (sort !== "recent") u.set("sort", sort);
+    u.set("format", format);
+    return `/trends/export?${u.toString()}`;
+  };
+
   return (
     <main>
-      <h1 style={{ fontSize: "1.5rem", margin: "0 0 4px" }}>Trends</h1>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+          margin: "0 0 4px",
+        }}
+      >
+        <h1 style={{ fontSize: "1.5rem", margin: 0 }}>Trends</h1>
+        {!watching && (
+          <span className="trend-export">
+            Export{" "}
+            <a href={exportHref("csv")} rel="nofollow">
+              CSV
+            </a>{" "}
+            ·{" "}
+            <a href={exportHref("json")} rel="nofollow">
+              JSON
+            </a>
+          </span>
+        )}
+      </div>
       <p style={{ color: "var(--fg-muted)", margin: "0 0 20px" }}>
         {searching
           ? `${trends.length} ${trends.length === 1 ? "result" : "results"} for “${query}”.`

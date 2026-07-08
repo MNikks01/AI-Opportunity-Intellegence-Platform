@@ -125,6 +125,20 @@
   font-size: 0.85rem;
 }
 
+/* Export links on the trends page */
+.trend-export {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+}
+.trend-export a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.trend-export a:hover {
+  text-decoration: underline;
+}
+
 /* Entities directory */
 .entity-grid {
   display: grid;
