@@ -1,5 +1,23 @@
 # @aioi/web
 
+## 0.7.0
+
+### Minor Changes
+
+- 3e558bb: Public landing page at `/` (was a redirect to /trends): hero + CTA, live stats, top-opportunity trends,
+  a "how it works" pipeline walkthrough, and the six official sources.
+- 12c676f: Close the browse→track loop: an "Add to watchlist" control on the trend page, and watchlist items now
+  resolve to the trend's title + opportunity score + link (via `getTrendsByIds`) instead of a raw id.
+
+### Patch Changes
+
+- Updated dependencies [e7f0515]
+- Updated dependencies [0a324c5]
+- Updated dependencies [4e604ca]
+- Updated dependencies [12c676f]
+  - @aioi/database@0.14.0
+  - @aioi/ui@0.2.1
+
 ## 0.6.8
 
 ### Patch Changes

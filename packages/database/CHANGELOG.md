@@ -1,5 +1,20 @@
 # @aioi/database
 
+## 0.14.0
+
+### Minor Changes
+
+- e7f0515: Enrich the daily brief: each top-opportunity trend now carries its score band + top build idea (from its
+  action plan). The scheduled refresh also generates a brief for the demo tenant so /briefs isn't empty.
+
+### Patch Changes
+
+- 0a324c5: Product Hunt connector captures rich launch data (website, makers, topics, thumbnail, comment count) and
+  the trend detail renders it: what it is (tagline), the problem (description), who built it (makers + links),
+  product + Product Hunt links, and topics. `getTrendResources` now returns the signal's raw payload.
+- 12c676f: Close the browse→track loop: an "Add to watchlist" control on the trend page, and watchlist items now
+  resolve to the trend's title + opportunity score + link (via `getTrendsByIds`) instead of a raw id.
+
 ## 0.13.0
 
 ### Minor Changes
