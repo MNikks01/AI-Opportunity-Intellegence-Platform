@@ -77,6 +77,17 @@ describe.skipIf(!enabled)("listTrendsPage (integration)", () => {
     expect(res[0]!.url).toBe("https://example.com/a");
     expect(res[0]!.title).toBe("alpha agent");
 
+    // ids filter (the "watching" view): restrict to a subset; empty → empty page
+    expect(
+      (await listTrendsPage({ source: sourceKey, ids: [t1] })).trends.map((t) => t.id),
+    ).toEqual([t1]);
+    expect(
+      (await listTrendsPage({ ids: [t2], sort: "opportunity" })).trends.map((t) => t.id),
+    ).toEqual([t2]);
+    const emptyWatch = await listTrendsPage({ ids: [] });
+    expect(emptyWatch.total).toBe(0);
+    expect(emptyWatch.trends).toHaveLength(0);
+
     // getTrendsByIds — resolve watchlist trend items to slug/title/opportunity
     const byId = await getTrendsByIds([t1, t2]);
     expect(byId.get(t1)?.title).toBe("Alpha trend");

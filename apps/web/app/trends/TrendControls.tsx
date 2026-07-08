@@ -41,11 +41,15 @@ export function TrendControls({
   source,
   status,
   sort,
+  watching,
+  watchedCount,
 }: {
   sources: string[];
   source: string;
   status: string;
   sort: string;
+  watching: boolean;
+  watchedCount: number;
 }) {
   const router = useRouter();
   const params = useSearchParams();
@@ -103,6 +107,18 @@ export function TrendControls({
             </option>
           ))}
         </select>
+      </label>
+
+      <label
+        className={`watching-filter${watching ? " is-on" : ""}`}
+        title={watchedCount === 0 ? "Watch some trends to use this filter" : undefined}
+      >
+        <input
+          type="checkbox"
+          checked={watching}
+          onChange={(e) => update({ watching: e.target.checked ? "1" : "" })}
+        />
+        <span>★ Watching{watchedCount > 0 ? ` (${watchedCount})` : ""}</span>
       </label>
     </div>
   );
