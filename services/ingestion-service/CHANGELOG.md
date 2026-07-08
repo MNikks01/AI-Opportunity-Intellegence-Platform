@@ -1,5 +1,14 @@
 # @aioi/ingestion-service
 
+## 0.3.8
+
+### Patch Changes
+
+- Updated dependencies [e7f0515]
+- Updated dependencies [0a324c5]
+- Updated dependencies [12c676f]
+  - @aioi/database@0.14.0
+
 ## 0.3.7
 
 ### Patch Changes

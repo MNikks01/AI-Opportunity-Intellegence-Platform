@@ -1,5 +1,17 @@
 # @aioi/ui
 
+## 0.2.1
+
+### Patch Changes
+
+- 0a324c5: Product Hunt connector captures rich launch data (website, makers, topics, thumbnail, comment count) and
+  the trend detail renders it: what it is (tagline), the problem (description), who built it (makers + links),
+  product + Product Hunt links, and topics. `getTrendResources` now returns the signal's raw payload.
+- 4e604ca: Rich resource cards for GitHub, YouTube, and Hugging Face on the trend detail (matching Product Hunt):
+  what it is, who built it (owner/channel/author with links), stats (stars/forks/likes/downloads), topics/tags,
+  and product links. GitHub + YouTube connectors capture a few extra fields (language, forks, homepage,
+  owner + channel links).
+
 ## 0.2.0
 
 ### Minor Changes
