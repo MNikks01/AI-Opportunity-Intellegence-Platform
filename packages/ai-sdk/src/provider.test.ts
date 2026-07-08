@@ -1,5 +1,45 @@
-import { describe, expect, it } from "vitest";
-import { defaultChatModel, getProvider } from "./index";
+import { describe, expect, it, vi } from "vitest";
+import { defaultChatModel, getProvider, StubProvider, LiteLLMProvider } from "./index";
+
+function jsonResponse(body: unknown): Response {
+  return { ok: true, status: 200, json: () => Promise.resolve(body) } as unknown as Response;
+}
+
+describe("extractEntities", () => {
+  it("stub discovers nothing (dictionary handles the offline case)", async () => {
+    expect(await new StubProvider().extractEntities("OpenAI ships GPT-4o")).toEqual([]);
+  });
+
+  it("LiteLLM parses + validates the model's JSON entities", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify({
+                entities: [
+                  { name: "Acme AI", type: "COMPANY" },
+                  { name: "not-a-type", type: "BOGUS" },
+                ],
+              }),
+            },
+          },
+        ],
+      }),
+    );
+    const p = new LiteLLMProvider("http://x:4000", "gpt-4o-mini", fetchImpl, "sk-x");
+    // BOGUS type fails the enum → the whole parse rejects (strict), so the caller skips this trend
+    await expect(p.extractEntities("text")).rejects.toBeTruthy();
+
+    const ok = vi.fn().mockResolvedValue(
+      jsonResponse({
+        choices: [{ message: { content: '{"entities":[{"name":"Acme AI","type":"COMPANY"}]}' } }],
+      }),
+    );
+    const p2 = new LiteLLMProvider("http://x:4000", "gpt-4o-mini", ok, "sk-x");
+    expect(await p2.extractEntities("text")).toEqual([{ name: "Acme AI", type: "COMPANY" }]);
+  });
+});
 
 describe("defaultChatModel", () => {
   it("matches the model to the configured provider key (AIOI_SCORING_MODEL wins)", () => {

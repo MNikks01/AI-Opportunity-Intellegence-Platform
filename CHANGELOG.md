@@ -16,6 +16,13 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Trends CSV/JSON export** — `/trends/export` streams the current filtered/searched view (title,
+  status, all 10 dimensions, top idea, url) as CSV or JSON; "Export CSV / JSON" links on the page.
+- **Polish pass** — loading-skeleton fallbacks for /trends and /entities, a global `:focus-visible`
+  outline for keyboard users (reduced-motion aware), and a11y labels.
+- **LLM-powered entity extraction (optional)** — `LLMProvider.extractEntities` + `extractEntitiesForTrends({ useLlm })`
+  discover entities beyond the curated dictionary (new startups/models); off by default, opt-in via
+  `AIOI_ENTITY_LLM`. Verified live (found "InstantVideos.org" not in the dictionary).
 - **Entities directory** — extract the AI companies/models/tools/protocols that recur across trends
   (curated keyword dictionary, deterministic, in the pipeline) and browse them at `/entities`, ranked by
   how many trends mention them; each entity links to those trends. New `entities` data layer +

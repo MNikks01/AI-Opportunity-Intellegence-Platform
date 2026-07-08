@@ -116,4 +116,23 @@ export const actionPlanContentSchema = z.object({
 });
 export type ActionPlanContent = z.infer<typeof actionPlanContentSchema>;
 
+/** LLM-extracted entities (open-ended discovery beyond the curated dictionary, B-006). */
+export const ENTITY_TYPES = [
+  "COMPANY",
+  "MODEL",
+  "REPO",
+  "TOOL",
+  "MCP_SERVER",
+  "PAPER",
+  "PERSON",
+] as const;
+export const extractedEntitySchema = z.object({
+  name: z.string().min(1).max(80),
+  type: z.enum(ENTITY_TYPES),
+});
+export const extractedEntitiesSchema = z.object({
+  entities: z.array(extractedEntitySchema).max(12),
+});
+export type ExtractedEntity = z.infer<typeof extractedEntitySchema>;
+
 export { z };

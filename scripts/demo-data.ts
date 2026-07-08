@@ -41,7 +41,10 @@ async function main() {
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
-  console.log("entities…", await extractEntitiesForTrends({ limit: 200 }));
+  console.log(
+    "entities…",
+    await extractEntitiesForTrends({ limit: 200, useLlm: Boolean(process.env.AIOI_ENTITY_LLM) }),
+  );
   console.log("action plans…", await generateActionPlansForTopTrends({ limit: 15 }));
 
   // Generate today's brief for the demo tenant so /briefs isn't empty on the live site.
