@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **The Golden Quadrant** — a `/quadrant` scatter plotting every scored trend on demand (business
+  viability) × supply (competition), highlighting the high-demand/low-supply "build now" region, with a
+  ranked build-now list. First cut of the USP demand×supply view (new `listTrendsQuadrant`).
 - **Compare from the browse grid** — a "Compare" checkbox on each trend card + a floating bar
   (select up to 4) that links to `/trends/compare`, so you can compare any trends while browsing, not
   just ones on a watchlist.

@@ -221,6 +221,89 @@
   letter-spacing: 0.02em;
 }
 
+/* Golden Quadrant */
+.quadrant-chart-wrap {
+  max-width: 560px;
+  overflow-x: auto;
+}
+.quadrant-chart {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.quad-region {
+  fill: color-mix(in srgb, #14a38b 14%, transparent);
+}
+.quad-frame {
+  fill: none;
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.quad-axis {
+  stroke: var(--border);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.quad-lab {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  fill: var(--fg-muted);
+  font-weight: 600;
+}
+.quad-lab-build {
+  fill: #12a594;
+}
+.quad-axis-title {
+  font-size: 10px;
+  fill: var(--fg-muted);
+  letter-spacing: 0.04em;
+}
+.quad-pt-build {
+  fill: #12a594;
+}
+.quad-pt-crowded,
+.quad-pt-early,
+.quad-pt-hype {
+  fill: var(--fg-muted);
+  opacity: 0.45;
+}
+.quadrant-chart a:hover circle {
+  r: 6.5;
+}
+.quadrant-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+.quadrant-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.quadrant-legend-item b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.quad-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+.quad-dot.quad-pt-build {
+  background: #12a594;
+}
+.quad-dot.quad-pt-crowded,
+.quad-dot.quad-pt-early,
+.quad-dot.quad-pt-hype {
+  background: var(--fg-muted);
+  opacity: 0.45;
+}
+
 /* Trend comparison table */
 .compare-wrap {
   overflow-x: auto;

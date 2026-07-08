@@ -50,6 +50,12 @@ export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey } from "./api
 export { exportOrgData, deleteOrg } from "./gdpr";
 export { getSourceStats, type SourceStat } from "./source-stats";
 export {
+  listTrendsQuadrant,
+  QUADRANT_MIDPOINT,
+  type QuadrantTrend,
+  type Quadrant,
+} from "./quadrant";
+export {
   upsertEntity,
   linkTrendEntity,
   listEntities,
