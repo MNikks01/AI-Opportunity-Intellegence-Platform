@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Public landing page** — `/` is now a real homepage (was a redirect): hero + CTA into /trends,
+  live stats (trends/signals/sources), the top opportunities right now, a four-step "how it works"
+  pipeline walkthrough, and the six official sources. Responsive + theme-aware.
 - **Rich resource cards for every source** — GitHub (stars/forks/language, owner, homepage + repo,
   topics), YouTube (description, channel link, watch link), and Hugging Face (likes/downloads, pipeline,
   author, tags) now render a full detail card like Product Hunt. One reusable renderer maps each source's
