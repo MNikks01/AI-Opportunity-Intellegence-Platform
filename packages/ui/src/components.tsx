@@ -81,54 +81,54 @@ export interface TrendSummaryProps {
   scores: Score[];
   /** A teaser from the trend's action plan (B-021), shown on the card when one exists. */
   plan?: { topIdea: string | null; productNames: string[] } | null;
+  /** Optional interactive control (e.g. a watch toggle) rendered above the card's stretched link. */
+  action?: ReactNode;
 }
 
-export function TrendCard({ slug, title, summary, scores, plan }: TrendSummaryProps) {
+export function TrendCard({ slug, title, summary, scores, plan, action }: TrendSummaryProps) {
   const opp = scores.find((s) => s.dimension === "opportunity");
   const top = scores.filter((s) => s.dimension !== "opportunity").slice(0, 3);
+  // Whole card links to the trend via a "stretched" overlay link; `action` sits above it (z-index) so
+  // an interactive control stays clickable without nesting a <form> inside an <a> (invalid HTML).
   return (
-    <a href={`/trends/${slug}`}>
-      <Card className="aioi-card--hover">
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-3)" }}>
-          <strong style={{ fontSize: "0.95rem" }}>{title}</strong>
-          {opp && <Badge band={opp.band}>{opp.value}</Badge>}
-        </div>
-        {summary && (
-          <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "6px 0 10px" }}>
-            {summary}
-          </p>
-        )}
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
-          {top.map((s) => (
-            <Badge key={s.dimension} band={s.band}>
-              {humanize(s.dimension)} {s.value}
-            </Badge>
-          ))}
-        </div>
-        {plan?.topIdea && (
-          <div
-            style={{
-              marginTop: "10px",
-              paddingTop: "10px",
-              borderTop: "1px solid var(--border)",
-            }}
-          >
-            <div style={{ fontSize: "0.6875rem", color: "var(--fg-muted)", marginBottom: "3px" }}>
-              💡 Build idea
-            </div>
-            <div style={{ fontSize: "0.8125rem", color: "var(--fg)", lineHeight: 1.35 }}>
-              {plan.topIdea}
-            </div>
-            {plan.productNames.length > 0 && (
-              <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
-                {plan.productNames.map((n) => (
-                  <Badge key={n}>{n}</Badge>
-                ))}
-              </div>
-            )}
+    <Card className="aioi-card--hover trend-card">
+      <a href={`/trends/${slug}`} className="trend-card-link" aria-label={title} />
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "var(--space-3)" }}>
+        <strong style={{ fontSize: "0.95rem" }}>{title}</strong>
+        {opp && <Badge band={opp.band}>{opp.value}</Badge>}
+      </div>
+      {summary && (
+        <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "6px 0 10px" }}>
+          {summary}
+        </p>
+      )}
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+        {top.map((s) => (
+          <Badge key={s.dimension} band={s.band}>
+            {humanize(s.dimension)} {s.value}
+          </Badge>
+        ))}
+      </div>
+      {plan?.topIdea && (
+        <div
+          style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px solid var(--border)" }}
+        >
+          <div style={{ fontSize: "0.6875rem", color: "var(--fg-muted)", marginBottom: "3px" }}>
+            💡 Build idea
           </div>
-        )}
-      </Card>
-    </a>
+          <div style={{ fontSize: "0.8125rem", color: "var(--fg)", lineHeight: 1.35 }}>
+            {plan.topIdea}
+          </div>
+          {plan.productNames.length > 0 && (
+            <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "4px" }}>
+              {plan.productNames.map((n) => (
+                <Badge key={n}>{n}</Badge>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {action && <div className="trend-card-action">{action}</div>}
+    </Card>
   );
 }

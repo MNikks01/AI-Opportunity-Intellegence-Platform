@@ -4,7 +4,7 @@
  * from another org is supplied (a non-visible row simply isn't found). The orgId comes from the
  * authenticated context (@aioi/auth) — never from client input.
  */
-import type { Prisma } from "@prisma/client";
+import type { Prisma, $Enums } from "@prisma/client";
 import { entitlementsFor, withinLimit, PlanLimitError } from "@aioi/billing";
 import { withOrgContext } from "./rls";
 import {
@@ -110,5 +110,55 @@ export function listWatchlistItems(orgId: string, watchlistId: string) {
   return withOrgContext(orgId, async (tx) => {
     await requireWatchlist(tx, watchlistId);
     return tx.watchlistItem.findMany({ where: { watchlistId }, orderBy: { createdAt: "desc" } });
+  });
+}
+
+// ── quick-watch helpers (a one-click toggle bound to a primary watchlist, B-016) ──────────────
+
+/** The org's primary (most-recent) watchlist, creating a default "My watchlist" if none exists. */
+export function getOrCreatePrimaryWatchlist(
+  orgId: string,
+  workspaceId: string,
+): Promise<{ id: string }> {
+  return withOrgContext(orgId, async (tx) => {
+    const existing = await tx.watchlist.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    if (existing) return existing;
+    const ws = await tx.workspace.findFirst({ where: { id: workspaceId } });
+    if (!ws) throw new NotFoundError("workspace");
+    return tx.watchlist.create({
+      data: { organizationId: orgId, workspaceId, name: "My watchlist" },
+      select: { id: true },
+    });
+  });
+}
+
+/** Target ids of a given type watched in a watchlist — powers the "watching" state on cards. */
+export function listWatchedTargetIds(
+  orgId: string,
+  watchlistId: string,
+  targetType: $Enums.WatchTargetType = "TREND",
+): Promise<Set<string>> {
+  return withOrgContext(orgId, async (tx) => {
+    const items = await tx.watchlistItem.findMany({
+      where: { watchlistId, targetType },
+      select: { targetId: true },
+    });
+    return new Set(items.map((i) => i.targetId));
+  });
+}
+
+/** Remove a watchlist item by its target (e.g. a trend id) rather than item id. Idempotent. */
+export function removeWatchlistItemByTarget(
+  orgId: string,
+  watchlistId: string,
+  targetType: $Enums.WatchTargetType,
+  targetId: string,
+): Promise<{ targetId: string }> {
+  return withOrgContext(orgId, async (tx) => {
+    await tx.watchlistItem.deleteMany({ where: { watchlistId, targetType, targetId } });
+    return { targetId };
   });
 }
