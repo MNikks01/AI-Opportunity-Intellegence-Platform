@@ -157,11 +157,25 @@ model Trend {
   signals      TrendSignal[]
   entities     TrendEntity[]
   scores       Score[]
+  snapshots    TrendSnapshot[]
   actionPlan   ActionPlan?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
   @@index([status, lastSignalAt])
+}
+
+/// Append-only history point per trend, written once per pipeline run — the basis for momentum
+/// (signal-count velocity) and opportunity trajectory over time.
+model TrendSnapshot {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trendId     String   @db.Uuid
+  signalCount Int
+  opportunity Int?
+  capturedAt  DateTime @default(now())
+  trend       Trend    @relation(fields: [trendId], references: [id], onDelete: Cascade)
+
+  @@index([trendId, capturedAt])
 }
 
 model TrendSignal {
