@@ -1,6 +1,15 @@
-import { listTrendsPage, searchTrends, semanticSearchTrends, getSourceStats } from "@aioi/database";
+import {
+  listTrendsPage,
+  searchTrends,
+  semanticSearchTrends,
+  getSourceStats,
+  listWatchlists,
+  listWatchedTargetIds,
+} from "@aioi/database";
 import { TrendCard } from "@aioi/ui";
 import { TrendControls } from "./TrendControls";
+import { WatchToggle } from "./WatchToggle";
+import { getDevOrg } from "../lib/dev-org";
 
 export const dynamic = "force-dynamic";
 
@@ -44,6 +53,13 @@ export default async function TrendsPage({
 
   // Source options for the radios — only connectors that have ingested something.
   const sources = (await getSourceStats()).filter((s) => s.signalCount > 0).map((s) => s.source);
+
+  // Which trends are already on the org's primary watchlist (for the card watch toggle).
+  const { organizationId } = await getDevOrg();
+  const primaryWatchlistId = (await listWatchlists(organizationId))[0]?.id;
+  const watchedIds = primaryWatchlistId
+    ? await listWatchedTargetIds(organizationId, primaryWatchlistId)
+    : new Set<string>();
 
   const result = searching
     ? {
@@ -178,6 +194,7 @@ export default async function TrendsPage({
               summary={t.summary}
               scores={t.scores}
               plan={t.plan}
+              action={<WatchToggle trendId={t.id} watched={watchedIds.has(t.id)} />}
             />
           ))}
         </div>

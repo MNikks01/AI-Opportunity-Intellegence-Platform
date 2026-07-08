@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **One-click "Watch" toggle on trend cards** — add/remove a trend to your watchlist right from the
+  browse grid (creates a default watchlist on first use); the card stays fully clickable via a stretched
+  link. New `getOrCreatePrimaryWatchlist` / `listWatchedTargetIds` / `removeWatchlistItemByTarget`.
 - **Richer daily briefs (+ generated in the cron)** — each top-opportunity trend in the brief now
   shows its score band + build-idea teaser (from its action plan), and the scheduled refresh generates
   a brief for the demo tenant so `/briefs` is populated on the live site.

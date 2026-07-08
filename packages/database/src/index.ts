@@ -16,6 +16,9 @@ export {
   addWatchlistItem,
   removeWatchlistItem,
   listWatchlistItems,
+  getOrCreatePrimaryWatchlist,
+  listWatchedTargetIds,
+  removeWatchlistItemByTarget,
 } from "./watchlists";
 export {
   alertMatches,
