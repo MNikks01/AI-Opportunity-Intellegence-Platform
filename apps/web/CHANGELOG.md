@@ -1,5 +1,19 @@
 # @aioi/web
 
+## 0.10.0
+
+### Minor Changes
+
+- bdc16f0: Three additions: (1) CSV/JSON export of the trends view; (2) a polish pass — loading skeletons, keyboard
+  focus visibility, a11y touches; (3) optional LLM-powered entity extraction for open-ended discovery
+  beyond the curated dictionary (`LLMProvider.extractEntities`, `extractEntitiesForTrends({ useLlm })`).
+
+### Patch Changes
+
+- Updated dependencies [bdc16f0]
+  - @aioi/validation@0.3.0
+  - @aioi/database@0.15.1
+
 ## 0.9.0
 
 ### Minor Changes
