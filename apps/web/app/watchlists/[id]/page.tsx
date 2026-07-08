@@ -47,7 +47,28 @@ export default async function WatchlistDetailPage({ params }: { params: Promise<
       <a href="/watchlists" style={{ fontSize: "0.8125rem", color: "var(--primary)" }}>
         ← Watchlists
       </a>
-      <h1 style={{ fontSize: "1.5rem", margin: "8px 0 4px" }}>{watchlist.name}</h1>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "baseline",
+          justifyContent: "space-between",
+          gap: 12,
+          flexWrap: "wrap",
+        }}
+      >
+        <h1 style={{ fontSize: "1.5rem", margin: "8px 0 4px" }}>{watchlist.name}</h1>
+        {trendMap.size >= 2 && (
+          <a
+            href={`/trends/compare?slugs=${[...trendMap.values()]
+              .slice(0, 4)
+              .map((t) => t.slug)
+              .join(",")}`}
+            className="watch-btn"
+          >
+            Compare {Math.min(trendMap.size, 4)} trends →
+          </a>
+        )}
+      </div>
       <p style={{ color: "var(--fg-muted)", margin: "0 0 20px" }}>
         {watchlist.items.length} {watchlist.items.length === 1 ? "item" : "items"}
       </p>
