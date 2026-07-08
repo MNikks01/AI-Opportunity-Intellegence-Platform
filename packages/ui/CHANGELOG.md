@@ -1,5 +1,13 @@
 # @aioi/ui
 
+## 0.4.0
+
+### Minor Changes
+
+- dc47b88: Trend momentum: append-only TrendSnapshot history (one point per pipeline run) → a signal-count
+  velocity + 7-day delta shown as a sparkline on trend cards and a momentum panel on the detail page.
+  New `recordTrendSnapshots` (wired into the cron) + `getTrendMomentumMap`; `Sparkline`/`MomentumTag` UI.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,5 +1,25 @@
 # @aioi/web
 
+## 0.13.0
+
+### Minor Changes
+
+- da8a1f2: Compare from the browse grid: a per-card "Compare" checkbox + a floating bar (client selection, up to 4)
+  that links to /trends/compare — compare any trends, not just watchlist ones.
+- e91c90b: The Golden Quadrant: a /quadrant page plotting every scored trend on demand (business) × supply
+  (competition), highlighting the high-demand/low-supply "build now" region, plus a ranked build-now list.
+  New `listTrendsQuadrant`. First cut of the USP demand×supply view; demand axis will fold in mined signals.
+- dc47b88: Trend momentum: append-only TrendSnapshot history (one point per pipeline run) → a signal-count
+  velocity + 7-day delta shown as a sparkline on trend cards and a momentum panel on the detail page.
+  New `recordTrendSnapshots` (wired into the cron) + `getTrendMomentumMap`; `Sparkline`/`MomentumTag` UI.
+
+### Patch Changes
+
+- Updated dependencies [e91c90b]
+- Updated dependencies [dc47b88]
+  - @aioi/database@0.17.0
+  - @aioi/ui@0.4.0
+
 ## 0.12.0
 
 ### Minor Changes
