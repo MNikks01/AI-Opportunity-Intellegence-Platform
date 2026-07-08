@@ -1,5 +1,16 @@
 # @aioi/database
 
+## 0.17.0
+
+### Minor Changes
+
+- e91c90b: The Golden Quadrant: a /quadrant page plotting every scored trend on demand (business) × supply
+  (competition), highlighting the high-demand/low-supply "build now" region, plus a ranked build-now list.
+  New `listTrendsQuadrant`. First cut of the USP demand×supply view; demand axis will fold in mined signals.
+- dc47b88: Trend momentum: append-only TrendSnapshot history (one point per pipeline run) → a signal-count
+  velocity + 7-day delta shown as a sparkline on trend cards and a momentum panel on the detail page.
+  New `recordTrendSnapshots` (wired into the cron) + `getTrendMomentumMap`; `Sparkline`/`MomentumTag` UI.
+
 ## 0.16.0
 
 ### Minor Changes
