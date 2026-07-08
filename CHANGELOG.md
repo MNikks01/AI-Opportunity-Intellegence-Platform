@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **The Golden Quadrant** — a `/quadrant` scatter plotting every scored trend on demand (business
+  viability) × supply (competition), highlighting the high-demand/low-supply "build now" region, with a
+  ranked build-now list. First cut of the USP demand×supply view (new `listTrendsQuadrant`).
 - **Trend momentum** — an append-only `TrendSnapshot` history (one point per pipeline run) powers a
   signal-velocity + 7-day delta, shown as a sparkline on every trend card and a momentum panel
   (Accelerating / Steady / Cooling) on the detail page. Starts accruing on the next cron run. New
