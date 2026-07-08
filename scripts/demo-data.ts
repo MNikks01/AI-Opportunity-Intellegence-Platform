@@ -18,6 +18,7 @@ import {
   scoreClusteredTrends,
   generateActionPlansForTopTrends,
 } from "../services/ai-service/src/index";
+import { bootstrapUser, generateDailyBrief } from "@aioi/database";
 
 /** Run one source; a failure (bad key, rate limit) is logged and skipped so others still run. */
 async function ingest(name: string, fn: () => Promise<unknown>): Promise<void> {
@@ -40,7 +41,17 @@ async function main() {
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
   console.log("action plans…", await generateActionPlansForTopTrends({ limit: 15 }));
-  console.log("done — the demo DB now has scored trends with action plans.");
+
+  // Generate today's brief for the demo tenant so /briefs isn't empty on the live site.
+  const { organizationId } = await bootstrapUser({
+    clerkId: "dev-user",
+    email: "dev@aioi.local",
+    name: "Dev User",
+  });
+  const brief = await generateDailyBrief(organizationId);
+  console.log("brief…", { id: brief.id });
+
+  console.log("done — the demo DB now has scored trends, action plans, and a brief.");
   process.exit(0);
 }
 

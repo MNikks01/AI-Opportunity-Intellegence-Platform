@@ -1,18 +1,11 @@
-import { getTrendBySlug, getTrendResources } from "@aioi/database";
+import { getTrendBySlug, getTrendResources, listWatchlists } from "@aioi/database";
 import { Badge, Card, Scorecard } from "@aioi/ui";
 import { notFound } from "next/navigation";
+import { ResourceItem } from "./ResourceItem";
+import { getDevOrg } from "../../lib/dev-org";
+import { watchTrendAction } from "../../watchlists/actions";
 
 export const dynamic = "force-dynamic";
-
-const SOURCE_LABELS: Record<string, string> = {
-  hackernews: "HackerNews",
-  youtube: "YouTube",
-  github: "GitHub",
-  huggingface: "Hugging Face",
-  reddit: "Reddit",
-  producthunt: "Product Hunt",
-};
-const sourceLabel = (k: string) => SOURCE_LABELS[k] ?? k;
 
 const DIM_LABELS: Record<string, string> = {
   opportunity: "Opportunity",
@@ -26,15 +19,6 @@ const DIM_LABELS: Record<string, string> = {
   difficulty: "Difficulty",
   predicted_lifetime: "Predicted lifetime",
 };
-
-function fmtDate(d: Date | null): string {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
 
 type ActionPlan = {
   saasIdeas: string[];
@@ -82,7 +66,11 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
   const trend = await getTrendBySlug(slug);
   if (!trend) notFound();
   const plan = trend.actionPlan?.content as ActionPlan | undefined;
-  const resources = await getTrendResources(trend.id);
+  const { organizationId } = await getDevOrg();
+  const [resources, watchlists] = await Promise.all([
+    getTrendResources(trend.id),
+    listWatchlists(organizationId),
+  ]);
   const sourceCount = new Set(resources.map((r) => r.source)).size;
   // Sub-dimension rationales (opportunity's rationale already leads the scorecard).
   const rationales = trend.scores.filter((s) => s.dimension !== "opportunity" && s.rationale);
@@ -102,6 +90,33 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
         Backed by {resources.length} {resources.length === 1 ? "signal" : "signals"} across{" "}
         {sourceCount} {sourceCount === 1 ? "source" : "sources"}.
       </p>
+
+      {watchlists.length > 0 ? (
+        <form action={watchTrendAction} className="watch-form">
+          <input type="hidden" name="trendId" value={trend.id} />
+          <label className="watch-label" htmlFor="watch-select">
+            + Add to watchlist
+          </label>
+          <select id="watch-select" name="watchlistId" className="watch-select">
+            {watchlists.map((w) => (
+              <option key={w.id} value={w.id}>
+                {w.name}
+              </option>
+            ))}
+          </select>
+          <button type="submit" className="watch-btn">
+            Add
+          </button>
+        </form>
+      ) : (
+        <p className="trend-meta">
+          <a href="/watchlists" style={{ color: "var(--primary)" }}>
+            Create a watchlist
+          </a>{" "}
+          to track this trend and get alerts.
+        </p>
+      )}
+
       <div style={{ maxWidth: 560 }}>
         <Scorecard scores={trend.scores} />
       </div>
@@ -111,22 +126,7 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
         <Card>
           <ul className="resource-list">
             {resources.map((r) => (
-              <li key={r.id} className="resource-item">
-                <Badge>{sourceLabel(r.source)}</Badge>
-                {r.url ? (
-                  <a
-                    href={r.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="resource-link"
-                  >
-                    {r.title ?? r.url}
-                  </a>
-                ) : (
-                  <span className="resource-link">{r.title ?? "(untitled)"}</span>
-                )}
-                {r.publishedAt && <time className="resource-date">{fmtDate(r.publishedAt)}</time>}
-              </li>
+              <ResourceItem key={r.id} r={r} />
             ))}
           </ul>
         </Card>

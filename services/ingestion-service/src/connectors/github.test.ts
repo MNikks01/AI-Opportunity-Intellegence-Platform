@@ -6,11 +6,14 @@ const repo: GitHubRepo = {
   name: "agent-kit",
   full_name: "acme/agent-kit",
   html_url: "https://github.com/acme/agent-kit",
+  homepage: "https://agent-kit.dev",
   description: "toolkit for building LLM agents",
   stargazers_count: 512,
+  forks_count: 42,
+  language: "TypeScript",
   topics: ["llm", "agents"],
   created_at: "2026-06-01T00:00:00Z",
-  owner: { login: "acme" },
+  owner: { login: "acme", html_url: "https://github.com/acme" },
 };
 
 function jsonResponse(
@@ -42,6 +45,14 @@ describe("normalize", () => {
 
   it("handles a null description", () => {
     expect(normalize({ ...repo, description: null })!.text).toContain("acme/agent-kit");
+  });
+
+  it("preserves language, forks, homepage, and owner link in raw (for the detail view)", () => {
+    const raw = normalize(repo)!.raw as GitHubRepo;
+    expect(raw.language).toBe("TypeScript");
+    expect(raw.forks_count).toBe(42);
+    expect(raw.homepage).toBe("https://agent-kit.dev");
+    expect(raw.owner?.html_url).toBe("https://github.com/acme");
   });
 });
 

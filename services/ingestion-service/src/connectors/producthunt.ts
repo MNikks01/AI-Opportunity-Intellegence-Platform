@@ -13,7 +13,12 @@ const GRAPHQL_URL = "https://api.producthunt.com/v2/api/graphql";
 
 const QUERY = `query TopPosts($first: Int!) {
   posts(first: $first, order: RANKING) {
-    edges { node { id name tagline description url votesCount createdAt } }
+    edges { node {
+      id name tagline description url website votesCount commentsCount createdAt featuredAt
+      thumbnail { url }
+      topics(first: 5) { edges { node { name } } }
+      makers { id name username url headline }
+    } }
   }
 }`;
 
@@ -25,16 +30,40 @@ export function productHuntConfigured(env: NodeJS.ProcessEnv = process.env): boo
   return Boolean(env.PRODUCTHUNT_TOKEN);
 }
 
+const makerSchema = z.object({
+  id: z.string().optional(),
+  name: z.string().optional(),
+  username: z.string().optional(),
+  url: z.string().optional(),
+  headline: z.string().nullable().optional(),
+});
 const nodeSchema = z.object({
   id: z.string(),
   name: z.string(),
   tagline: z.string().optional(),
   description: z.string().nullable().optional(),
   url: z.string().optional(),
+  website: z.string().nullable().optional(),
   votesCount: z.number().optional(),
+  commentsCount: z.number().optional(),
   createdAt: z.string().optional(),
+  featuredAt: z.string().nullable().optional(),
+  thumbnail: z.object({ url: z.string().optional() }).nullable().optional(),
+  topics: z
+    .object({ edges: z.array(z.object({ node: z.object({ name: z.string() }) })) })
+    .nullable()
+    .optional(),
+  makers: z.array(makerSchema).optional(),
 });
 export type ProductHuntPost = z.infer<typeof nodeSchema>;
+
+/** Topic names + maker names extracted from a post (for scoring text + display). */
+function topicsOf(post: ProductHuntPost): string[] {
+  return post.topics?.edges.map((e) => e.node.name).filter(Boolean) ?? [];
+}
+function makerNamesOf(post: ProductHuntPost): string[] {
+  return (post.makers ?? []).map((m) => m.name).filter((n): n is string => Boolean(n));
+}
 
 const responseSchema = z.object({
   data: z.object({
@@ -64,7 +93,14 @@ function resolve(deps: FetchDeps): Resolved {
 /** Normalize a validated post to a SourceRecord. */
 export function normalize(post: ProductHuntPost): SourceRecord | null {
   if (!post.name) return null;
-  const text = [post.name, post.tagline ?? "", post.description ?? ""]
+  // Rich text for clustering/scoring: what it is + what it does + its topics + who made it.
+  const text = [
+    post.name,
+    post.tagline ?? "",
+    post.description ?? "",
+    topicsOf(post).join(", "),
+    makerNamesOf(post).join(", "),
+  ]
     .filter(Boolean)
     .join(" ")
     .trim();
@@ -75,7 +111,7 @@ export function normalize(post: ProductHuntPost): SourceRecord | null {
     title: post.name,
     publishedAt: post.createdAt,
     text,
-    raw: post,
+    raw: post, // full node (tagline, description, website, makers, topics, votes…) for the detail view
   };
 }
 

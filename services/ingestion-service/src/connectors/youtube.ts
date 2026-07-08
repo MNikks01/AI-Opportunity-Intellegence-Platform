@@ -29,6 +29,7 @@ const itemSchema = z.object({
     description: z.string().optional(),
     publishedAt: z.string().optional(),
     channelTitle: z.string().optional(),
+    channelId: z.string().optional(),
   }),
 });
 export type YouTubeItem = z.infer<typeof itemSchema>;

@@ -42,9 +42,14 @@ export default async function BriefDetailPage({ params }: { params: Promise<{ id
                   {t.title}
                 </a>
                 <span style={{ marginLeft: "auto" }}>
-                  <Badge band="high">{t.opportunity}</Badge>
+                  <Badge band={t.band ?? "high"}>{t.opportunity}</Badge>
                 </span>
               </div>
+              {t.topIdea && (
+                <p style={{ margin: "8px 0 0", color: "var(--fg-muted)", fontSize: "0.8125rem" }}>
+                  💡 {t.topIdea}
+                </p>
+              )}
             </Card>
           ))}
         </div>
