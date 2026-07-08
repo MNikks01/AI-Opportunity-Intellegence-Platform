@@ -17,6 +17,7 @@ import {
   clusterRecentSignals,
   scoreClusteredTrends,
   generateActionPlansForTopTrends,
+  extractEntitiesForTrends,
 } from "../services/ai-service/src/index";
 import { bootstrapUser, generateDailyBrief } from "@aioi/database";
 
@@ -40,6 +41,7 @@ async function main() {
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
+  console.log("entities…", await extractEntitiesForTrends({ limit: 200 }));
   console.log("action plans…", await generateActionPlansForTopTrends({ limit: 15 }));
 
   // Generate today's brief for the demo tenant so /briefs isn't empty on the live site.

@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Entities directory** — extract the AI companies/models/tools/protocols that recur across trends
+  (curated keyword dictionary, deterministic, in the pipeline) and browse them at `/entities`, ranked by
+  how many trends mention them; each entity links to those trends. New `entities` data layer +
+  `extractEntitiesForTrends` (wired into the cron) + `/entities` and `/entities/[id]` pages + nav.
 - **Notifications page polish** — each notification now links to the trend that matched (with its
   opportunity score), shows a relative timestamp ("1m ago"), and unread vs read is visually distinct
   (accent border vs dimmed).

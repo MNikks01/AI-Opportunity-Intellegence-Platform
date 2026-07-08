@@ -125,6 +125,54 @@
   font-size: 0.85rem;
 }
 
+/* Entities directory */
+.entity-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+}
+.entity-card {
+  display: block;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+  text-decoration: none;
+  color: var(--fg);
+}
+.entity-card:hover {
+  border-color: var(--primary);
+}
+.entity-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+.entity-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+.entity-trend {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+  text-decoration: none;
+  color: var(--fg);
+  font-size: 0.9rem;
+}
+.entity-trend:hover {
+  border-color: var(--primary);
+}
+
 /* Notifications */
 .notif {
   border-left: 3px solid var(--primary);
