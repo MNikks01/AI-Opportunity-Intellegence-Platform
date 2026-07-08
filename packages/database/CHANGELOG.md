@@ -1,5 +1,13 @@
 # @aioi/database
 
+## 0.16.0
+
+### Minor Changes
+
+- 13a4d82: Trend ↔ entity cross-linking on the trend detail: an "Entities" chip row (linked to /entities), and a
+  "Related trends" section (trends sharing entities, by shared count then opportunity). New
+  `getTrendEntities` + `getRelatedTrends`.
+
 ## 0.15.1
 
 ### Patch Changes

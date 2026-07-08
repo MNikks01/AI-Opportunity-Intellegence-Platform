@@ -1,5 +1,12 @@
 # @aioi/ai-service
 
+## 0.6.1
+
+### Patch Changes
+
+- Updated dependencies [13a4d82]
+  - @aioi/database@0.16.0
+
 ## 0.6.0
 
 ### Minor Changes
