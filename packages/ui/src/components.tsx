@@ -74,6 +74,76 @@ export function Scorecard({ scores }: { scores: Score[] }) {
   );
 }
 
+/** Minimal inline-SVG sparkline for signal-count history. Renders nothing for <2 points. */
+export function Sparkline({
+  data,
+  width = 52,
+  height = 16,
+  color = "var(--fg-muted)",
+}: {
+  data: number[];
+  width?: number;
+  height?: number;
+  color?: string;
+}) {
+  if (data.length < 2) return null;
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min || 1;
+  const step = width / (data.length - 1);
+  const pts = data.map(
+    (v, i) => `${(i * step).toFixed(1)},${(height - ((v - min) / range) * height).toFixed(1)}`,
+  );
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox={`0 0 ${width} ${height}`}
+      aria-hidden="true"
+      style={{ display: "block", overflow: "visible" }}
+    >
+      <polyline
+        points={pts.join(" ")}
+        fill="none"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+export type CardMomentumState = "new" | "accelerating" | "steady" | "cooling";
+export interface CardMomentum {
+  state: CardMomentumState;
+  delta: number;
+  spark: number[];
+}
+const MOMENTUM_UI: Record<
+  Exclude<CardMomentumState, "new">,
+  { color: string; label: (d: number) => string }
+> = {
+  accelerating: { color: "#26a269", label: (d) => `▲ +${d}` },
+  cooling: { color: "var(--fg-muted)", label: (d) => `▼ ${d}` },
+  steady: { color: "var(--fg-muted)", label: () => "steady" },
+};
+
+/** Compact momentum indicator: a sparkline + a 7-day delta. Hidden until history exists. */
+export function MomentumTag({ momentum }: { momentum: CardMomentum }) {
+  if (momentum.state === "new") return null;
+  const ui = MOMENTUM_UI[momentum.state];
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "8px" }}>
+      <Sparkline data={momentum.spark} color={ui.color} />
+      <span style={{ fontSize: "0.6875rem", fontWeight: 600, color: ui.color }}>
+        {ui.label(momentum.delta)}
+      </span>
+      <span style={{ fontSize: "0.625rem", color: "var(--fg-muted)" }}>7d</span>
+    </div>
+  );
+}
+
 export interface TrendSummaryProps {
   slug: string;
   title: string;
@@ -81,11 +151,21 @@ export interface TrendSummaryProps {
   scores: Score[];
   /** A teaser from the trend's action plan (B-021), shown on the card when one exists. */
   plan?: { topIdea: string | null; productNames: string[] } | null;
+  /** Signal-count momentum (B-030); a sparkline + delta shown when history has accrued. */
+  momentum?: CardMomentum | null;
   /** Optional interactive control (e.g. a watch toggle) rendered above the card's stretched link. */
   action?: ReactNode;
 }
 
-export function TrendCard({ slug, title, summary, scores, plan, action }: TrendSummaryProps) {
+export function TrendCard({
+  slug,
+  title,
+  summary,
+  scores,
+  plan,
+  momentum,
+  action,
+}: TrendSummaryProps) {
   const opp = scores.find((s) => s.dimension === "opportunity");
   const top = scores.filter((s) => s.dimension !== "opportunity").slice(0, 3);
   // Whole card links to the trend via a "stretched" overlay link; `action` sits above it (z-index) so
@@ -109,6 +189,7 @@ export function TrendCard({ slug, title, summary, scores, plan, action }: TrendS
           </Badge>
         ))}
       </div>
+      {momentum && <MomentumTag momentum={momentum} />}
       {plan?.topIdea && (
         <div
           style={{ marginTop: "10px", paddingTop: "10px", borderTop: "1px solid var(--border)" }}

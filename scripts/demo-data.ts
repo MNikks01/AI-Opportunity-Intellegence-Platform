@@ -19,7 +19,7 @@ import {
   generateActionPlansForTopTrends,
   extractEntitiesForTrends,
 } from "../services/ai-service/src/index";
-import { bootstrapUser, generateDailyBrief } from "@aioi/database";
+import { bootstrapUser, generateDailyBrief, recordTrendSnapshots } from "@aioi/database";
 
 /** Run one source; a failure (bad key, rate limit) is logged and skipped so others still run. */
 async function ingest(name: string, fn: () => Promise<unknown>): Promise<void> {
@@ -46,6 +46,9 @@ async function main() {
     await extractEntitiesForTrends({ limit: 200, useLlm: Boolean(process.env.AIOI_ENTITY_LLM) }),
   );
   console.log("action plans…", await generateActionPlansForTopTrends({ limit: 15 }));
+
+  // Record a history point so momentum/trajectory accrues run over run.
+  console.log("snapshots…", await recordTrendSnapshots());
 
   // Generate today's brief for the demo tenant so /briefs isn't empty on the live site.
   const { organizationId } = await bootstrapUser({

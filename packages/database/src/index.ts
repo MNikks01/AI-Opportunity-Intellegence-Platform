@@ -56,6 +56,12 @@ export {
   type Quadrant,
 } from "./quadrant";
 export {
+  recordTrendSnapshots,
+  getTrendMomentumMap,
+  type TrendMomentum,
+  type MomentumState,
+} from "./momentum";
+export {
   upsertEntity,
   linkTrendEntity,
   listEntities,
