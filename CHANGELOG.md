@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Rich resource cards for every source** — GitHub (stars/forks/language, owner, homepage + repo,
+  topics), YouTube (description, channel link, watch link), and Hugging Face (likes/downloads, pipeline,
+  author, tags) now render a full detail card like Product Hunt. One reusable renderer maps each source's
+  raw payload to a shared view.
 - **Rich Product Hunt items** — the connector now captures website, makers, topics, thumbnail, and
   comments; the trend detail renders a full card per launch: tagline (what it is), description (the
   problem), makers with profile links (who built it), product + Product Hunt links, and topic chips.

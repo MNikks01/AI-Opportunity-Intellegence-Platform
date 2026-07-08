@@ -30,12 +30,15 @@ const repoSchema = z.object({
   name: z.string(),
   full_name: z.string(),
   html_url: z.string().url(),
+  homepage: z.string().nullable().optional(),
   description: z.string().nullable().optional(),
   stargazers_count: z.number().optional(),
+  forks_count: z.number().optional(),
+  language: z.string().nullable().optional(),
   topics: z.array(z.string()).optional(),
   created_at: z.string().optional(),
   pushed_at: z.string().optional(),
-  owner: z.object({ login: z.string() }).optional(),
+  owner: z.object({ login: z.string(), html_url: z.string().optional() }).optional(),
 });
 export type GitHubRepo = z.infer<typeof repoSchema>;
 
