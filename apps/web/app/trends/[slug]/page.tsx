@@ -4,8 +4,9 @@ import {
   listWatchlists,
   getTrendEntities,
   getRelatedTrends,
+  getTrendMomentumMap,
 } from "@aioi/database";
-import { Badge, Card, Scorecard } from "@aioi/ui";
+import { Badge, Card, Scorecard, Sparkline } from "@aioi/ui";
 import { notFound } from "next/navigation";
 import { ResourceItem } from "./ResourceItem";
 import { getDevOrg } from "../../lib/dev-org";
@@ -74,12 +75,14 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
   if (!trend) notFound();
   const plan = trend.actionPlan?.content as ActionPlan | undefined;
   const { organizationId } = await getDevOrg();
-  const [resources, watchlists, entities, related] = await Promise.all([
+  const [resources, watchlists, entities, related, momentumMap] = await Promise.all([
     getTrendResources(trend.id),
     listWatchlists(organizationId),
     getTrendEntities(trend.id),
     getRelatedTrends(trend.id, 6),
+    getTrendMomentumMap([trend.id]),
   ]);
+  const momentum = momentumMap.get(trend.id);
   const sourceCount = new Set(resources.map((r) => r.source)).size;
   // Sub-dimension rationales (opportunity's rationale already leads the scorecard).
   const rationales = trend.scores.filter((s) => s.dimension !== "opportunity" && s.rationale);
@@ -135,6 +138,58 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
               <span className="trend-entity-type">{TYPE_LABELS[e.type] ?? e.type}</span>
             </a>
           ))}
+        </div>
+      )}
+
+      {momentum && momentum.state !== "new" && (
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 16,
+            padding: "12px 16px",
+            border: "1px solid var(--border)",
+            borderRadius: 12,
+            marginBottom: 20,
+          }}
+        >
+          <div>
+            <div
+              style={{
+                fontSize: "0.6875rem",
+                color: "var(--fg-muted)",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
+                marginBottom: 3,
+              }}
+            >
+              Momentum
+            </div>
+            <div
+              style={{
+                fontSize: "0.95rem",
+                fontWeight: 700,
+                color: momentum.state === "accelerating" ? "#26a269" : "var(--fg)",
+              }}
+            >
+              {momentum.state === "accelerating"
+                ? "Accelerating"
+                : momentum.state === "cooling"
+                  ? "Cooling"
+                  : "Steady"}
+            </div>
+          </div>
+          <Sparkline
+            data={momentum.spark}
+            width={120}
+            height={34}
+            color={momentum.state === "accelerating" ? "#26a269" : "var(--fg-muted)"}
+          />
+          <div style={{ fontSize: "0.8125rem", color: "var(--fg-muted)" }}>
+            {momentum.delta >= 0 ? "+" : ""}
+            {momentum.delta} signals · 7d
+            {momentum.pct !== null ? ` · ${momentum.pct >= 0 ? "+" : ""}${momentum.pct}%` : ""}
+          </div>
         </div>
       )}
 

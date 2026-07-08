@@ -5,6 +5,7 @@ import {
   getSourceStats,
   listWatchlists,
   listWatchedTargetIds,
+  getTrendMomentumMap,
 } from "@aioi/database";
 import { TrendCard } from "@aioi/ui";
 import { TrendControls } from "./TrendControls";
@@ -82,6 +83,7 @@ export default async function TrendsPage({
         ids: watching ? [...watchedIds] : undefined,
       });
   const trends = result.trends;
+  const momentumMap = await getTrendMomentumMap(trends.map((t) => t.id));
 
   // Build a /trends URL for pagination that preserves the active source + status + sort + watching.
   const pageUrl = (p: number) => {
@@ -245,6 +247,7 @@ export default async function TrendsPage({
                 summary={t.summary}
                 scores={t.scores}
                 plan={t.plan}
+                momentum={momentumMap.get(t.id) ?? null}
                 action={
                   <>
                     <CompareCheckbox slug={t.slug} />

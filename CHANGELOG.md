@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Trend momentum** — an append-only `TrendSnapshot` history (one point per pipeline run) powers a
+  signal-velocity + 7-day delta, shown as a sparkline on every trend card and a momentum panel
+  (Accelerating / Steady / Cooling) on the detail page. Starts accruing on the next cron run. New
+  `recordTrendSnapshots` + `getTrendMomentumMap`, `Sparkline`/`MomentumTag` components.
 - **Compare from the browse grid** — a "Compare" checkbox on each trend card + a floating bar
   (select up to 4) that links to `/trends/compare`, so you can compare any trends while browsing, not
   just ones on a watchlist.
