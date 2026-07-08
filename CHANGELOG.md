@@ -16,6 +16,8 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **"Watching" filter on the trends page** — a toggle to show only the trends on your watchlist.
+  `listTrendsPage` gains an optional `ids` restriction (composes with source/status/sort/pagination).
 - **One-click "Watch" toggle on trend cards** — add/remove a trend to your watchlist right from the
   browse grid (creates a default watchlist on first use); the card stays fully clickable via a stretched
   link. New `getOrCreatePrimaryWatchlist` / `listWatchedTargetIds` / `removeWatchlistItemByTarget`.

@@ -40,6 +40,7 @@ export default async function TrendsPage({
     status?: string;
     sort?: string;
     page?: string;
+    watching?: string;
   }>;
 }) {
   const sp = await searchParams;
@@ -49,6 +50,7 @@ export default async function TrendsPage({
   const status = sp.status?.trim() ?? "";
   const sort = sp.sort?.trim() || "recent";
   const page = Math.max(1, Number.parseInt(sp.page ?? "1", 10) || 1);
+  const watching = sp.watching === "1";
   const searching = query.length > 0;
 
   // Source options for the radios — only connectors that have ingested something.
@@ -74,15 +76,17 @@ export default async function TrendsPage({
         sort,
         page,
         pageSize: PAGE_SIZE,
+        ids: watching ? [...watchedIds] : undefined,
       });
   const trends = result.trends;
 
-  // Build a /trends URL for pagination that preserves the active source + status + sort.
+  // Build a /trends URL for pagination that preserves the active source + status + sort + watching.
   const pageUrl = (p: number) => {
     const u = new URLSearchParams();
     if (source) u.set("source", source);
     if (status) u.set("status", status);
     if (sort !== "recent") u.set("sort", sort);
+    if (watching) u.set("watching", "1");
     if (p > 1) u.set("page", String(p));
     const qs = u.toString();
     return qs ? `/trends?${qs}` : "/trends";
@@ -94,9 +98,11 @@ export default async function TrendsPage({
       <p style={{ color: "var(--fg-muted)", margin: "0 0 20px" }}>
         {searching
           ? `${trends.length} ${trends.length === 1 ? "result" : "results"} for “${query}”.`
-          : `${result.total} scored ${result.total === 1 ? "trend" : "trends"}${
-              source ? ` from ${source}` : " from the AI ecosystem"
-            }.`}
+          : watching
+            ? `${result.total} ${result.total === 1 ? "trend" : "trends"} you're watching.`
+            : `${result.total} scored ${result.total === 1 ? "trend" : "trends"}${
+                source ? ` from ${source}` : " from the AI ecosystem"
+              }.`}
       </p>
 
       <form
@@ -169,7 +175,14 @@ export default async function TrendsPage({
       </form>
 
       {!searching && (
-        <TrendControls sources={sources} source={source} status={status} sort={sort} />
+        <TrendControls
+          sources={sources}
+          source={source}
+          status={status}
+          sort={sort}
+          watching={watching}
+          watchedCount={watchedIds.size}
+        />
       )}
 
       {trends.length === 0 ? (

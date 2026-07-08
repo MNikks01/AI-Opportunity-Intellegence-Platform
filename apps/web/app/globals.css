@@ -125,6 +125,30 @@
   font-size: 0.85rem;
 }
 
+/* "Watching only" filter toggle */
+.watching-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-end;
+  padding: 6px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  user-select: none;
+}
+.watching-filter input {
+  margin: 0;
+  accent-color: var(--primary);
+}
+.watching-filter.is-on {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
 /* Pagination */
 .pagination {
   display: flex;
