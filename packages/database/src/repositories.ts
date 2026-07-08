@@ -540,6 +540,28 @@ export async function listTopTrendsNeedingPlan(
   });
 }
 
+/** Resolve trends by id → slug/title/opportunity (for watchlist items that store a trend id). */
+export async function getTrendsByIds(
+  ids: string[],
+): Promise<Map<string, { slug: string; title: string; opportunity: number | null }>> {
+  if (ids.length === 0) return new Map();
+  const rows = await prisma.trend.findMany({
+    where: { id: { in: ids } },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      scores: { where: { dimension: "OPPORTUNITY" }, select: { value: true }, take: 1 },
+    },
+  });
+  return new Map(
+    rows.map((r) => [
+      r.id,
+      { slug: r.slug, title: r.title, opportunity: r.scores[0]?.value ?? null },
+    ]),
+  );
+}
+
 /** The signals that make up a trend, with their source + link, newest first. Global tables (public). */
 export async function getTrendResources(trendId: string, limit = 60): Promise<TrendResource[]> {
   const rows = await prisma.trendSignal.findMany({

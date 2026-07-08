@@ -4,6 +4,7 @@ import {
   createTrendFromSignalIds,
   ensureSource,
   getTrendResources,
+  getTrendsByIds,
   listTrendsPage,
   prisma,
 } from "./index";
@@ -75,5 +76,12 @@ describe.skipIf(!enabled)("listTrendsPage (integration)", () => {
     expect(res[0]!.source).toBe(sourceKey);
     expect(res[0]!.url).toBe("https://example.com/a");
     expect(res[0]!.title).toBe("alpha agent");
+
+    // getTrendsByIds — resolve watchlist trend items to slug/title/opportunity
+    const byId = await getTrendsByIds([t1, t2]);
+    expect(byId.get(t1)?.title).toBe("Alpha trend");
+    expect(byId.get(t1)?.opportunity).toBe(90);
+    expect(byId.get(t2)?.opportunity).toBe(10);
+    expect(byId.get(t1)?.slug).toMatch(/^alpha-trend/);
   });
 });

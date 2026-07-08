@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Watchlists: track trends end-to-end** — an "Add to watchlist" control on the trend page (pick a
+  list, one click), and watchlist items now render the trend's title + opportunity score + link instead
+  of a raw id (`getTrendsByIds`). Closes browse → track → alert. (Create/alerts/notifications already existed.)
 - **Public landing page** — `/` is now a real homepage (was a redirect): hero + CTA into /trends,
   live stats (trends/signals/sources), the top opportunities right now, a four-step "how it works"
   pipeline walkthrough, and the six official sources. Responsive + theme-aware.
