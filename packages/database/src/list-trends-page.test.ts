@@ -6,6 +6,10 @@ import {
   getTrendResources,
   getTrendsByIds,
   listTrendsPage,
+  upsertEntity,
+  linkTrendEntity,
+  getTrendEntities,
+  getRelatedTrends,
   prisma,
 } from "./index";
 
@@ -94,5 +98,15 @@ describe.skipIf(!enabled)("listTrendsPage (integration)", () => {
     expect(byId.get(t1)?.opportunity).toBe(90);
     expect(byId.get(t2)?.opportunity).toBe(10);
     expect(byId.get(t1)?.slug).toMatch(/^alpha-trend/);
+
+    // entities: link both trends to a shared entity → related-by-entity + trend entities
+    const entityId = await upsertEntity("MODEL", `TestModel-${sourceKey}`);
+    await linkTrendEntity(t1, entityId);
+    await linkTrendEntity(t2, entityId);
+    expect((await getTrendEntities(t1)).map((e) => e.name)).toContain(`TestModel-${sourceKey}`);
+    const related = await getRelatedTrends(t1);
+    expect(related.map((r) => r.slug)).toContain(byId.get(t2)!.slug);
+    expect(related.find((r) => r.slug === byId.get(t2)!.slug)!.shared).toBeGreaterThanOrEqual(1);
+    await prisma.entity.delete({ where: { id: entityId } }).catch(() => {});
   });
 });
