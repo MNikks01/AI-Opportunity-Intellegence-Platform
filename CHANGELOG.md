@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Trend comparison** — `/trends/compare?slugs=…` shows up to 4 trends' 10-dimension scorecards side
+  by side, highlighting the best value per row (lowest for inverted dims). Entered via a "Compare N
+  trends" link on any watchlist with ≥2 tracked trends.
 - **Trend ↔ entity cross-linking + related trends** — the trend detail now shows its extracted
   entities (chips linking to /entities) and a "Related trends" section (trends sharing entities, ranked
   by shared-entity count then opportunity). Deterministic — works from the entity links, no embeddings.
