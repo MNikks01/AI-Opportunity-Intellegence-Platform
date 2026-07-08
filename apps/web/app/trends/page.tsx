@@ -5,10 +5,14 @@ import {
   getSourceStats,
   listWatchlists,
   listWatchedTargetIds,
+  getTrendMomentumMap,
 } from "@aioi/database";
 import { TrendCard } from "@aioi/ui";
 import { TrendControls } from "./TrendControls";
 import { WatchToggle } from "./WatchToggle";
+import { CompareProvider } from "./CompareContext";
+import { CompareCheckbox } from "./CompareCheckbox";
+import { CompareBar } from "./CompareBar";
 import { getDevOrg } from "../lib/dev-org";
 
 export const dynamic = "force-dynamic";
@@ -79,6 +83,7 @@ export default async function TrendsPage({
         ids: watching ? [...watchedIds] : undefined,
       });
   const trends = result.trends;
+  const momentumMap = await getTrendMomentumMap(trends.map((t) => t.id));
 
   // Build a /trends URL for pagination that preserves the active source + status + sort + watching.
   const pageUrl = (p: number) => {
@@ -219,68 +224,77 @@ export default async function TrendsPage({
         />
       )}
 
-      {trends.length === 0 ? (
-        <div className="aioi-card" style={{ color: "var(--fg-muted)" }}>
-          {query
-            ? "No trends match your search."
-            : "No trends yet — run the ingestion + scoring pipeline to populate this dashboard."}
-        </div>
-      ) : (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
-            gap: "16px",
-          }}
-        >
-          {trends.map((t) => (
-            <TrendCard
-              key={t.slug}
-              slug={t.slug}
-              title={t.title}
-              summary={t.summary}
-              scores={t.scores}
-              plan={t.plan}
-              action={<WatchToggle trendId={t.id} watched={watchedIds.has(t.id)} />}
-            />
-          ))}
-        </div>
-      )}
+      <CompareProvider>
+        {trends.length === 0 ? (
+          <div className="aioi-card" style={{ color: "var(--fg-muted)" }}>
+            {query
+              ? "No trends match your search."
+              : "No trends yet — run the ingestion + scoring pipeline to populate this dashboard."}
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(min(100%, 280px), 1fr))",
+              gap: "16px",
+            }}
+          >
+            {trends.map((t) => (
+              <TrendCard
+                key={t.slug}
+                slug={t.slug}
+                title={t.title}
+                summary={t.summary}
+                scores={t.scores}
+                plan={t.plan}
+                momentum={momentumMap.get(t.id) ?? null}
+                action={
+                  <>
+                    <CompareCheckbox slug={t.slug} />
+                    <WatchToggle trendId={t.id} watched={watchedIds.has(t.id)} />
+                  </>
+                }
+              />
+            ))}
+          </div>
+        )}
 
-      {!searching && result.pageCount > 1 && (
-        <nav className="pagination" aria-label="Trends pagination">
-          {page > 1 ? (
-            <a href={pageUrl(page - 1)} className="pagination-link" rel="prev">
-              ‹ Prev
-            </a>
-          ) : (
-            <span className="pagination-link is-disabled">‹ Prev</span>
-          )}
-          {pageWindow(result.page, result.pageCount).map((p, i) =>
-            p === "…" ? (
-              <span key={`gap-${i}`} className="pagination-gap">
-                …
-              </span>
-            ) : (
-              <a
-                key={p}
-                href={pageUrl(p)}
-                aria-current={p === result.page ? "page" : undefined}
-                className={`pagination-link${p === result.page ? " is-current" : ""}`}
-              >
-                {p}
+        {!searching && result.pageCount > 1 && (
+          <nav className="pagination" aria-label="Trends pagination">
+            {page > 1 ? (
+              <a href={pageUrl(page - 1)} className="pagination-link" rel="prev">
+                ‹ Prev
               </a>
-            ),
-          )}
-          {page < result.pageCount ? (
-            <a href={pageUrl(page + 1)} className="pagination-link" rel="next">
-              Next ›
-            </a>
-          ) : (
-            <span className="pagination-link is-disabled">Next ›</span>
-          )}
-        </nav>
-      )}
+            ) : (
+              <span className="pagination-link is-disabled">‹ Prev</span>
+            )}
+            {pageWindow(result.page, result.pageCount).map((p, i) =>
+              p === "…" ? (
+                <span key={`gap-${i}`} className="pagination-gap">
+                  …
+                </span>
+              ) : (
+                <a
+                  key={p}
+                  href={pageUrl(p)}
+                  aria-current={p === result.page ? "page" : undefined}
+                  className={`pagination-link${p === result.page ? " is-current" : ""}`}
+                >
+                  {p}
+                </a>
+              ),
+            )}
+            {page < result.pageCount ? (
+              <a href={pageUrl(page + 1)} className="pagination-link" rel="next">
+                Next ›
+              </a>
+            ) : (
+              <span className="pagination-link is-disabled">Next ›</span>
+            )}
+          </nav>
+        )}
+        <CompareBar />
+      </CompareProvider>
     </main>
   );
 }
