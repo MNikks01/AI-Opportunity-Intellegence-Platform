@@ -34,7 +34,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <header className="app-header">
           <span className="app-brand">◧ AI Opportunity Intelligence</span>
-          <nav className="app-nav">
+          <nav className="app-nav" aria-label="Primary">
             <a href="/trends">Trends</a>
             <a href="/entities">Entities</a>
             <a href="/watchlists">Watchlists</a>
