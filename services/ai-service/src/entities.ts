@@ -9,6 +9,7 @@ import {
   upsertEntity,
   linkTrendEntity,
 } from "@aioi/database";
+import { getProvider, type LLMProvider } from "@aioi/ai-sdk";
 import { logger } from "@aioi/logger";
 
 interface EntityDef {
@@ -98,23 +99,44 @@ export function extractEntities(text: string): { name: string; type: EntityType 
   return [...found.values()];
 }
 
-/** Extract + link entities for trends that don't have any yet (newest first). */
+/**
+ * Extract + link entities for trends that don't have any yet (newest first). The deterministic
+ * dictionary always runs; `useLlm` adds open-ended discovery via the AI SDK (new startups/models not in
+ * the dictionary) when a real provider is configured — off by default (cost + determinism).
+ */
 export async function extractEntitiesForTrends(
-  opts: { limit?: number } = {},
-): Promise<{ trends: number; links: number }> {
+  opts: { limit?: number; useLlm?: boolean; provider?: LLMProvider } = {},
+): Promise<{ trends: number; links: number; llmLinks: number }> {
   const trends = await listTrendsForEntityExtraction(opts.limit ?? 200);
+  const provider = opts.useLlm ? (opts.provider ?? getProvider()) : null;
   let links = 0;
+  let llmLinks = 0;
   for (const t of trends) {
-    for (const e of extractEntities(t.text)) {
+    const dict = extractEntities(t.text);
+    let llm: { name: string; type: EntityType }[] = [];
+    if (provider) {
+      try {
+        llm = (await provider.extractEntities(t.text)).map((e) => ({
+          name: e.name,
+          type: e.type as EntityType,
+        }));
+      } catch (err) {
+        logger.warn({ err, trendId: t.id }, "llm entity extraction failed (skipped)");
+      }
+    }
+    const merged = new Map<string, { name: string; type: EntityType }>();
+    for (const e of [...dict, ...llm]) merged.set(`${e.type}:${e.name}`, e);
+    for (const e of merged.values()) {
       try {
         const entityId = await upsertEntity(e.type, e.name);
         await linkTrendEntity(t.id, entityId);
         links += 1;
+        if (!dict.some((d) => d.type === e.type && d.name === e.name)) llmLinks += 1;
       } catch (err) {
         logger.warn({ err, trendId: t.id, entity: e.name }, "entity link failed (skipped)");
       }
     }
   }
-  logger.info({ trends: trends.length, links }, "entity extraction complete");
-  return { trends: trends.length, links };
+  logger.info({ trends: trends.length, links, llmLinks }, "entity extraction complete");
+  return { trends: trends.length, links, llmLinks };
 }

@@ -7,8 +7,10 @@
 import {
   rawModelScoreSchema,
   actionPlanContentSchema,
+  extractedEntitiesSchema,
   type RawModelScore,
   type ActionPlanContent,
+  type ExtractedEntity,
 } from "@aioi/validation";
 import type { ScoreDimension } from "@aioi/shared";
 
@@ -35,6 +37,8 @@ export interface LLMProvider {
   readonly name: string;
   scoreDimension(req: ScoreRequest): Promise<RawModelScore>;
   generateActionPlan(req: ActionPlanRequest): Promise<ActionPlanContent>;
+  /** Open-ended entity discovery from text (companies/models/tools/people). Stub returns none. */
+  extractEntities(text: string): Promise<ExtractedEntity[]>;
 }
 
 /** FNV-1a — small, deterministic, dependency-free hash for the stub. */
@@ -95,6 +99,11 @@ export class StubProvider implements LLMProvider {
       techStack: ["Next.js", "tRPC", "PostgreSQL", "Redis"],
     };
     return Promise.resolve(actionPlanContentSchema.parse(content));
+  }
+
+  // Offline: entity discovery is left to the deterministic dictionary in @aioi/ai-service.
+  extractEntities(): Promise<ExtractedEntity[]> {
+    return Promise.resolve([]);
   }
 }
 
@@ -177,6 +186,32 @@ export class LiteLLMProvider implements LLMProvider {
     const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
     const content = data.choices?.[0]?.message?.content ?? "";
     return actionPlanContentSchema.parse(JSON.parse(content));
+  }
+
+  async extractEntities(text: string): Promise<ExtractedEntity[]> {
+    const system =
+      "Extract only real, specific named entities relevant to AI from the text — companies/labs, " +
+      "models, tools/frameworks, protocols (MCP_SERVER), notable people (PERSON), or repos (REPO). " +
+      "No generic terms. Return STRICT JSON: " +
+      '{"entities":[{"name":string,"type":"COMPANY"|"MODEL"|"REPO"|"TOOL"|"MCP_SERVER"|"PAPER"|"PERSON"}]}. ' +
+      "Max 8 entities.";
+    const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
+      method: "POST",
+      headers: this.headers(),
+      body: JSON.stringify({
+        model: this.model,
+        temperature: 0,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: text.slice(0, 4000) },
+        ],
+      }),
+    });
+    if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const content = data.choices?.[0]?.message?.content ?? "{}";
+    return extractedEntitiesSchema.parse(JSON.parse(content)).entities;
   }
 }
 
