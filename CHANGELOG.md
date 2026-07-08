@@ -16,6 +16,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Compare from the browse grid** — a "Compare" checkbox on each trend card + a floating bar
+  (select up to 4) that links to `/trends/compare`, so you can compare any trends while browsing, not
+  just ones on a watchlist.
 - **Trend comparison** — `/trends/compare?slugs=…` shows up to 4 trends' 10-dimension scorecards side
   by side, highlighting the best value per row (lowest for inverted dims). Entered via a "Compare N
   trends" link on any watchlist with ≥2 tracked trends.
