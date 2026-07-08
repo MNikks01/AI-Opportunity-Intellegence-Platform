@@ -397,6 +397,8 @@ export async function listTrendsPage(opts: {
   sort?: string;
   page?: number;
   pageSize?: number;
+  /** Restrict to these trend ids (e.g. the "watching" filter). An empty array → empty page. */
+  ids?: string[];
 }): Promise<TrendPage> {
   const page = Math.max(1, Math.floor(opts.page ?? 1));
   const pageSize = Math.min(60, Math.max(1, Math.floor(opts.pageSize ?? 24)));
@@ -408,10 +410,17 @@ export async function listTrendsPage(opts: {
   const sortDim = SCORE_DIMENSIONS.includes(opts.sort as ScoreDimension)
     ? (opts.sort as ScoreDimension)
     : null;
+  const restrictIds = opts.ids;
+
+  // An explicit empty id set (e.g. "watching" with nothing watched) → empty page, no query.
+  if (restrictIds && restrictIds.length === 0) {
+    return { trends: [], total: 0, page, pageSize, pageCount: 1 };
+  }
 
   const where: Prisma.TrendWhereInput = {
     ...(source ? { signals: { some: { signal: { source: { key: source } } } } } : {}),
     ...(status ? { status } : {}),
+    ...(restrictIds ? { id: { in: restrictIds } } : {}),
   };
 
   const total = await prisma.trend.count({ where });
@@ -428,6 +437,11 @@ export async function listTrendsPage(opts: {
         WHERE ts."trendId" = t.id AND src.key = ${source})`);
     }
     if (status) filters.push(Prisma.sql`t.status::text = ${status}`);
+    if (restrictIds) {
+      filters.push(
+        Prisma.sql`t.id IN (${Prisma.join(restrictIds.map((id) => Prisma.sql`${id}::uuid`))})`,
+      );
+    }
     const whereSql = filters.length
       ? Prisma.sql`WHERE ${Prisma.join(filters, " AND ")}`
       : Prisma.empty;
