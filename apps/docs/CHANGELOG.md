@@ -1,5 +1,12 @@
 # @aioi/docs
 
+## 0.0.6
+
+### Patch Changes
+
+- Updated dependencies [0fc7986]
+  - @aioi/ui@0.3.0
+
 ## 0.0.5
 
 ### Patch Changes
