@@ -65,6 +65,10 @@ describe.skipIf(!enabled)("daily brief (integration)", () => {
     expect(content.topTrends.length).toBeGreaterThan(0);
     expect(typeof content.watchlistCount).toBe("number");
     expect(typeof content.unreadAlerts).toBe("number");
+    // enriched per-trend fields: score band + (possibly null) top build idea
+    const top = content.topTrends[0]!;
+    expect(["low", "medium", "high"]).toContain(top.band);
+    expect(top).toHaveProperty("topIdea");
   });
 
   it("lists briefs and tracks opens (idempotent)", async () => {

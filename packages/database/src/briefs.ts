@@ -4,6 +4,7 @@
  * through `withOrgContext` (Brief has direct-org RLS); the top-trends query is over global tables.
  */
 import type { Prisma } from "@prisma/client";
+import { bandForValue, type ScoreBand } from "@aioi/shared";
 import { withOrgContext } from "./rls";
 import { NotFoundError } from "./watchlists";
 import { prisma } from "./client";
@@ -12,6 +13,9 @@ export interface BriefTrend {
   slug: string;
   title: string;
   opportunity: number;
+  band: ScoreBand;
+  /** First SaaS idea from the trend's action plan, if one exists. */
+  topIdea: string | null;
 }
 
 export interface BriefContent {
@@ -22,16 +26,40 @@ export interface BriefContent {
   unreadAlerts: number;
 }
 
-/** Highest-opportunity trends (global). MAX collapses rubric versions to one row per trend. */
+/**
+ * Highest-opportunity trends (global), enriched with the score band + the trend's top build idea (from
+ * its action plan). MAX collapses rubric versions to one row per trend.
+ */
 async function topOpportunityTrends(limit: number): Promise<BriefTrend[]> {
-  const rows = await prisma.$queryRaw<Array<{ slug: string; title: string; opportunity: number }>>`
-    SELECT t.slug, t.title, MAX(s.value) AS opportunity
+  const rows = await prisma.$queryRaw<
+    Array<{ id: string; slug: string; title: string; opportunity: number }>
+  >`
+    SELECT t.id, t.slug, t.title, MAX(s.value) AS opportunity
     FROM "Trend" t
     JOIN "Score" s ON s."trendId" = t.id AND s.dimension = 'OPPORTUNITY'
-    GROUP BY t.slug, t.title
+    GROUP BY t.id, t.slug, t.title
     ORDER BY opportunity DESC
     LIMIT ${limit}`;
-  return rows.map((r) => ({ slug: r.slug, title: r.title, opportunity: Number(r.opportunity) }));
+  const ids = rows.map((r) => r.id);
+  const plans = ids.length
+    ? await prisma.actionPlan.findMany({
+        where: { trendId: { in: ids } },
+        select: { trendId: true, content: true },
+      })
+    : [];
+  const ideaByTrend = new Map(
+    plans.map((p) => [p.trendId, (p.content as { saasIdeas?: string[] })?.saasIdeas?.[0] ?? null]),
+  );
+  return rows.map((r) => {
+    const opportunity = Number(r.opportunity);
+    return {
+      slug: r.slug,
+      title: r.title,
+      opportunity,
+      band: bandForValue(opportunity),
+      topIdea: ideaByTrend.get(r.id) ?? null,
+    };
+  });
 }
 
 export async function generateDailyBrief(orgId: string, userId?: string) {
