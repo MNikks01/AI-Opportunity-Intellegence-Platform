@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Trend ↔ entity cross-linking + related trends** — the trend detail now shows its extracted
+  entities (chips linking to /entities) and a "Related trends" section (trends sharing entities, ranked
+  by shared-entity count then opportunity). Deterministic — works from the entity links, no embeddings.
+  New `getTrendEntities` + `getRelatedTrends`.
 - **Trends CSV/JSON export** — `/trends/export` streams the current filtered/searched view (title,
   status, all 10 dimensions, top idea, url) as CSV or JSON; "Export CSV / JSON" links on the page.
 - **Polish pass** — loading-skeleton fallbacks for /trends and /entities, a global `:focus-visible`

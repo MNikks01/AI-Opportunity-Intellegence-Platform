@@ -102,6 +102,56 @@ export async function listTrendsForEntity(entityId: string, limit = 100): Promis
     .sort((a, b) => (b.opportunity ?? -1) - (a.opportunity ?? -1));
 }
 
+/** The entities linked to a trend (for the trend detail page). */
+export async function getTrendEntities(
+  trendId: string,
+): Promise<{ id: string; type: EntityType; name: string }[]> {
+  const rows = await prisma.trendEntity.findMany({
+    where: { trendId },
+    include: { entity: { select: { id: true, type: true, name: true } } },
+  });
+  return rows.map((r) => r.entity);
+}
+
+export interface RelatedTrend {
+  slug: string;
+  title: string;
+  opportunity: number | null;
+  band: ScoreBand | null;
+  shared: number;
+}
+
+/**
+ * Trends that share ≥1 entity with the given trend (excluding itself), ranked by number of shared
+ * entities then opportunity. Deterministic "related" — works from the dictionary links, no embeddings.
+ */
+export async function getRelatedTrends(trendId: string, limit = 6): Promise<RelatedTrend[]> {
+  const rows = await prisma.$queryRaw<
+    Array<{ slug: string; title: string; shared: number; opportunity: number | null }>
+  >`
+    SELECT t.slug, t.title,
+           COUNT(DISTINCT te2."entityId")::int AS shared,
+           MAX(CASE WHEN s.dimension = 'OPPORTUNITY' THEN s.value END) AS opportunity
+    FROM "TrendEntity" te1
+    JOIN "TrendEntity" te2 ON te2."entityId" = te1."entityId" AND te2."trendId" <> te1."trendId"
+    JOIN "Trend" t ON t.id = te2."trendId"
+    LEFT JOIN "Score" s ON s."trendId" = t.id
+    WHERE te1."trendId" = ${trendId}::uuid
+    GROUP BY t.id, t.slug, t.title
+    ORDER BY shared DESC, opportunity DESC NULLS LAST
+    LIMIT ${limit}`;
+  return rows.map((r) => {
+    const opportunity = r.opportunity !== null ? Number(r.opportunity) : null;
+    return {
+      slug: r.slug,
+      title: r.title,
+      shared: Number(r.shared),
+      opportunity,
+      band: opportunity !== null ? bandForValue(opportunity) : null,
+    };
+  });
+}
+
 /** Trends with no entity links yet + their combined text, for the extraction step (newest first). */
 export async function listTrendsForEntityExtraction(
   limit = 200,

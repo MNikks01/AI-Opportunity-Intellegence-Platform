@@ -1,9 +1,16 @@
-import { getTrendBySlug, getTrendResources, listWatchlists } from "@aioi/database";
+import {
+  getTrendBySlug,
+  getTrendResources,
+  listWatchlists,
+  getTrendEntities,
+  getRelatedTrends,
+} from "@aioi/database";
 import { Badge, Card, Scorecard } from "@aioi/ui";
 import { notFound } from "next/navigation";
 import { ResourceItem } from "./ResourceItem";
 import { getDevOrg } from "../../lib/dev-org";
 import { watchTrendAction } from "../../watchlists/actions";
+import { TYPE_LABELS } from "../../entities/page";
 
 export const dynamic = "force-dynamic";
 
@@ -67,9 +74,11 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
   if (!trend) notFound();
   const plan = trend.actionPlan?.content as ActionPlan | undefined;
   const { organizationId } = await getDevOrg();
-  const [resources, watchlists] = await Promise.all([
+  const [resources, watchlists, entities, related] = await Promise.all([
     getTrendResources(trend.id),
     listWatchlists(organizationId),
+    getTrendEntities(trend.id),
+    getRelatedTrends(trend.id, 6),
   ]);
   const sourceCount = new Set(resources.map((r) => r.source)).size;
   // Sub-dimension rationales (opportunity's rationale already leads the scorecard).
@@ -117,9 +126,43 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
         </p>
       )}
 
+      {entities.length > 0 && (
+        <div className="trend-entities">
+          <span className="trend-entities-label">Entities:</span>
+          {entities.map((e) => (
+            <a key={e.id} href={`/entities/${e.id}`} className="trend-entity-chip">
+              {e.name}
+              <span className="trend-entity-type">{TYPE_LABELS[e.type] ?? e.type}</span>
+            </a>
+          ))}
+        </div>
+      )}
+
       <div style={{ maxWidth: 560 }}>
         <Scorecard scores={trend.scores} />
       </div>
+
+      {related.length > 0 && (
+        <>
+          <h2 style={{ fontSize: "1.25rem", margin: "32px 0 8px" }}>Related trends</h2>
+          <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "0 0 12px" }}>
+            Trends that share entities with this one.
+          </p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+            {related.map((r) => (
+              <a key={r.slug} href={`/trends/${r.slug}`} className="entity-trend">
+                <span>{r.title}</span>
+                <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <span style={{ color: "var(--fg-muted)", fontSize: "0.75rem" }}>
+                    {r.shared} shared
+                  </span>
+                  {r.opportunity !== null && r.band && <Badge band={r.band}>{r.opportunity}</Badge>}
+                </span>
+              </a>
+            ))}
+          </div>
+        </>
+      )}
 
       <h2 style={{ fontSize: "1.25rem", margin: "32px 0 8px" }}>Sources &amp; resources</h2>
       {resources.length > 0 ? (
