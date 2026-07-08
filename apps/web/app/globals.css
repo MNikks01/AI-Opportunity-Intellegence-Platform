@@ -125,6 +125,61 @@
   font-size: 0.85rem;
 }
 
+/* Notifications */
+.notif {
+  border-left: 3px solid var(--primary);
+}
+.notif--read {
+  border-left-color: transparent;
+  opacity: 0.66;
+}
+.notif-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.notif-title {
+  font-weight: 600;
+  color: var(--fg);
+}
+.notif-time {
+  color: var(--fg-muted);
+  font-size: 0.75rem;
+  margin-left: auto;
+  white-space: nowrap;
+}
+.notif-body {
+  color: var(--fg-muted);
+  margin: 4px 0 0;
+  font-size: 0.875rem;
+}
+.notif-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+.notif-link:hover {
+  text-decoration: underline;
+}
+.notif-btn {
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.notif-btn:hover {
+  border-color: var(--primary);
+  color: var(--fg);
+}
+
 /* "Watching only" filter toggle */
 .watching-filter {
   display: inline-flex;
