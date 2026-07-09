@@ -1,6 +1,6 @@
 {
   "name": "@aioi/api",
-  "version": "0.8.13",
+  "version": "0.8.14",
   "private": true,
   "type": "module",
   "description": "Fastify: tRPC (internal) + REST/OpenAPI (public) + WebSocket. Single business-logic layer.",
