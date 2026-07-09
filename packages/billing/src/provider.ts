@@ -3,7 +3,7 @@
  * the SDK lives); this package owns the interface, a deterministic Stub for dev/test, and the pure
  * mapping from a Stripe subscription event to our plan.
  */
-import { isPaidPlan, type Plan, type PaidPlan } from "./index";
+import { isPaidPlan, type Plan, type PaidPlan, type BillingInterval } from "./index";
 
 export interface CheckoutSession {
   url: string;
@@ -12,6 +12,7 @@ export interface CheckoutSession {
 export interface CheckoutInput {
   orgId: string;
   plan: PaidPlan;
+  interval: BillingInterval;
   successUrl: string;
   cancelUrl: string;
 }
@@ -25,7 +26,7 @@ export interface BillingProvider {
 export class StubBillingProvider implements BillingProvider {
   readonly name = "stub";
   createCheckoutSession(input: CheckoutInput): Promise<CheckoutSession> {
-    const url = `${input.successUrl}?stub_checkout=1&plan=${input.plan}&org=${input.orgId}`;
+    const url = `${input.successUrl}?stub_checkout=1&plan=${input.plan}&interval=${input.interval}&org=${input.orgId}`;
     return Promise.resolve({ url });
   }
 }

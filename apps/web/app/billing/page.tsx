@@ -8,6 +8,7 @@ import {
   listApiKeys,
   getApiKeyUsageToday,
 } from "@aioi/database";
+import { isBillingInterval, type BillingInterval } from "@aioi/billing";
 import { Badge, Card } from "@aioi/ui";
 import { getDevOrg } from "../lib/dev-org";
 import { stripeConfigured } from "../lib/billing";
@@ -29,7 +30,7 @@ const BANNERS: Record<string, { text: string; band: "high" | "medium" }> = {
 export default async function BillingPage({
   searchParams,
 }: {
-  searchParams: Promise<{ checkout?: string }>;
+  searchParams: Promise<{ checkout?: string; interval?: string }>;
 }) {
   const { organizationId } = await getDevOrg();
   const [plan, ent, sub, watchlists, alerts, seats, apiKeys] = await Promise.all([
@@ -46,7 +47,9 @@ export default async function BillingPage({
     : new Map<string, number>();
   // The quota is per key per day, so the meaningful "closest to the cap" figure is the busiest key.
   const apiPeak = usageToday.size ? Math.max(...usageToday.values()) : 0;
-  const { checkout } = await searchParams;
+  const { checkout, interval: rawInterval } = await searchParams;
+  const interval: BillingInterval =
+    rawInterval && isBillingInterval(rawInterval) ? rawInterval : "monthly";
   const banner = checkout ? BANNERS[checkout] : undefined;
   const isPaid = plan === "PRO" || plan === "TEAM";
   const hasStripeCustomer = Boolean(sub?.stripeCustomerId);
@@ -56,13 +59,37 @@ export default async function BillingPage({
   return (
     <main>
       <h1 style={{ fontSize: "1.5rem", margin: "0 0 4px" }}>Billing</h1>
-      <p style={{ color: "var(--fg-muted)", margin: "0 0 20px" }}>
+      <p style={{ color: "var(--fg-muted)", margin: "0 0 16px" }}>
         Your plan and entitlements. Compare tiers on the{" "}
         <a href="/pricing" style={{ color: "var(--primary)" }}>
           pricing page
         </a>
         .
       </p>
+
+      {plan !== "TEAM" && (
+        <div
+          className="pricing-toggle"
+          role="group"
+          aria-label="Billing interval"
+          style={{ margin: "0 0 20px" }}
+        >
+          <a
+            href="/billing?interval=monthly"
+            className={interval === "annual" ? "" : "is-active"}
+            aria-current={interval !== "annual"}
+          >
+            Monthly
+          </a>
+          <a
+            href="/billing?interval=annual"
+            className={interval === "annual" ? "is-active" : ""}
+            aria-current={interval === "annual"}
+          >
+            Annual <span className="pricing-save">2 months free</span>
+          </a>
+        </div>
+      )}
 
       {banner && (
         <div
@@ -95,6 +122,7 @@ export default async function BillingPage({
             {plan === "FREE" && (
               <form action={startCheckoutAction}>
                 <input type="hidden" name="plan" value="PRO" />
+                <input type="hidden" name="interval" value={interval} />
                 <button type="submit" className="billing-btn billing-btn-primary">
                   Upgrade to Pro{testSuffix}
                 </button>
@@ -103,6 +131,7 @@ export default async function BillingPage({
             {plan !== "TEAM" && (
               <form action={startCheckoutAction}>
                 <input type="hidden" name="plan" value="TEAM" />
+                <input type="hidden" name="interval" value={interval} />
                 <button type="submit" className="billing-btn billing-btn-primary">
                   Upgrade to Team{testSuffix}
                 </button>

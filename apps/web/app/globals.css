@@ -1469,6 +1469,47 @@ a.resource-link:hover {
   color: var(--fg-muted);
   line-height: 1.6;
 }
+.pricing-toggle {
+  display: inline-flex;
+  gap: 4px;
+  margin: 20px auto 0;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-subtle);
+}
+.pricing-toggle a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+.pricing-toggle a.is-active {
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+.pricing-save {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--success);
+  color: #fff;
+}
+.pricing-toggle a.is-active .pricing-save {
+  background: rgba(255, 255, 255, 0.24);
+}
+.pricing-billed {
+  color: var(--fg-muted);
+  font-size: 0.8rem;
+  margin: 2px 0 0;
+}
 .pricing-tiers {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
