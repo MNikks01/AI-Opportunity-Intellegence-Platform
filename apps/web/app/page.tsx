@@ -59,6 +59,12 @@ const FEATURES = [
     href: "/team",
     text: "The daily brief delivered to your Slack or Discord.",
   },
+  {
+    icon: "📰",
+    title: "State of AI report",
+    href: "/report",
+    text: "A live snapshot of the whole opportunity landscape.",
+  },
 ];
 
 const STEPS = [

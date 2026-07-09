@@ -24,6 +24,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **State of AI Opportunities report** — a public `/report` snapshot composing the top opportunities,
+  the Golden-Quadrant distribution, momentum leaders, most-tracked entities, and the source breakdown
+  into one shareable, SEO-indexed page (in the sitemap + a homepage feature card).
 - **Weekly newsletter send** — format the top opportunities as an email (HTML + plain-text, with a
   `List-Unsubscribe` header) and send to every active subscriber via Resend, each with a personal
   unsubscribe link. New `buildNewsletterHtml`/`buildNewsletterText`/`sendEmail` + `scripts/newsletter.ts`
