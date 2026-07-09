@@ -24,6 +24,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Weekly newsletter send** — format the top opportunities as an email (HTML + plain-text, with a
+  `List-Unsubscribe` header) and send to every active subscriber via Resend, each with a personal
+  unsubscribe link. New `buildNewsletterHtml`/`buildNewsletterText`/`sendEmail` + `scripts/newsletter.ts`
+  + a weekly `newsletter.yml` workflow (gated on `RESEND_API_KEY`; dry-run supported).
 - **Newsletter signup** — a homepage form to subscribe to a free weekly digest (new `Subscriber`
   model + idempotent, case-insensitive `subscribe`/`unsubscribe`/`listActiveSubscribers`), and a
   token-based `/unsubscribe` page. The top-of-funnel list starts building now; the weekly send follows.
