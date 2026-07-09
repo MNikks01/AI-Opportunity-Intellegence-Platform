@@ -16,6 +16,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Added
+- **Demand mining (Golden Quadrant)** — detect demand-expressing signals ("Ask HN", "is there a
+  tool for…", "I wish there was…", "alternative to…") and blend them into the quadrant's demand axis,
+  so articulated demand lifts a trend toward "build now". Build-now rows show an "N wanted" tag. New
+  `mineDemand` + `getTrendDemandHits`.
 - **The Golden Quadrant** — a `/quadrant` scatter plotting every scored trend on demand (business
   viability) × supply (competition), highlighting the high-demand/low-supply "build now" region, with a
   ranked build-now list. First cut of the USP demand×supply view (new `listTrendsQuadrant`).

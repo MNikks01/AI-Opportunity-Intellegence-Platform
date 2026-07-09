@@ -40,8 +40,8 @@ export default async function QuadrantPage() {
           margin: "0 0 20px",
         }}
       >
-        Demand uses the model&rsquo;s business score today; mined &ldquo;I wish there was…&rdquo;
-        signals fold in next.
+        Demand blends business viability with mined demand — signals where people ask for a tool
+        (&ldquo;Ask HN&rdquo;, &ldquo;is there a tool for…&rdquo;) lift a trend up the demand axis.
       </p>
 
       <div className="quadrant-chart-wrap">
@@ -131,6 +131,11 @@ export default async function QuadrantPage() {
             <a key={t.slug} href={`/trends/${t.slug}`} className="entity-trend">
               <span>{t.title}</span>
               <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                {t.demandSignals > 0 && (
+                  <span style={{ color: "#12a594", fontSize: "0.72rem", fontWeight: 600 }}>
+                    {t.demandSignals} wanted
+                  </span>
+                )}
                 <span style={{ color: "var(--fg-muted)", fontSize: "0.72rem" }}>
                   demand {t.demand} · supply {t.supply}
                 </span>
