@@ -1,5 +1,19 @@
 # @aioi/database
 
+## 0.23.0
+
+### Minor Changes
+
+- d122844: API rate limiting: authenticated API keys now count against a 1,000/day quota (DB-backed), return
+  X-RateLimit-* headers, and get a 429 when exhausted. Usage shown per key on /team. New ApiKeyUsage model
+
+  - recordApiKeyUsage/getApiKeyUsageToday.
+
+### Patch Changes
+
+- Updated dependencies [30ddabc]
+  - @aioi/billing@0.3.0
+
 ## 0.22.0
 
 ### Minor Changes

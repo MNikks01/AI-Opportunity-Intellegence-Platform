@@ -1,5 +1,15 @@
 # @aioi/api
 
+## 0.8.19
+
+### Patch Changes
+
+- Updated dependencies [d122844]
+- Updated dependencies [30ddabc]
+  - @aioi/database@0.23.0
+  - @aioi/billing@0.3.0
+  - @aioi/ai-service@0.7.4
+
 ## 0.8.18
 
 ### Patch Changes

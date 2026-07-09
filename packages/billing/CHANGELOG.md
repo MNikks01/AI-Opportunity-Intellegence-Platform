@@ -1,5 +1,12 @@
 # @aioi/billing
 
+## 0.3.0
+
+### Minor Changes
+
+- 30ddabc: Plan-aware API quota: the daily API rate limit now comes from the org plan's entitlements (Free 1,000/day,
+  Pro 50,000/day) instead of a constant. New apiDailyQuota entitlement; /team shows the plan + quota.
+
 ## 0.2.0
 
 ### Minor Changes
