@@ -1,12 +1,20 @@
 import "@aioi/ui/tokens.css";
 import "./globals.css";
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { clerkEnabled } from "./lib/dev-org";
+import { getSiteUrl } from "./lib/site";
 
-export const metadata = {
-  title: "AI Opportunity Intelligence",
+export const metadata: Metadata = {
+  metadataBase: new URL(getSiteUrl()),
+  title: {
+    default: "AI Opportunity Intelligence",
+    template: "%s · AI Opportunity Intelligence",
+  },
   description: "Discover AI trends before everyone else. Validate opportunities. Build faster.",
+  openGraph: { siteName: "AI Opportunity Intelligence", type: "website" },
+  twitter: { card: "summary" },
 };
 
 // Ensure correct scaling on phones/tablets (device-width, no forced zoom).

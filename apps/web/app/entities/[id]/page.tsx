@@ -1,9 +1,30 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getEntityById, listTrendsForEntity } from "@aioi/database";
+import { getEntityById, listTrendsForEntity, getEntitySeo } from "@aioi/database";
 import { Badge } from "@aioi/ui";
 import { TYPE_LABELS } from "../page";
+import { getSiteUrl } from "../../lib/site";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const seo = await getEntitySeo(id);
+  if (!seo) return { title: "Entity not found", robots: { index: false } };
+  const label = TYPE_LABELS[seo.type as keyof typeof TYPE_LABELS] ?? seo.type;
+  const description = `${seo.name} (${label}) in AI — every trend that mentions it, ranked by opportunity.`;
+  const url = `${getSiteUrl()}/entities/${id}`;
+  return {
+    title: `${seo.name} — ${label}`,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title: `${seo.name} — ${label}`, description, url, type: "profile" },
+  };
+}
 
 export default async function EntityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
