@@ -978,6 +978,70 @@ a.resource-link:hover {
   gap: 8px;
 }
 
+/* Landing: USP pillars + feature grid */
+.home-pillars {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+.home-pillar {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  padding: 22px;
+  background: var(--bg-subtle);
+}
+.home-pillar .n {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--primary);
+}
+.home-pillar h3 {
+  margin: 10px 0 8px;
+  font-size: 1.05rem;
+}
+.home-pillar p {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.5;
+}
+.home-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 14px;
+}
+.home-feature {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  text-decoration: none;
+  color: var(--fg);
+  display: block;
+  transition: border-color 0.15s ease;
+}
+.home-feature:hover {
+  border-color: var(--primary);
+}
+.home-feature .icon {
+  font-size: 1.35rem;
+}
+.home-feature h3 {
+  margin: 8px 0 4px;
+  font-size: 0.98rem;
+}
+.home-feature p {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  margin: 0;
+  line-height: 1.45;
+}
+@media (max-width: 720px) {
+  .home-pillars {
+    grid-template-columns: 1fr;
+  }
+}
+
 .home-final {
   text-align: center;
   margin: 64px 0 24px;
