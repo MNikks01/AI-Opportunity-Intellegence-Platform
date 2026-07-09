@@ -2,12 +2,18 @@ import { listWatchlists } from "@aioi/database";
 import { Badge, Card } from "@aioi/ui";
 import { getDevOrg } from "../lib/dev-org";
 import { createWatchlistAction, deleteWatchlistAction } from "./actions";
+import { UpgradeNotice } from "./UpgradeNotice";
 
 export const dynamic = "force-dynamic";
 
-export default async function WatchlistsPage() {
+export default async function WatchlistsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ limit?: string }>;
+}) {
   const { organizationId } = await getDevOrg();
   const lists = await listWatchlists(organizationId);
+  const { limit } = await searchParams;
 
   return (
     <main>
@@ -15,6 +21,8 @@ export default async function WatchlistsPage() {
       <p style={{ color: "var(--fg-muted)", margin: "0 0 20px" }}>
         Track trends, entities, and topics you care about.
       </p>
+
+      {limit === "watchlists" && <UpgradeNotice feature="watchlists" />}
 
       <form
         action={createWatchlistAction}

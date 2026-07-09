@@ -24,6 +24,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Entitlement enforcement at the write paths** — `createAlert` now enforces the plan's
+  `maxAlerts` (Free 10) the way `createWatchlist` already enforced `maxWatchlists`, throwing
+  `PlanLimitError`; semantic search on `/trends` is gated on the `semanticSearch` entitlement (Free
+  falls back to keyword search with an upgrade prompt). Blocked creates redirect back with an inline
+  “upgrade to Pro” banner instead of surfacing an error.
 - **Stripe checkout & webhook** — self-serve upgrades on `/billing`: *Upgrade to Pro* opens Stripe
   Checkout (or applies Pro directly in test mode), a signature-verified webhook at
   `/api/stripe/webhook` is the source of truth for plan changes (pure, unit-tested event→plan

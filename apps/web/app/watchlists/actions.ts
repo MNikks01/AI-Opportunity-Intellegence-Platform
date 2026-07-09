@@ -13,6 +13,7 @@ import {
   getOrCreatePrimaryWatchlist,
   removeWatchlistItemByTarget,
 } from "@aioi/database";
+import { PlanLimitError } from "@aioi/billing";
 import { createWatchlistSchema, watchlistItemSchema, createAlertSchema } from "@aioi/validation";
 import { getDevOrg } from "../lib/dev-org";
 
@@ -61,7 +62,12 @@ export async function createWatchlistAction(formData: FormData): Promise<void> {
     name: String(formData.get("name") ?? ""),
   });
   if (!parsed.success) return;
-  await createWatchlist(organizationId, parsed.data);
+  try {
+    await createWatchlist(organizationId, parsed.data);
+  } catch (e) {
+    if (e instanceof PlanLimitError) redirect("/watchlists?limit=watchlists");
+    throw e;
+  }
   revalidatePath("/watchlists");
 }
 
@@ -108,7 +114,12 @@ export async function createAlertAction(formData: FormData): Promise<void> {
       : { type: "NEW_TREND" as const };
   const parsed = createAlertSchema.safeParse({ watchlistId, trigger });
   if (!parsed.success) return;
-  await createAlert(organizationId, parsed.data);
+  try {
+    await createAlert(organizationId, parsed.data);
+  } catch (e) {
+    if (e instanceof PlanLimitError) redirect(`/watchlists/${watchlistId}?limit=alerts`);
+    throw e;
+  }
   revalidatePath(`/watchlists/${watchlistId}`);
 }
 

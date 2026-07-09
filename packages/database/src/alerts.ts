@@ -5,6 +5,7 @@
  * follow-up — they read unsent notifications.
  */
 import type { Prisma } from "@prisma/client";
+import { entitlementsFor, withinLimit, PlanLimitError } from "@aioi/billing";
 import { alertTriggerSchema, type AlertTrigger, type CreateAlertInput } from "@aioi/validation";
 import { prisma } from "./client";
 import { withOrgContext } from "./rls";
@@ -42,6 +43,14 @@ async function requireWatchlist(tx: Prisma.TransactionClient, id: string) {
 export function createAlert(orgId: string, input: CreateAlertInput) {
   return withOrgContext(orgId, async (tx) => {
     await requireWatchlist(tx, input.watchlistId);
+
+    // Enforce the plan's alert limit (B-020). Alerts are org-scoped via RLS (EXISTS-through-parent),
+    // so this count is the org's total across all watchlists. No subscription row → FREE.
+    const sub = await tx.subscription.findFirst();
+    const limit = entitlementsFor(sub?.plan ?? "FREE").maxAlerts;
+    const count = await tx.alert.count();
+    if (!withinLimit(limit, count)) throw new PlanLimitError("alerts");
+
     return tx.alert.create({
       data: {
         watchlistId: input.watchlistId,
