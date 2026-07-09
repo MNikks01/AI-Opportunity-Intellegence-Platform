@@ -1,14 +1,20 @@
-import { getPlan, getEntitlements, getSubscription } from "@aioi/database";
+import {
+  getPlan,
+  getEntitlements,
+  getSubscription,
+  countWatchlists,
+  countAlerts,
+  countMembers,
+  listApiKeys,
+  getApiKeyUsageToday,
+} from "@aioi/database";
 import { Badge, Card } from "@aioi/ui";
 import { getDevOrg } from "../lib/dev-org";
 import { stripeConfigured } from "../lib/billing";
 import { startCheckoutAction, openPortalAction, cancelSubscriptionAction } from "./actions";
+import { UsageMeter } from "./UsageMeter";
 
 export const dynamic = "force-dynamic";
-
-function fmtLimit(n: number): string {
-  return n < 0 ? "Unlimited" : n.toLocaleString();
-}
 
 const BANNERS: Record<string, { text: string; band: "high" | "medium" }> = {
   success: { text: "Payment received — your plan is now active.", band: "high" },
@@ -26,11 +32,20 @@ export default async function BillingPage({
   searchParams: Promise<{ checkout?: string }>;
 }) {
   const { organizationId } = await getDevOrg();
-  const [plan, ent, sub] = await Promise.all([
+  const [plan, ent, sub, watchlists, alerts, seats, apiKeys] = await Promise.all([
     getPlan(organizationId),
     getEntitlements(organizationId),
     getSubscription(organizationId),
+    countWatchlists(organizationId),
+    countAlerts(organizationId),
+    countMembers(organizationId),
+    listApiKeys(organizationId),
   ]);
+  const usageToday = apiKeys.length
+    ? await getApiKeyUsageToday(apiKeys.map((k) => k.id))
+    : new Map<string, number>();
+  // The quota is per key per day, so the meaningful "closest to the cap" figure is the busiest key.
+  const apiPeak = usageToday.size ? Math.max(...usageToday.values()) : 0;
   const { checkout } = await searchParams;
   const banner = checkout ? BANNERS[checkout] : undefined;
   const isPaid = plan === "PRO" || plan === "TEAM";
@@ -111,13 +126,22 @@ export default async function BillingPage({
         </div>
 
         <ul style={{ margin: "16px 0 0", paddingLeft: 18, color: "var(--fg-muted)" }}>
-          <li>Watchlists: {fmtLimit(ent.maxWatchlists)}</li>
-          <li>Alerts: {fmtLimit(ent.maxAlerts)}</li>
-          <li>Team seats: {fmtLimit(ent.maxSeats)}</li>
           <li>Semantic search: {ent.semanticSearch ? "Yes" : "No"}</li>
           <li>Daily brief: {ent.dailyBrief ? "Yes" : "No"}</li>
-          <li>API quota: {fmtLimit(ent.apiDailyQuota)} requests/day per key</li>
         </ul>
+      </Card>
+
+      <h2 style={{ fontSize: "1.125rem", margin: "28px 0 4px" }}>Usage</h2>
+      <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "0 0 14px" }}>
+        What you&rsquo;re using against your plan&rsquo;s limits. API resets daily (UTC).
+      </p>
+      <Card>
+        <div className="usage-grid">
+          <UsageMeter label="Watchlists" used={watchlists} limit={ent.maxWatchlists} />
+          <UsageMeter label="Alerts" used={alerts} limit={ent.maxAlerts} />
+          <UsageMeter label="Team seats" used={seats} limit={ent.maxSeats} />
+          <UsageMeter label="API today (busiest key)" used={apiPeak} limit={ent.apiDailyQuota} />
+        </div>
       </Card>
 
       <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "14px 2px 0" }}>
