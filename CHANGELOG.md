@@ -28,6 +28,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Public RSS feed** (`/feed.xml`) — an RSS 2.0 feed of the newest scored opportunities (title,
+  link, opportunity score, build idea, `pubDate`) from a new `listTrendFeed` query, with feed-reader
+  autodiscovery in the document head. A distribution channel for readers + automation alongside the
+  API/MCP.
 - **Related opportunities** on the trend page — a new `relatedTrends` query finds the
   embedding-nearest trends (pgvector `<=>`, excluding itself); the trend detail "Related" section
   now shows shared-entity matches first and fills with semantically-similar trends, so even
