@@ -24,9 +24,11 @@ The `docs/` tree evolves phase by phase per [ROADMAP](09-process/ROADMAP.md). St
 ## Completed so far
 
 - Phases 1–22 (Discovery → design → data/API → infra → standards → planning), all documented.
-- Phase 23 implementation: **feature-complete and released** — full stack running end-to-end, 162
-  tests. See the [ROADMAP current position](09-process/ROADMAP.md#current-position).
-- ADRs: 0001 core stack · 0002 auth/RBAC · 0003 row-level security.
+- Phase 23 implementation: **feature-complete** across the core loop, growth engine, collaboration,
+  programmatic access, and a full three-tier monetization surface — running end-to-end, **262 tests**.
+  See **[Implementation Status & Product Direction](01-product/IMPLEMENTATION_STATUS.md)** for the full
+  picture, or the [ROADMAP current position](09-process/ROADMAP.md#current-position) for the summary.
+- ADRs: 0001 core stack · 0002 auth/RBAC · 0003 row-level security · 0004 billing & entitlements.
 
 ## Getting started
 
@@ -39,4 +41,5 @@ The `docs/` tree evolves phase by phase per [ROADMAP](09-process/ROADMAP.md). St
 2. [Personas](00-discovery/PERSONAS.md) → [Competitive Analysis](00-discovery/COMPETITIVE_ANALYSIS.md)
 3. [PRD](01-product/PRODUCT_REQUIREMENTS_DOCUMENT.md)
 4. [TRD](01-product/TECHNICAL_REQUIREMENTS_DOCUMENT.md) → [ADR-0001](adr/ADR-0001-core-stack.md)
-5. [Roadmap](09-process/ROADMAP.md) for what's next.
+5. [Implementation Status](01-product/IMPLEMENTATION_STATUS.md) — what's built, decided, and next.
+6. [Roadmap](09-process/ROADMAP.md) for the phase tracker.

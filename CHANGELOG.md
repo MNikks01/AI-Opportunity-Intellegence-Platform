@@ -11,6 +11,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Docs: implementation status + ADR-0004** — a new `docs/01-product/IMPLEMENTATION_STATUS.md`
+  (what's built, decisions, business model, forward roadmap), `ADR-0004` (billing & entitlements
+  architecture), and refreshed ROADMAP current-position + BACKLOG to match the shipped monetization
+  wave.
 - **Landing page refresh** — a sharper USP hero (“See what to build before it’s a trend”), the
   three differentiation pillars, a feature grid (Golden Quadrant, momentum, build kit, entities, API+MCP,
   digests), a 5-step pipeline, 8 sources, and an API CTA.
