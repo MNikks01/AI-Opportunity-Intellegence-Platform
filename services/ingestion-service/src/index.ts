@@ -43,6 +43,8 @@ export {
 } from "./connectors/youtube";
 // Selective re-export: arxiv shares names (normalize/IngestResult) with hackernews.
 export { ARXIV_SOURCE_KEY, fetchPapers, parseAtom, type ArxivEntry } from "./connectors/arxiv";
+// Selective re-export: npm shares names (normalize) with hackernews.
+export { NPM_SOURCE_KEY, DEFAULT_NPM_QUERY, fetchPackages, type NpmObject } from "./connectors/npm";
 export * from "./repository";
 export * from "./repository.prisma";
 
@@ -55,6 +57,7 @@ import { fetchModels } from "./connectors/huggingface";
 import { fetchTopPosts, productHuntConfigured } from "./connectors/producthunt";
 import { fetchVideos, youtubeConfigured } from "./connectors/youtube";
 import { fetchPapers } from "./connectors/arxiv";
+import { fetchPackages } from "./connectors/npm";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -91,6 +94,23 @@ export async function runArxivIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "arxiv", ...result }, "ingestion pass complete");
   await recordIngestionRun("arxiv", result, startedAt);
+  return result;
+}
+
+/**
+ * Run one npm ingestion pass (top AI packages by popularity). Keyless, always safe to schedule —
+ * package adoption is a leading indicator.
+ */
+export async function runNpmIngestion(
+  limit = 30,
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
+  const { records, skipped } = await fetchPackages(limit);
+  const inserted = await repo.upsertMany(records);
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "npm", ...result }, "ingestion pass complete");
+  await recordIngestionRun("npm", result, startedAt);
   return result;
 }
 
