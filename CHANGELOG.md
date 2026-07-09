@@ -24,6 +24,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **tRPC `trends.semanticSearch` gated on entitlements** — now a `protectedProcedure` requiring
+  `search:read` and a plan that grants `semanticSearch` (Pro/Team), returning `FORBIDDEN`
+  otherwise. Closes the last ungated semantic-search surface (the web `/trends` flow was already gated).
 - **Usage panel on `/billing`** — usage-vs-limit meters for watchlists, alerts, team seats, and
   the busiest API key today, read live against the plan's entitlements (amber at ≥80%, red at the
   limit; unlimited shows a running count). Backed by new `countWatchlists` / `countAlerts` helpers.
