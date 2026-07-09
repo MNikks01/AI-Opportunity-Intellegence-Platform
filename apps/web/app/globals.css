@@ -537,6 +537,121 @@
   user-select: all;
 }
 
+/* State of AI Opportunities report */
+.report {
+  max-width: 900px;
+  margin: 0 auto;
+}
+.report-eyebrow {
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+  margin: 8px 0 8px;
+  font-weight: 600;
+}
+.report-title {
+  font-size: clamp(1.9rem, 5vw, 2.8rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 10px;
+}
+.report-sub {
+  color: var(--fg-muted);
+  font-size: 1.05rem;
+  max-width: 640px;
+  margin: 0 0 24px;
+}
+.report-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin: 0 0 12px;
+}
+.report-stats > div {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--bg-subtle);
+}
+.report-stats strong {
+  display: block;
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+.report-stats span {
+  font-size: 0.8rem;
+  color: var(--fg-muted);
+}
+.report-section {
+  margin: 40px 0;
+}
+.report-section h2 {
+  font-size: 1.35rem;
+  margin: 0 0 6px;
+}
+.report-muted {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  margin: 0 0 16px;
+}
+.report-quadbars,
+.report-sources {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 640px;
+}
+.report-quadbar-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+}
+.report-quadbar-head b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.report-quadbar-count {
+  margin-left: auto;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.report-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-subtle);
+  overflow: hidden;
+}
+.report-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--fg-muted);
+}
+.report-bar-build {
+  background: #12a594;
+}
+.report-bar-signal {
+  background: var(--primary);
+}
+.report-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 640px;
+}
+.report-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+@media (max-width: 720px) {
+  .report-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* Trend comparison table */
 .compare-wrap {
   overflow-x: auto;
