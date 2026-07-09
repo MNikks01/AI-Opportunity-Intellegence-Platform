@@ -49,6 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/watchlists">Watchlists</a>
             <a href="/notifications">Notifications</a>
             <a href="/briefs">Briefs</a>
+            <a href="/team">Team</a>
             <a href="/billing">Billing</a>
             <a href="/sources">Sources</a>
             {clerkEnabled && <AuthControls />}
