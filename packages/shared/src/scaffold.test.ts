@@ -18,17 +18,20 @@ const input: ScaffoldInput = {
 };
 
 describe("buildScaffoldPrompt", () => {
-  it("leads with the top product name and includes the MVP scope + stack", () => {
+  it("emits the structured brief: role, task with product name, standards + definition of done", () => {
     const out = buildScaffoldPrompt(input);
-    expect(out).toContain("# Build: TokenWatch");
-    expect(out).toContain("## MVP scope");
-    expect(out).toContain("Ingest usage events, one dashboard, budget alerts.");
-    expect(out).toContain("Next.js · tRPC · PostgreSQL");
-    expect(out).toContain("## Target user");
-    expect(out).toContain("Indie developers shipping AI features");
+    expect(out).toContain("# ROLE");
+    expect(out).toContain("# TASK\nScaffold and build a production-ready MVP of **TokenWatch**");
+    expect(out).toContain("A user can: Ingest usage events, one dashboard, budget alerts.");
+    expect(out).toContain("# TECH STACK\nNext.js · tRPC · PostgreSQL");
+    expect(out).toContain("# TARGET USERS\nIndie developers shipping AI features");
+    expect(out).toContain("# CODING STANDARDS");
+    expect(out).toContain("# SECURITY");
+    expect(out).toContain("# DEFINITION OF DONE");
+    expect(out).toContain("Correctness → Security → Maintainability");
   });
 
-  it("falls back to the title when names/ideas are sparse", () => {
+  it("falls back gracefully when names/ideas/stack are sparse", () => {
     const out = buildScaffoldPrompt({
       title: "Edge inference runtimes",
       plan: {
@@ -43,8 +46,8 @@ describe("buildScaffoldPrompt", () => {
         techStack: [],
       },
     });
-    expect(out).toContain("# Build: A managed edge-inference platform");
-    expect(out).not.toContain("## Positioning"); // nothing to position with
-    expect(out).not.toContain("## API surface"); // no api ideas
+    expect(out).toContain("**A managed edge-inference platform**"); // task falls back to top idea
+    expect(out).toContain("Propose a modern, type-safe stack"); // empty stack → guidance
+    expect(out).not.toContain("# POSITIONING"); // no names/domains/keywords
   });
 });
