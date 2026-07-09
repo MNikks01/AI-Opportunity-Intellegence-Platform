@@ -21,6 +21,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Public SEO pages** — a dynamic `sitemap.xml` (all scored trends + entities + static routes) and
+  `robots.txt`, per-page metadata (title template, description, canonical, Open Graph/Twitter) for
+  `/trends/[slug]` and `/entities/[id]`, JSON-LD on trend pages, and `metadataBase` in the root layout —
+  the compounding organic-traffic engine. New `listTrendSlugs`/`getTrendSeo`/`getEntitySeo` + `getSiteUrl`.
 - **Build kit (scaffold export)** — a trend's action plan is assembled into a rigorous, ready-to-paste
   scaffold prompt for an AI coding agent (Claude Code / Cursor / v0): a full engineering brief (role,
   requirements, coding standards, security, performance, UX, definition of done, decision priority) with
