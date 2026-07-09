@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { bootstrapUser } from "@aioi/database";
+import { bootstrapUser, type Role } from "@aioi/database";
 
 /** Clerk is active only when a publishable key is configured (else the dev tenant + CI stay green). */
 export const clerkEnabled = Boolean(process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY);
@@ -26,6 +26,28 @@ export const getDevOrg = cache(
       name: "Dev User",
     });
     return { organizationId: r.organizationId, workspaceId: r.workspaceId };
+  },
+);
+
+/** Current org + the signed-in user's id and role (for RBAC on team/member actions). */
+export const getDevMembership = cache(
+  async (): Promise<{ organizationId: string; userId: string; role: Role }> => {
+    if (clerkEnabled) {
+      const { auth, currentUser } = await import("@clerk/nextjs/server");
+      const { userId } = await auth();
+      if (!userId) throw new Error("Unauthenticated");
+      const user = await currentUser();
+      const email = user?.emailAddresses?.[0]?.emailAddress ?? `${userId}@users.noreply`;
+      const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ") || undefined;
+      const r = await bootstrapUser({ clerkId: userId, email, name });
+      return { organizationId: r.organizationId, userId: r.userId, role: r.role };
+    }
+    const r = await bootstrapUser({
+      clerkId: "dev-user",
+      email: "dev@aioi.local",
+      name: "Dev User",
+    });
+    return { organizationId: r.organizationId, userId: r.userId, role: r.role };
   },
 );
 

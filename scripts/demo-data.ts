@@ -12,6 +12,7 @@ import {
   runRedditIngestion,
   runProductHuntIngestion,
   runYouTubeIngestion,
+  runArxivIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -19,6 +20,7 @@ import {
   generateActionPlansForTopTrends,
   extractEntitiesForTrends,
 } from "../services/ai-service/src/index";
+import { deliverDigest, type DigestContent } from "../services/notification-service/src/index";
 // Relative import (not the "@aioi/database" package name): this script lives at the repo root, which
 // has no @aioi/* dependency, so the package isn't linked into the root node_modules and would fail to
 // resolve under `tsx` in CI. The service imports above use the same relative style.
@@ -45,6 +47,7 @@ async function main() {
   await ingest("reddit", () => runRedditIngestion(20));
   await ingest("producthunt", () => runProductHuntIngestion(20));
   await ingest("youtube", () => runYouTubeIngestion(20));
+  await ingest("arxiv", () => runArxivIngestion(30));
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
@@ -65,6 +68,19 @@ async function main() {
   });
   const brief = await generateDailyBrief(organizationId);
   console.log("brief…", { id: brief.id });
+
+  // Deliver the digest to Slack/Discord when a webhook is configured (best-effort, opt-in).
+  const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
+  const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (slackWebhookUrl || discordWebhookUrl) {
+    const delivered = await deliverDigest({
+      content: brief.content as unknown as DigestContent,
+      slackWebhookUrl,
+      discordWebhookUrl,
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL,
+    });
+    console.log("digest…", delivered);
+  }
 
   console.log("done — the demo DB now has scored trends, action plans, and a brief.");
   process.exit(0);

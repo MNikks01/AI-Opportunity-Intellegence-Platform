@@ -59,6 +59,16 @@ export { mineDemand, getTrendDemandHits } from "./demand";
 export { listTrendsForRescore, touchTrend, countScoredTrends } from "./rescore";
 export { listTrendSlugs, getTrendSeo, getEntitySeo } from "./seo";
 export {
+  listMembers,
+  inviteMember,
+  updateMemberRole,
+  removeMember,
+  canManageMembers,
+  ROLES,
+  type Role,
+  type Member,
+} from "./members";
+export {
   recordTrendSnapshots,
   getTrendMomentumMap,
   type TrendMomentum,
