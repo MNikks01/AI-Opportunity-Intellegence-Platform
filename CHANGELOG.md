@@ -24,6 +24,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Public pricing page** (`/pricing`) — Free vs Pro tiers rendered from the live plan
+  entitlements (single source of truth in `@aioi/billing`): unlimited watchlists/alerts, semantic
+  search, and a 50,000/day API quota on Pro. Comparison + "included in every plan" + FAQ; linked
+  from the nav, the landing page, and the sitemap.
 - **Plan-aware API quota** — the daily API rate limit now derives from the org plan's entitlements
   (Free 1,000/day, Pro 50,000/day) via a new `apiDailyQuota` entitlement, instead of a fixed constant.
   `/team` shows the current plan + quota; `X-RateLimit-Limit` reflects it.
