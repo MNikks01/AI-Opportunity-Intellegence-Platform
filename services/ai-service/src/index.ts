@@ -6,5 +6,6 @@ export * from "./scoring";
 export * from "./action-plan";
 export * from "./clustering";
 export * from "./score-trends";
+export * from "./rescore-trends";
 export * from "./entities";
 export * from "./eval";
