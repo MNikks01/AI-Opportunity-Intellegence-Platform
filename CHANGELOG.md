@@ -21,6 +21,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Slack/Discord digest delivery** — the daily brief is formatted as a Slack Block Kit / Discord
+  message and posted to a webhook (best-effort, opt-in). New `formatSlackDigest`/`formatDiscordDigest`/
+  `deliverDigest` in the notification service; the refresh cron delivers when `SLACK_WEBHOOK_URL` /
+  `DISCORD_WEBHOOK_URL` is configured.
 - **arXiv source** — a 7th connector ingesting the latest cs.AI/cs.LG/cs.CL submissions from the
   official, keyless arXiv Atom API (a leading indicator — research precedes products). New `fetchPapers`
   + `runArxivIngestion`, wired into the refresh pipeline; appears in the source filter automatically.
