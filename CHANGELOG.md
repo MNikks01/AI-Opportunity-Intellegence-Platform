@@ -24,6 +24,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Team tier + seat enforcement** — a new **TEAM** plan (25 seats, 200k/day API) alongside
+  Free/Pro. Every plan gains a `maxSeats` entitlement (Free 1, Pro 3, Team 25), enforced at
+  `inviteMember` (throws `PlanLimitError`, surfaced as an upgrade notice). Stripe checkout is now
+  plan-aware — Pro/Team price ids, with the plan carried in subscription metadata so the webhook
+  needs no price→plan table. Pricing shows three tiers; `/billing` offers per-plan upgrades; the
+  team page shows seat usage and blocks invites once full.
 - **Stripe checkout & webhook** — self-serve upgrades on `/billing`: *Upgrade to Pro* opens Stripe
   Checkout (or applies Pro directly in test mode), a signature-verified webhook at
   `/api/stripe/webhook` is the source of truth for plan changes (pure, unit-tested event→plan

@@ -5,8 +5,15 @@
  * through Clerk, bootstrap links their real account by email.
  */
 import type { $Enums } from "@prisma/client";
+import { entitlementsFor, withinLimit, PlanLimitError } from "@aioi/billing";
 import { prisma } from "./client";
 import { writeAuditLog } from "./audit";
+import { getPlan } from "./subscription";
+
+/** Team members (including pending invites) on an org — counts against the plan's seat limit. */
+export function countMembers(orgId: string): Promise<number> {
+  return prisma.membership.count({ where: { organizationId: orgId } });
+}
 
 export type Role = $Enums.Role;
 export const ROLES: Role[] = ["OWNER", "ADMIN", "MEMBER", "BILLING", "VIEWER"];
@@ -56,7 +63,12 @@ export async function inviteMember(
   const existing = await prisma.membership.findUnique({
     where: { organizationId_userId: { organizationId: orgId, userId: user.id } },
   });
-  if (existing) return { created: false, userId: user.id };
+  if (existing) return { created: false, userId: user.id }; // idempotent re-invite; no new seat
+
+  // Enforce the plan's seat limit (B-020/B-032). Pending invites occupy a seat.
+  const seats = entitlementsFor(await getPlan(orgId)).maxSeats;
+  const used = await prisma.membership.count({ where: { organizationId: orgId } });
+  if (!withinLimit(seats, used)) throw new PlanLimitError("seats");
 
   await prisma.membership.create({
     data: { organizationId: orgId, userId: user.id, role: input.role },

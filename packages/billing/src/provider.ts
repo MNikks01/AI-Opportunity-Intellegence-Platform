@@ -3,7 +3,7 @@
  * the SDK lives); this package owns the interface, a deterministic Stub for dev/test, and the pure
  * mapping from a Stripe subscription event to our plan.
  */
-import type { Plan } from "./index";
+import { isPaidPlan, type Plan, type PaidPlan } from "./index";
 
 export interface CheckoutSession {
   url: string;
@@ -11,7 +11,7 @@ export interface CheckoutSession {
 
 export interface CheckoutInput {
   orgId: string;
-  plan: Exclude<Plan, "FREE">;
+  plan: PaidPlan;
   successUrl: string;
   cancelUrl: string;
 }
@@ -30,11 +30,25 @@ export class StubBillingProvider implements BillingProvider {
   }
 }
 
-/** Map a Stripe subscription webhook → our plan. Cancelled/expired/deleted → FREE; otherwise PRO. */
-export function planForStripeSubscription(eventType: string, status?: string): Plan {
+/**
+ * Map a Stripe subscription webhook → our plan. Cancelled/expired/deleted → FREE; otherwise the
+ * `activePlan` the caller resolved from the subscription (we carry it in Stripe metadata at checkout,
+ * so no price→plan table is needed). Defaults to PRO for back-compat.
+ */
+export function planForStripeSubscription(
+  eventType: string,
+  status?: string,
+  activePlan: PaidPlan = "PRO",
+): Plan {
   if (eventType === "customer.subscription.deleted") return "FREE";
   if (status && ["canceled", "unpaid", "incomplete_expired"].includes(status)) return "FREE";
-  return "PRO";
+  return activePlan;
+}
+
+/** The paid plan carried in Stripe metadata (set at checkout), defaulting to PRO if absent/invalid. */
+function planFromMetadata(metadata?: Record<string, string> | null): PaidPlan {
+  const p = metadata?.plan;
+  return p && isPaidPlan(p) ? p : "PRO";
 }
 
 /**
@@ -67,20 +81,20 @@ export interface StripeSubscriptionLike {
 
 const asId = (v: unknown): string | undefined => (typeof v === "string" && v ? v : undefined);
 
-/** A completed Checkout Session means a fresh Pro subscription. Org travels in `client_reference_id`. */
+/** A completed Checkout Session means a fresh paid subscription. Plan + org travel in metadata. */
 export function syncFromCheckoutSession(s: StripeCheckoutSessionLike): PlanSync | null {
   const orgId = s.client_reference_id ?? s.metadata?.orgId;
   if (!orgId) return null;
   return {
     orgId,
-    plan: "PRO",
+    plan: planFromMetadata(s.metadata),
     status: "active",
     stripeCustomerId: asId(s.customer),
     stripeSubscriptionId: asId(s.subscription),
   };
 }
 
-/** A subscription update/deletion re-derives the plan from its status. Org travels in `metadata.orgId`. */
+/** A subscription update/deletion re-derives the plan from its status. Org + plan in `metadata`. */
 export function syncFromSubscription(
   eventType: string,
   sub: StripeSubscriptionLike,
@@ -89,7 +103,7 @@ export function syncFromSubscription(
   if (!orgId) return null;
   return {
     orgId,
-    plan: planForStripeSubscription(eventType, sub.status),
+    plan: planForStripeSubscription(eventType, sub.status, planFromMetadata(sub.metadata)),
     status: sub.status ?? "active",
     stripeCustomerId: asId(sub.customer),
     stripeSubscriptionId: asId(sub.id),

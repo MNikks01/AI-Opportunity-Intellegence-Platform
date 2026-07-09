@@ -11,11 +11,11 @@ function fmtLimit(n: number): string {
 }
 
 const BANNERS: Record<string, { text: string; band: "high" | "medium" }> = {
-  success: { text: "Payment received — welcome to Pro. Your plan is active.", band: "high" },
-  stub: { text: "Upgraded to Pro (test mode — no Stripe configured).", band: "medium" },
+  success: { text: "Payment received — your plan is now active.", band: "high" },
+  stub: { text: "Plan updated (test mode — no Stripe configured).", band: "medium" },
   cancelled: { text: "Checkout cancelled. You're still on your current plan.", band: "medium" },
   cancelling: {
-    text: "Cancellation scheduled — you keep Pro until the period ends.",
+    text: "Cancellation scheduled — you keep your plan until the period ends.",
     band: "medium",
   },
 };
@@ -33,9 +33,10 @@ export default async function BillingPage({
   ]);
   const { checkout } = await searchParams;
   const banner = checkout ? BANNERS[checkout] : undefined;
-  const isPro = plan === "PRO";
+  const isPaid = plan === "PRO" || plan === "TEAM";
   const hasStripeCustomer = Boolean(sub?.stripeCustomerId);
   const live = stripeConfigured();
+  const testSuffix = live ? "" : " (test)";
 
   return (
     <main>
@@ -63,7 +64,9 @@ export default async function BillingPage({
             fontSize: "0.9rem",
           }}
         >
-          <Badge band={banner.band}>{isPro ? "Pro" : "Free"}</Badge>
+          <Badge band={banner.band}>
+            {plan === "FREE" ? "Free" : plan === "TEAM" ? "Team" : "Pro"}
+          </Badge>
           {banner.text}
         </div>
       )}
@@ -71,24 +74,33 @@ export default async function BillingPage({
       <Card>
         <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
           <span style={{ fontWeight: 600 }}>Current plan</span>
-          <Badge band={isPro ? "high" : "medium"}>{plan}</Badge>
+          <Badge band={isPaid ? "high" : "medium"}>{plan}</Badge>
 
           <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-            {!isPro && (
+            {plan === "FREE" && (
               <form action={startCheckoutAction}>
+                <input type="hidden" name="plan" value="PRO" />
                 <button type="submit" className="billing-btn billing-btn-primary">
-                  {live ? "Upgrade to Pro" : "Upgrade to Pro (test)"}
+                  Upgrade to Pro{testSuffix}
                 </button>
               </form>
             )}
-            {isPro && hasStripeCustomer && live && (
+            {plan !== "TEAM" && (
+              <form action={startCheckoutAction}>
+                <input type="hidden" name="plan" value="TEAM" />
+                <button type="submit" className="billing-btn billing-btn-primary">
+                  Upgrade to Team{testSuffix}
+                </button>
+              </form>
+            )}
+            {isPaid && hasStripeCustomer && live && (
               <form action={openPortalAction}>
                 <button type="submit" className="billing-btn">
                   Manage subscription
                 </button>
               </form>
             )}
-            {isPro && (
+            {isPaid && (
               <form action={cancelSubscriptionAction}>
                 <button type="submit" className="billing-btn billing-btn-danger">
                   {live && hasStripeCustomer ? "Cancel" : "Downgrade to Free"}
@@ -101,6 +113,7 @@ export default async function BillingPage({
         <ul style={{ margin: "16px 0 0", paddingLeft: 18, color: "var(--fg-muted)" }}>
           <li>Watchlists: {fmtLimit(ent.maxWatchlists)}</li>
           <li>Alerts: {fmtLimit(ent.maxAlerts)}</li>
+          <li>Team seats: {fmtLimit(ent.maxSeats)}</li>
           <li>Semantic search: {ent.semanticSearch ? "Yes" : "No"}</li>
           <li>Daily brief: {ent.dailyBrief ? "Yes" : "No"}</li>
           <li>API quota: {fmtLimit(ent.apiDailyQuota)} requests/day per key</li>

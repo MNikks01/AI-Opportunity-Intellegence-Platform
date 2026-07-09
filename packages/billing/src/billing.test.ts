@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { entitlementsFor, withinLimit, isPlan, PlanLimitError, PLANS } from "./index";
+import { entitlementsFor, withinLimit, isPlan, isPaidPlan, PlanLimitError, PLANS } from "./index";
 
 describe("entitlements", () => {
   it("FREE is limited; PRO is unlimited", () => {
@@ -11,11 +11,21 @@ describe("entitlements", () => {
     expect(entitlementsFor("PRO").apiDailyQuota).toBe(50000);
   });
 
-  it("unknown plans fall back to FREE", () => {
+  it("seats scale by plan (FREE 1 → PRO 3 → TEAM 25)", () => {
+    expect(entitlementsFor("FREE").maxSeats).toBe(1);
+    expect(entitlementsFor("PRO").maxSeats).toBe(3);
+    expect(entitlementsFor("TEAM").maxSeats).toBe(25);
+    expect(entitlementsFor("TEAM").apiDailyQuota).toBe(200000);
+  });
+
+  it("unknown plans fall back to FREE; TEAM is a paid plan", () => {
     expect(entitlementsFor("ENTERPRISE_X")).toEqual(entitlementsFor("FREE"));
     expect(isPlan("PRO")).toBe(true);
+    expect(isPlan("TEAM")).toBe(true);
     expect(isPlan("nope")).toBe(false);
-    expect(PLANS).toContain("PRO");
+    expect(isPaidPlan("TEAM")).toBe(true);
+    expect(isPaidPlan("FREE")).toBe(false);
+    expect(PLANS).toContain("TEAM");
   });
 
   it("withinLimit respects -1 as unlimited", () => {

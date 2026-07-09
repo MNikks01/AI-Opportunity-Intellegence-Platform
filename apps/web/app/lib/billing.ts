@@ -5,6 +5,7 @@ import {
   type BillingProvider,
   type CheckoutInput,
   type CheckoutSession,
+  type PaidPlan,
 } from "@aioi/billing";
 import { getSiteUrl } from "./site";
 
@@ -15,11 +16,19 @@ import { getSiteUrl } from "./site";
  * so importing this module never throws in an unconfigured environment.
  */
 const secret = process.env.STRIPE_SECRET_KEY;
-const pricePro = process.env.STRIPE_PRICE_PRO;
+const PRICES: Record<PaidPlan, string | undefined> = {
+  PRO: process.env.STRIPE_PRICE_PRO,
+  TEAM: process.env.STRIPE_PRICE_TEAM,
+};
 
-/** True when both a secret key and the Pro price id are configured — real checkout is available. */
+/** True when a secret key + the Pro price id are configured — real checkout is available. */
 export function stripeConfigured(): boolean {
-  return Boolean(secret && pricePro);
+  return Boolean(secret && PRICES.PRO);
+}
+
+/** True when the given paid plan has a Stripe price id (Team is optional). */
+export function planCheckoutAvailable(plan: PaidPlan): boolean {
+  return Boolean(secret && PRICES[plan]);
 }
 
 let client: Stripe | null = null;
@@ -32,12 +41,17 @@ export function getStripe(): Stripe {
 class StripeBillingProvider implements BillingProvider {
   readonly name = "stripe";
   async createCheckoutSession(input: CheckoutInput): Promise<CheckoutSession> {
+    const price = PRICES[input.plan];
+    if (!price) throw new Error(`No Stripe price configured for plan ${input.plan}`);
+    // Org + plan travel with the session and onto the subscription, so the webhook can attribute it
+    // and set the right plan — no price→plan table needed.
+    const metadata = { orgId: input.orgId, plan: input.plan };
     const session = await getStripe().checkout.sessions.create({
       mode: "subscription",
-      line_items: [{ price: pricePro!, quantity: 1 }],
-      // The org travels with the session and onto the subscription, so the webhook can attribute it.
+      line_items: [{ price, quantity: 1 }],
       client_reference_id: input.orgId,
-      subscription_data: { metadata: { orgId: input.orgId } },
+      metadata,
+      subscription_data: { metadata },
       success_url: `${input.successUrl}?checkout=success`,
       cancel_url: `${input.cancelUrl}?checkout=cancelled`,
     });

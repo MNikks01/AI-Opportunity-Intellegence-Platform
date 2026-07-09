@@ -88,6 +88,7 @@ export {
   updateMemberRole,
   removeMember,
   canManageMembers,
+  countMembers,
   ROLES,
   type Role,
   type Member,

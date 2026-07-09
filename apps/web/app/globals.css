@@ -1443,7 +1443,7 @@ a.resource-link:hover {
 
 /* ---- Pricing ---- */
 .pricing {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 .pricing-head {
@@ -1474,6 +1474,9 @@ a.resource-link:hover {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin: 36px 0;
+}
+.pricing-tiers-3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 .pricing-card {
   position: relative;
