@@ -28,9 +28,20 @@ model Organization {
   briefs        Brief[]
   notifications Notification[]
   subscription  Subscription?
+  integration   OrgIntegration?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   deletedAt     DateTime?
+}
+
+/// Per-org outbound integrations (B-034) — where the daily digest is delivered. Org-scoped config.
+model OrgIntegration {
+  organizationId    String       @id @db.Uuid
+  slackWebhookUrl   String?
+  discordWebhookUrl String?
+  digestEnabled     Boolean      @default(true)
+  updatedAt         DateTime     @updatedAt
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
 model User {

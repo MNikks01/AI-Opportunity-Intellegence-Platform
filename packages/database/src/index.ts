@@ -68,6 +68,7 @@ export {
   type Role,
   type Member,
 } from "./members";
+export { getOrgIntegration, setOrgIntegration, type OrgIntegration } from "./integrations";
 export {
   recordTrendSnapshots,
   getTrendMomentumMap,

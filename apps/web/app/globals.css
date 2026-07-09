@@ -457,6 +457,64 @@
   color: #d64545;
 }
 
+/* Digest integrations (Team) */
+.integration-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin: 0 0 16px;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+.integration-channel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.integration-channel b {
+  color: var(--fg);
+  font-weight: 600;
+}
+.integration-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--fg-muted);
+  opacity: 0.5;
+}
+.integration-dot.is-on {
+  background: #12a594;
+  opacity: 1;
+}
+.integration-disconnect {
+  margin-left: 6px;
+  border: none;
+  background: none;
+  color: var(--fg-muted);
+  cursor: pointer;
+  font-size: 0.75rem;
+  text-decoration: underline;
+}
+.integration-disconnect:hover {
+  color: #d64545;
+}
+.integration-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 520px;
+}
+.integration-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: var(--fg-muted);
+}
+.integration-toggle input {
+  accent-color: var(--primary);
+}
+
 /* Trend comparison table */
 .compare-wrap {
   overflow-x: auto;

@@ -21,6 +21,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Per-org digest config** — a "Digest delivery" section on `/team` to connect a Slack/Discord
+  incoming webhook and toggle the daily digest per organization (new `OrgIntegration` model). RBAC-gated,
+  audited, webhook host-validated; the URL is never reflected back to the page. The cron delivers to each
+  org's configured webhook (env remains the fallback).
 - **MCP server** (`@aioi/mcp-server`) — a Model Context Protocol server (stdio) exposing the platform
   as tools: `search_trends`, `get_trend`, `list_build_now_opportunities`. A coding agent (Claude Desktop,
   Cursor, Claude Code) can query live AI opportunities. Wraps the public API over HTTP (`AIOI_API_URL`) —
