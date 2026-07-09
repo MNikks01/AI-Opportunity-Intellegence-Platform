@@ -21,6 +21,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **npm source** — an 8th connector ingesting the top AI packages by popularity from the official,
+  keyless npm registry search API (package adoption is a leading indicator). New `fetchPackages` +
+  `runNpmIngestion`, wired into the refresh pipeline; appears in the source filter automatically.
 - **MCP server** (`@aioi/mcp-server`) — a Model Context Protocol server (stdio) exposing the platform
   as tools: `search_trends`, `get_trend`, `list_build_now_opportunities`. A coding agent (Claude Desktop,
   Cursor, Claude Code) can query live AI opportunities. Wraps the public API over HTTP (`AIOI_API_URL`) —

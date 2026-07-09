@@ -13,6 +13,7 @@ import {
   runProductHuntIngestion,
   runYouTubeIngestion,
   runArxivIngestion,
+  runNpmIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -48,6 +49,7 @@ async function main() {
   await ingest("producthunt", () => runProductHuntIngestion(20));
   await ingest("youtube", () => runYouTubeIngestion(20));
   await ingest("arxiv", () => runArxivIngestion(30));
+  await ingest("npm", () => runNpmIngestion(30));
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
