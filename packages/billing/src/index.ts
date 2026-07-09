@@ -12,11 +12,25 @@ export interface Entitlements {
   maxAlerts: number;
   semanticSearch: boolean;
   dailyBrief: boolean;
+  /** Public-API requests per day per key. */
+  apiDailyQuota: number;
 }
 
 export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
-  FREE: { maxWatchlists: 5, maxAlerts: 10, semanticSearch: false, dailyBrief: true },
-  PRO: { maxWatchlists: -1, maxAlerts: -1, semanticSearch: true, dailyBrief: true },
+  FREE: {
+    maxWatchlists: 5,
+    maxAlerts: 10,
+    semanticSearch: false,
+    dailyBrief: true,
+    apiDailyQuota: 1000,
+  },
+  PRO: {
+    maxWatchlists: -1,
+    maxAlerts: -1,
+    semanticSearch: true,
+    dailyBrief: true,
+    apiDailyQuota: 50000,
+  },
 };
 
 export const PLANS = Object.keys(PLAN_ENTITLEMENTS) as Plan[];
