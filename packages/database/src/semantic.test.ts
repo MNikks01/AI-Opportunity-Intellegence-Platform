@@ -2,7 +2,12 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Score, TrendLike } from "@aioi/shared";
 import { prisma } from "./client";
-import { persistScoredTrend, semanticSearchTrends } from "./repositories";
+import {
+  persistScoredTrend,
+  semanticSearchTrends,
+  relatedTrends,
+  getTrendBySlug,
+} from "./repositories";
 
 // Integration — needs a live Postgres with pgvector. persistScoredTrend backfills the embedding
 // (StubEmbedder, deterministic), so a query equal to a trend's embedded text is its nearest neighbor.
@@ -53,5 +58,13 @@ describe.skipIf(!hasDb)("semanticSearchTrends (integration)", () => {
 
   it("returns empty for a blank query", async () => {
     expect(await semanticSearchTrends("   ")).toHaveLength(0);
+  });
+
+  it("relatedTrends returns nearest neighbours, excluding the trend itself", async () => {
+    const self = await getTrendBySlug(target.slug);
+    const related = await relatedTrends(self!.id, 5);
+    expect(related.some((t) => t.id === self!.id)).toBe(false); // never itself
+    expect(related.length).toBeGreaterThan(0); // other seeded trends are embedded
+    expect(Array.isArray(related[0]!.scores)).toBe(true); // TrendView shape
   });
 });
