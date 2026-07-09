@@ -1,6 +1,6 @@
 {
   "name": "@aioi/scheduler",
-  "version": "0.6.11",
+  "version": "0.6.12",
   "private": true,
   "type": "module",
   "description": "Cron + BullMQ repeatable jobs that drive ingestion and trend recompute.",
