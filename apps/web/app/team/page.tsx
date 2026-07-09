@@ -1,23 +1,34 @@
-import { listMembers, getOrgIntegration, canManageMembers, ROLES } from "@aioi/database";
+import {
+  listMembers,
+  getOrgIntegration,
+  listApiKeys,
+  canManageMembers,
+  ROLES,
+} from "@aioi/database";
 import { Badge } from "@aioi/ui";
 import { getDevMembership } from "../lib/dev-org";
+import { ApiKeyCreate } from "./ApiKeyCreate";
 import {
   inviteMemberAction,
   changeRoleAction,
   removeMemberAction,
   saveIntegrationAction,
   disconnectIntegrationAction,
+  revokeApiKeyAction,
 } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleDateString() : null);
+
 export default async function TeamPage() {
   const { organizationId, userId, role } = await getDevMembership();
-  const [members, integration] = await Promise.all([
+  const canManage = canManageMembers(role);
+  const [members, integration, apiKeys] = await Promise.all([
     listMembers(organizationId),
     getOrgIntegration(organizationId),
+    canManage ? listApiKeys(organizationId) : Promise.resolve([]),
   ]);
-  const canManage = canManageMembers(role);
 
   return (
     <main>
@@ -153,6 +164,50 @@ export default async function TeamPage() {
               Save
             </button>
           </form>
+        </>
+      )}
+
+      {canManage && (
+        <>
+          <h2 style={{ fontSize: "1.25rem", margin: "36px 0 4px" }}>API keys</h2>
+          <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "0 0 14px" }}>
+            Programmatic access to the read API — a key raises your rate limit. See the{" "}
+            <a href="/api/v1" style={{ color: "var(--primary)" }}>
+              API docs
+            </a>
+            .
+          </p>
+
+          <ApiKeyCreate />
+
+          <div className="member-list" style={{ marginTop: 16 }}>
+            {apiKeys.length === 0 ? (
+              <p className="trend-meta">No API keys yet.</p>
+            ) : (
+              apiKeys.map((k) => (
+                <div key={k.id} className="member-row">
+                  <div>
+                    <div className="member-name">
+                      {k.name}
+                      {k.revokedAt && <span className="member-pending">revoked</span>}
+                    </div>
+                    <div className="member-email">
+                      created {fmtDate(k.createdAt)} ·{" "}
+                      {k.lastUsedAt ? `last used ${fmtDate(k.lastUsedAt)}` : "never used"}
+                    </div>
+                  </div>
+                  {!k.revokedAt && (
+                    <form action={revokeApiKeyAction}>
+                      <input type="hidden" name="id" value={k.id} />
+                      <button type="submit" className="member-btn member-btn-danger">
+                        Revoke
+                      </button>
+                    </form>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
         </>
       )}
     </main>

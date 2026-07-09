@@ -24,6 +24,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **API keys** — manage read-API keys on `/team` (create with a one-time secret reveal, list, revoke;
+  RBAC-gated). The public API accepts an optional `Authorization: Bearer aioi_…` key that raises the
+  per-request limit cap (anonymous ≤25, authenticated ≤100) and records `lastUsedAt`. New `touchApiKey`.
 - **Social share images** — a dynamic, branded Open Graph image per trend (title + opportunity
   score + build idea) and for the homepage (generated with `next/og`), so shared links render a rich
   card on Twitter/Slack/LinkedIn/iMessage. New `getTrendOg` query.

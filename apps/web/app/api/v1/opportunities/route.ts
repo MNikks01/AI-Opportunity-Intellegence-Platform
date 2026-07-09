@@ -1,12 +1,18 @@
 import { listTrendsQuadrant } from "@aioi/database";
 import { apiJson, trendUrl, parseLimit } from "../_lib";
+import { apiAuth, ANON_MAX_LIMIT, AUTHED_MAX_LIMIT } from "../_auth";
 
 export const dynamic = "force-dynamic";
 
 /** The Golden-Quadrant "build now" list: high demand, low supply — ranked by opportunity. */
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const limit = parseLimit(url.searchParams.get("limit"));
+  const { authed } = await apiAuth(req);
+  const limit = parseLimit(
+    url.searchParams.get("limit"),
+    25,
+    authed ? AUTHED_MAX_LIMIT : ANON_MAX_LIMIT,
+  );
 
   const all = await listTrendsQuadrant(300);
   const build = all
@@ -23,5 +29,5 @@ export async function GET(req: Request) {
     supply: t.supply,
     demandSignals: t.demandSignals,
   }));
-  return apiJson(data, { count: data.length, quadrant: "build" });
+  return apiJson(data, { count: data.length, quadrant: "build", authenticated: authed });
 }
