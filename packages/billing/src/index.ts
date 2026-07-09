@@ -61,7 +61,12 @@ export class PlanLimitError extends Error {
 export {
   StubBillingProvider,
   planForStripeSubscription,
+  syncFromCheckoutSession,
+  syncFromSubscription,
   type BillingProvider,
   type CheckoutSession,
   type CheckoutInput,
+  type PlanSync,
+  type StripeCheckoutSessionLike,
+  type StripeSubscriptionLike,
 } from "./provider";

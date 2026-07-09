@@ -1658,3 +1658,32 @@ a.resource-link:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Billing buttons ---- */
+.billing-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.billing-btn:hover {
+  border-color: var(--primary);
+}
+.billing-btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-fg);
+}
+.billing-btn-primary:hover {
+  filter: brightness(1.08);
+}
+.billing-btn-danger {
+  color: var(--danger);
+}
+.billing-btn-danger:hover {
+  border-color: var(--danger);
+}
