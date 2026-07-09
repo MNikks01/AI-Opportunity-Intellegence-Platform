@@ -9,6 +9,25 @@ export type Plan = "FREE" | "PRO" | "TEAM";
 /** Paid plans a customer can check out into (everything but FREE). */
 export type PaidPlan = Exclude<Plan, "FREE">;
 
+/** Billing cadence. Annual is priced at 10× the monthly rate (two months free). */
+export type BillingInterval = "monthly" | "annual";
+
+export function isBillingInterval(value: string): value is BillingInterval {
+  return value === "monthly" || value === "annual";
+}
+
+/** Display prices in USD. `annual` is the total charged per year; entitlements don't change by interval. */
+export const PLAN_PRICING: Record<PaidPlan, { monthly: number; annual: number }> = {
+  PRO: { monthly: 29, annual: 290 },
+  TEAM: { monthly: 99, annual: 990 },
+};
+
+/** Effective USD/month for an interval (annual total ÷ 12), rounded. */
+export function monthlyEquivalent(plan: PaidPlan, interval: BillingInterval): number {
+  const p = PLAN_PRICING[plan];
+  return interval === "annual" ? Math.round(p.annual / 12) : p.monthly;
+}
+
 export interface Entitlements {
   /** -1 = unlimited. */
   maxWatchlists: number;

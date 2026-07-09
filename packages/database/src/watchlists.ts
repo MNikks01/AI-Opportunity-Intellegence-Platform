@@ -54,6 +54,11 @@ export function listWatchlists(orgId: string) {
   );
 }
 
+/** Number of watchlists in the org — for usage-vs-limit display. */
+export function countWatchlists(orgId: string): Promise<number> {
+  return withOrgContext(orgId, (tx) => tx.watchlist.count());
+}
+
 export function getWatchlist(orgId: string, id: string) {
   return withOrgContext(orgId, async (tx) => {
     const wl = await tx.watchlist.findFirst({

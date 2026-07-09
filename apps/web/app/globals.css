@@ -1469,6 +1469,47 @@ a.resource-link:hover {
   color: var(--fg-muted);
   line-height: 1.6;
 }
+.pricing-toggle {
+  display: inline-flex;
+  gap: 4px;
+  margin: 20px auto 0;
+  padding: 4px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-subtle);
+}
+.pricing-toggle a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+.pricing-toggle a.is-active {
+  background: var(--primary);
+  color: var(--primary-fg);
+}
+.pricing-save {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--success);
+  color: #fff;
+}
+.pricing-toggle a.is-active .pricing-save {
+  background: rgba(255, 255, 255, 0.24);
+}
+.pricing-billed {
+  color: var(--fg-muted);
+  font-size: 0.8rem;
+  margin: 2px 0 0;
+}
 .pricing-tiers {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -1689,4 +1730,98 @@ a.resource-link:hover {
 }
 .billing-btn-danger:hover {
   border-color: var(--danger);
+}
+
+/* ---- Usage meters ---- */
+.usage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px 28px;
+}
+.usage-row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.usage-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.875rem;
+}
+.usage-label {
+  font-weight: 600;
+}
+.usage-count {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.usage-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  overflow: hidden;
+}
+.usage-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.usage-fill.is-ok {
+  background: var(--primary);
+}
+.usage-fill.is-warn {
+  background: var(--warning);
+}
+.usage-fill.is-full {
+  background: var(--danger);
+}
+.usage-fill.is-unlimited {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--border),
+    var(--border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+.spark-block {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.spark-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+.spark {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.spark-line {
+  stroke: var(--primary);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.spark-area {
+  fill: color-mix(in srgb, var(--primary) 14%, transparent);
+  stroke: none;
+}
+.spark-dot {
+  fill: var(--primary);
+}
+
+@media (max-width: 560px) {
+  .usage-grid {
+    grid-template-columns: 1fr;
+  }
 }

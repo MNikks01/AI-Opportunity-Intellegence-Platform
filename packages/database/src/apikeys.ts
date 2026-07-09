@@ -97,3 +97,26 @@ export async function getApiKeyUsageToday(apiKeyIds: string[]): Promise<Map<stri
   });
   return new Map(rows.map((r) => [r.apiKeyId, r.count]));
 }
+
+/**
+ * Total API requests per UTC day over the last `days` (summed across the given keys), oldest→newest,
+ * with missing days filled as 0. Powers the usage sparkline. Day strings compare lexically (ISO).
+ */
+export async function getApiUsageHistory(
+  apiKeyIds: string[],
+  days = 14,
+): Promise<{ day: string; count: number }[]> {
+  const series = (from: number) =>
+    Array.from({ length: days }, (_, i) => utcDay(new Date(from - (days - 1 - i) * 86_400_000)));
+  const now = Date.now();
+  const wanted = series(now);
+  if (apiKeyIds.length === 0) return wanted.map((day) => ({ day, count: 0 }));
+
+  const rows = await prisma.apiKeyUsage.groupBy({
+    by: ["day"],
+    where: { apiKeyId: { in: apiKeyIds }, day: { gte: wanted[0] } },
+    _sum: { count: true },
+  });
+  const byDay = new Map(rows.map((r) => [r.day, r._sum.count ?? 0]));
+  return wanted.map((day) => ({ day, count: byDay.get(day) ?? 0 }));
+}

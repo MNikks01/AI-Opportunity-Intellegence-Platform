@@ -90,18 +90,25 @@ export const appRouter = router({
         ),
       ),
 
-    semanticSearch: publicProcedure
+    // Semantic (vector) search is a paid entitlement — requires auth + a plan that grants it.
+    semanticSearch: protectedProcedure
       .input(
         z.object({
           q: z.string().min(1).max(200),
           limit: z.number().int().min(1).max(50).default(25),
         }),
       )
-      .query(({ input }) =>
-        cached(`trends:search:sem:${input.q}:${input.limit}`, 30, () =>
+      .query(async ({ ctx, input }) => {
+        authorize(ctx.auth, "search:read");
+        if (!entitlementsFor(await getPlan(ctx.auth.orgId)).semanticSearch)
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "Semantic search requires a Pro or Team plan.",
+          });
+        return cached(`trends:search:sem:${input.q}:${input.limit}`, 30, () =>
           semanticSearchTrends(input.q, input.limit),
-        ),
-      ),
+        );
+      }),
 
     // Generate + persist the "what to build" action plan for a trend (admin, expensive).
     generateActionPlan: protectedProcedure
@@ -278,6 +285,7 @@ export const appRouter = router({
         return getBillingProvider().createCheckoutSession({
           orgId: ctx.auth.orgId,
           plan: "PRO",
+          interval: "monthly",
           successUrl: input.successUrl,
           cancelUrl: input.cancelUrl,
         });

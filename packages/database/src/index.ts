@@ -10,6 +10,7 @@ export {
   NotFoundError,
   createWatchlist,
   listWatchlists,
+  countWatchlists,
   getWatchlist,
   renameWatchlist,
   deleteWatchlist,
@@ -24,6 +25,7 @@ export {
   alertMatches,
   createAlert,
   listAlerts,
+  countAlerts,
   setAlertEnabled,
   deleteAlert,
   evaluateTrendForOrg,
@@ -68,6 +70,7 @@ export {
   touchApiKey,
   recordApiKeyUsage,
   getApiKeyUsageToday,
+  getApiUsageHistory,
   utcDay,
 } from "./apikeys";
 export { exportOrgData, deleteOrg } from "./gdpr";

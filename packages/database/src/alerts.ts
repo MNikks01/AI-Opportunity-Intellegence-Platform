@@ -69,6 +69,11 @@ export function listAlerts(orgId: string, watchlistId: string) {
   });
 }
 
+/** Number of alerts across the org's watchlists (org-scoped via RLS) — for usage-vs-limit display. */
+export function countAlerts(orgId: string): Promise<number> {
+  return withOrgContext(orgId, (tx) => tx.alert.count());
+}
+
 export function setAlertEnabled(orgId: string, id: string, enabled: boolean) {
   return withOrgContext(orgId, async (tx) => {
     const alert = await tx.alert.findFirst({ where: { id } });

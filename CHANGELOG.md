@@ -25,6 +25,21 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 
 ### Added
 
+- **API usage history sparkline** on `/billing` — a 14-day SVG sparkline of daily API requests
+  (summed across the org's keys) with the running total, from a new `getApiUsageHistory` helper that
+  zero-fills the existing per-day `ApiKeyUsage` rows. No new retention needed.
+- **Annual billing** — paid plans can be billed annually at 10× the monthly rate (two months
+  free). Shared `PLAN_PRICING` + `monthlyEquivalent` in `@aioi/billing`, a monthly/annual toggle on
+  the pricing and billing pages, and interval-aware Stripe checkout (`STRIPE_PRICE_PRO_ANNUAL` /
+  `STRIPE_PRICE_TEAM_ANNUAL`; the interval is threaded through `CheckoutInput`). Entitlements don't
+  change by interval.
+- **tRPC `trends.semanticSearch` gated on entitlements** — now a `protectedProcedure` requiring
+  `search:read` and a plan that grants `semanticSearch` (Pro/Team), returning `FORBIDDEN`
+  otherwise. Closes the last ungated semantic-search surface (the web `/trends` flow was already gated).
+- **Usage panel on `/billing`** — usage-vs-limit meters for watchlists, alerts, team seats, and
+  the busiest API key today, read live against the plan's entitlements (amber at ≥80%, red at the
+  limit; unlimited shows a running count). Backed by new `countWatchlists` / `countAlerts` helpers.
+
 - **Team tier + seat enforcement** — a new **TEAM** plan (25 seats, 200k/day API) alongside
   Free/Pro. Every plan gains a `maxSeats` entitlement (Free 1, Pro 3, Team 25), enforced at
   `inviteMember` (throws `PlanLimitError`, surfaced as an upgrade notice). Stripe checkout is now

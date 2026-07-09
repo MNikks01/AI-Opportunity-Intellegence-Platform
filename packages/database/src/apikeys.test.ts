@@ -11,6 +11,7 @@ import {
   revokeApiKey,
   recordApiKeyUsage,
   getApiKeyUsageToday,
+  getApiUsageHistory,
 } from "./apikeys";
 
 const enabled = Boolean(process.env.DATABASE_URL) && Boolean(process.env.APP_DATABASE_URL);
@@ -81,5 +82,18 @@ describe.skipIf(!enabled)("api keys (integration)", () => {
     const created = await createApiKey(orgA, "iso", []);
     await expect(revokeApiKey(orgB, created.id)).rejects.toBeInstanceOf(NotFoundError);
     expect((await listApiKeys(orgB)).some((k) => k.id === created.id)).toBe(false);
+  });
+});
+
+describe("getApiUsageHistory (fill logic)", () => {
+  it("returns exactly `days` zero-filled buckets, oldest→newest, for no keys", async () => {
+    const days = 14;
+    const series = await getApiUsageHistory([], days);
+    expect(series).toHaveLength(days);
+    expect(series.every((d) => d.count === 0)).toBe(true);
+    // Strictly increasing ISO day strings, ending today (UTC).
+    const sorted = [...series].sort((a, b) => a.day.localeCompare(b.day));
+    expect(series.map((d) => d.day)).toEqual(sorted.map((d) => d.day));
+    expect(series.at(-1)!.day).toBe(new Date().toISOString().slice(0, 10));
   });
 });
