@@ -1,13 +1,22 @@
-import { listMembers, canManageMembers, ROLES } from "@aioi/database";
+import { listMembers, getOrgIntegration, canManageMembers, ROLES } from "@aioi/database";
 import { Badge } from "@aioi/ui";
 import { getDevMembership } from "../lib/dev-org";
-import { inviteMemberAction, changeRoleAction, removeMemberAction } from "./actions";
+import {
+  inviteMemberAction,
+  changeRoleAction,
+  removeMemberAction,
+  saveIntegrationAction,
+  disconnectIntegrationAction,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
 export default async function TeamPage() {
   const { organizationId, userId, role } = await getDevMembership();
-  const members = await listMembers(organizationId);
+  const [members, integration] = await Promise.all([
+    listMembers(organizationId),
+    getOrgIntegration(organizationId),
+  ]);
   const canManage = canManageMembers(role);
 
   return (
@@ -87,6 +96,90 @@ export default async function TeamPage() {
           );
         })}
       </div>
+
+      {canManage && (
+        <>
+          <h2 style={{ fontSize: "1.25rem", margin: "36px 0 4px" }}>Digest delivery</h2>
+          <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "0 0 14px" }}>
+            Post the daily brief to your team&rsquo;s Slack or Discord. Paste an{" "}
+            <strong>incoming webhook</strong> URL.
+          </p>
+
+          <div className="integration-status">
+            <Channel
+              label="Slack"
+              connected={Boolean(integration?.slackWebhookUrl)}
+              channel="slack"
+            />
+            <Channel
+              label="Discord"
+              connected={Boolean(integration?.discordWebhookUrl)}
+              channel="discord"
+            />
+          </div>
+
+          <form action={saveIntegrationAction} className="integration-form">
+            <input
+              name="slack"
+              type="url"
+              className="team-input"
+              aria-label="Slack webhook URL"
+              placeholder={
+                integration?.slackWebhookUrl
+                  ? "Slack connected — paste a new URL to replace"
+                  : "https://hooks.slack.com/services/…"
+              }
+            />
+            <input
+              name="discord"
+              type="url"
+              className="team-input"
+              aria-label="Discord webhook URL"
+              placeholder={
+                integration?.discordWebhookUrl
+                  ? "Discord connected — paste a new URL to replace"
+                  : "https://discord.com/api/webhooks/…"
+              }
+            />
+            <label className="integration-toggle">
+              <input
+                type="checkbox"
+                name="digestEnabled"
+                defaultChecked={integration?.digestEnabled ?? true}
+              />
+              Send the daily digest
+            </label>
+            <button type="submit" className="watch-btn">
+              Save
+            </button>
+          </form>
+        </>
+      )}
     </main>
+  );
+}
+
+function Channel({
+  label,
+  connected,
+  channel,
+}: {
+  label: string;
+  connected: boolean;
+  channel: string;
+}) {
+  return (
+    <span className="integration-channel">
+      <span className={`integration-dot${connected ? " is-on" : ""}`} />
+      <b>{label}</b> {connected ? "connected" : "not connected"}
+      {connected && (
+        <form action={disconnectIntegrationAction} style={{ display: "inline" }}>
+          <input type="hidden" name="channel" value={channel} />
+          <button type="submit" className="integration-disconnect">
+            Disconnect
+          </button>
+        </form>
+      )}
+    </span>
   );
 }
