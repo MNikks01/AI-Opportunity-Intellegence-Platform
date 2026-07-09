@@ -24,6 +24,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
+  `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /
+  `markNotificationsEmailed` helpers, an alert-email builder in the notification service, and a
+  `scripts/deliver-alerts.ts` job on an hourly `deliver-alerts.yml` workflow (gated on
+  `RESEND_API_KEY`, dry-run supported). Emails deep-link to the trend; best-effort + idempotent.
 - **Related opportunities** on the trend page — a new `relatedTrends` query finds the
   embedding-nearest trends (pgvector `<=>`, excluding itself); the trend detail "Related" section
   now shows shared-entity matches first and fills with semantically-similar trends, so even

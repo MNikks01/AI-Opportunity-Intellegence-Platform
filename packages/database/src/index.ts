@@ -37,6 +37,9 @@ export {
   unreadNotificationCount,
   markNotificationRead,
   markAllNotificationsRead,
+  listPendingEmailNotifications,
+  markNotificationsEmailed,
+  type PendingEmailNotification,
 } from "./notifications";
 export { writeAuditLog, listAuditLogs, type AuditEntry } from "./audit";
 export {

@@ -354,10 +354,13 @@ model Notification {
   targetType     WatchTargetType?
   targetId       String?
   readAt         DateTime?
+  /// Set once this notification has been delivered by email (for EMAIL-channel alerts).
+  emailedAt      DateTime?
   createdAt      DateTime         @default(now())
   organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([organizationId, readAt])
+  @@index([organizationId, emailedAt])
 }
 
 model Brief {
