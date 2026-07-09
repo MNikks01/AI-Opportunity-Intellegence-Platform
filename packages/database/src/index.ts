@@ -46,7 +46,7 @@ export {
   type BriefTrend,
 } from "./briefs";
 export { getPlan, getEntitlements, setPlan } from "./subscription";
-export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey } from "./apikeys";
+export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey, touchApiKey } from "./apikeys";
 export { exportOrgData, deleteOrg } from "./gdpr";
 export { getSourceStats, type SourceStat } from "./source-stats";
 export {

@@ -13,6 +13,7 @@
     "clean": "rm -rf .next .turbo"
   },
   "dependencies": {
+    "@aioi/auth": "workspace:*",
     "@aioi/database": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/ui": "workspace:*",

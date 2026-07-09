@@ -6,6 +6,8 @@ import {
   updateMemberRole,
   removeMember,
   setOrgIntegration,
+  createApiKey,
+  revokeApiKey,
   canManageMembers,
   ROLES,
   type Role,
@@ -90,5 +92,24 @@ export async function disconnectIntegrationAction(formData: FormData) {
     await setOrgIntegration(organizationId, userId, { slackWebhookUrl: null });
   else if (channel === "discord")
     await setOrgIntegration(organizationId, userId, { discordWebhookUrl: null });
+  revalidatePath("/team");
+}
+
+/** useActionState shape — returns the raw key once so the client can show it. */
+export async function createApiKeyAction(
+  _prev: { rawKey?: string },
+  formData: FormData,
+): Promise<{ rawKey?: string }> {
+  const { organizationId } = await requireManage();
+  const name = String(formData.get("name") ?? "").trim() || "API key";
+  const key = await createApiKey(organizationId, name, ["read"]);
+  revalidatePath("/team");
+  return { rawKey: key.raw };
+}
+
+export async function revokeApiKeyAction(formData: FormData) {
+  const { organizationId } = await requireManage();
+  const id = String(formData.get("id") ?? "");
+  if (id) await revokeApiKey(organizationId, id);
   revalidatePath("/team");
 }

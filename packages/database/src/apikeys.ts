@@ -62,3 +62,10 @@ export function revokeApiKey(orgId: string, id: string) {
     });
   });
 }
+
+/** Record that a key was just used (auth time). Best-effort; the org is known from the lookup. */
+export function touchApiKey(orgId: string, id: string) {
+  return withOrgContext(orgId, (tx) =>
+    tx.apiKey.update({ where: { id }, data: { lastUsedAt: new Date() } }),
+  );
+}
