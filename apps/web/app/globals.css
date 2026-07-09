@@ -1690,3 +1690,64 @@ a.resource-link:hover {
 .billing-btn-danger:hover {
   border-color: var(--danger);
 }
+
+/* ---- Usage meters ---- */
+.usage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px 28px;
+}
+.usage-row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.usage-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.875rem;
+}
+.usage-label {
+  font-weight: 600;
+}
+.usage-count {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.usage-track {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  overflow: hidden;
+}
+.usage-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.usage-fill.is-ok {
+  background: var(--primary);
+}
+.usage-fill.is-warn {
+  background: var(--warning);
+}
+.usage-fill.is-full {
+  background: var(--danger);
+}
+.usage-fill.is-unlimited {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--border),
+    var(--border) 6px,
+    transparent 6px,
+    transparent 12px
+  );
+}
+
+@media (max-width: 560px) {
+  .usage-grid {
+    grid-template-columns: 1fr;
+  }
+}
