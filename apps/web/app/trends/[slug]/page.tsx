@@ -8,7 +8,9 @@ import {
 } from "@aioi/database";
 import { Badge, Card, Scorecard, Sparkline } from "@aioi/ui";
 import { notFound } from "next/navigation";
+import { buildScaffoldPrompt } from "@aioi/shared";
 import { ResourceItem } from "./ResourceItem";
+import { ScaffoldBlock } from "./ScaffoldBlock";
 import { getDevOrg } from "../../lib/dev-org";
 import { watchTrendAction } from "../../watchlists/actions";
 import { TYPE_LABELS } from "../../entities/page";
@@ -278,6 +280,19 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
         <div className="aioi-card" style={{ color: "var(--fg-muted)" }}>
           No action plan generated yet.
         </div>
+      )}
+
+      {plan && (
+        <>
+          <h2 style={{ fontSize: "1.25rem", margin: "32px 0 4px" }}>🛠 Build kit</h2>
+          <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "0 0 12px" }}>
+            One step from opportunity to code — a scaffold prompt assembled from this plan.
+          </p>
+          <ScaffoldBlock
+            prompt={buildScaffoldPrompt({ title: trend.title, summary: trend.summary, plan })}
+            filename={`${slug}-scaffold.md`}
+          />
+        </>
       )}
     </main>
   );
