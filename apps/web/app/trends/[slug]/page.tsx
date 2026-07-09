@@ -8,7 +8,10 @@ import {
 } from "@aioi/database";
 import { Badge, Card, Scorecard, Sparkline } from "@aioi/ui";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import { buildScaffoldPrompt } from "@aioi/shared";
+import { getTrendSeo } from "@aioi/database";
+import { getSiteUrl } from "../../lib/site";
 import { ResourceItem } from "./ResourceItem";
 import { ScaffoldBlock } from "./ScaffoldBlock";
 import { getDevOrg } from "../../lib/dev-org";
@@ -71,6 +74,27 @@ function Chips({ title, items }: { title: string; items: string[] }) {
   );
 }
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const seo = await getTrendSeo(slug);
+  if (!seo) return { title: "Trend not found", robots: { index: false } };
+  const description =
+    seo.summary?.slice(0, 155) ||
+    `Opportunity analysis for “${seo.title}” — scored across 10 dimensions, with related entities and a build plan.`;
+  const url = `${getSiteUrl()}/trends/${slug}`;
+  return {
+    title: seo.title,
+    description,
+    alternates: { canonical: url },
+    openGraph: { title: seo.title, description, url, type: "article" },
+    twitter: { title: seo.title, description },
+  };
+}
+
 export default async function TrendDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const trend = await getTrendBySlug(slug);
@@ -91,6 +115,18 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
 
   return (
     <main>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "Article",
+            headline: trend.title,
+            ...(trend.summary ? { description: trend.summary } : {}),
+            url: `${getSiteUrl()}/trends/${slug}`,
+          }),
+        }}
+      />
       <a href="/trends" style={{ color: "var(--fg-muted)", fontSize: "0.875rem" }}>
         ← Trends
       </a>
