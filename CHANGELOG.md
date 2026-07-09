@@ -11,6 +11,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Landing page refresh** — a sharper USP hero (“See what to build before it’s a trend”), the
+  three differentiation pillars, a feature grid (Golden Quadrant, momentum, build kit, entities, API+MCP,
+  digests), a 5-step pipeline, 8 sources, and an API CTA.
 - deps: adopt safe major dependency bumps validated by CI — turbo 2.10, @types/node 26, pino 10,
   next 16, lint-staged 17, @commitlint/{cli,config-conventional} 21, zod 4, eslint 10. (TypeScript 6
   held back — fails typecheck; tracked as B-026.)

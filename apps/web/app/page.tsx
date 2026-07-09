@@ -3,30 +3,93 @@ import { Badge } from "@aioi/ui";
 
 export const dynamic = "force-dynamic";
 
-const STEPS = [
+const PILLARS = [
   {
-    icon: "📡",
-    title: "Ingest",
-    text: "Pull launches, repos, models, videos, and discussions from six official sources — continuously.",
+    n: "01",
+    title: "Leading indicators, not lagging",
+    text: "We read what builders ship first — repos, models, papers, packages, launches, dev chatter — the earliest signal, weeks before it becomes a search trend.",
   },
   {
-    icon: "🧩",
-    title: "Cluster",
-    text: "Group cross-source signals about the same thing into a single trend, by meaning (embeddings).",
+    n: "02",
+    title: "Supply × demand",
+    text: "The Golden Quadrant crosses what's being built with what people are asking for. The build-now quadrant — high demand, low supply — is where you want to be.",
   },
+  {
+    n: "03",
+    title: "Signal → shipped",
+    text: "Every opportunity comes scored on 10 dimensions with evidence, and a ready-to-paste build plan for your AI coding agent. From weak signal to running code.",
+  },
+];
+
+const FEATURES = [
   {
     icon: "📊",
+    title: "Golden Quadrant",
+    href: "/quadrant",
+    text: "Demand × supply — see the build-now quadrant at a glance.",
+  },
+  {
+    icon: "📈",
+    title: "Momentum",
+    href: "/trends?sort=opportunity",
+    text: "Signal-velocity tracking — spot what's accelerating before the crowd.",
+  },
+  {
+    icon: "🛠️",
+    title: "Build kit",
+    href: "/trends",
+    text: "One-click scaffold prompt for Claude Code, Cursor, or v0.",
+  },
+  {
+    icon: "🏷️",
+    title: "Entities",
+    href: "/entities",
+    text: "The companies, models & tools that keep recurring across trends.",
+  },
+  {
+    icon: "🔌",
+    title: "API + MCP",
+    href: "/api/v1",
+    text: "Query opportunities from your own agent or codebase.",
+  },
+  {
+    icon: "📨",
+    title: "Team digests",
+    href: "/team",
+    text: "The daily brief delivered to your Slack or Discord.",
+  },
+];
+
+const STEPS = [
+  {
+    title: "Ingest",
+    text: "Pull launches, repos, models, papers, packages, videos & discussions from eight official sources — continuously.",
+  },
+  {
+    title: "Cluster",
+    text: "Group cross-source signals about the same thing into one trend, by meaning (embeddings).",
+  },
+  {
     title: "Score",
     text: "Rate each trend on 10 opportunity dimensions with evidence-grounded rationale.",
   },
   {
-    icon: "🛠️",
     title: "Plan",
-    text: "Auto-generate a build plan: SaaS/API ideas, MVP scope, pricing, names, and tech stack.",
+    text: "Auto-generate a build plan: SaaS/API ideas, MVP scope, pricing, names, tech stack.",
   },
+  { title: "Ship", text: "Export a rigorous scaffold prompt and hand it to your AI coding agent." },
 ];
 
-const SOURCES = ["HackerNews", "GitHub", "Hugging Face", "YouTube", "Reddit", "Product Hunt"];
+const SOURCES = [
+  "HackerNews",
+  "GitHub",
+  "Hugging Face",
+  "arXiv",
+  "npm",
+  "YouTube",
+  "Reddit",
+  "Product Hunt",
+];
 
 export default async function Home() {
   const [{ trends, total }, sources] = await Promise.all([
@@ -40,17 +103,18 @@ export default async function Home() {
     <main className="home">
       <section className="home-hero">
         <span className="home-eyebrow">◧ AI Opportunity Intelligence</span>
-        <h1 className="home-title">Discover AI opportunities before everyone else.</h1>
+        <h1 className="home-title">See what to build before it&rsquo;s a trend.</h1>
         <p className="home-sub">
-          We continuously scan the AI ecosystem, cluster what&rsquo;s emerging, score the
-          opportunity, and hand you a concrete plan to build on it.
+          We watch where AI ships first — repos, models, papers, launches — detect what&rsquo;s
+          breaking out before it&rsquo;s a search trend, score the opportunity, and hand you a
+          buildable plan.
         </p>
         <div className="home-cta">
           <a className="home-btn home-btn-primary" href="/trends">
             Browse trends →
           </a>
-          <a className="home-btn" href="#how">
-            How it works
+          <a className="home-btn" href="/quadrant">
+            See the Golden Quadrant
           </a>
         </div>
         <div className="home-stats">
@@ -63,6 +127,18 @@ export default async function Home() {
           <span>
             <strong>{liveSources}</strong> live sources
           </span>
+        </div>
+      </section>
+
+      <section className="home-section">
+        <div className="home-pillars">
+          {PILLARS.map((p) => (
+            <div key={p.n} className="home-pillar">
+              <div className="n">{p.n}</div>
+              <h3>{p.title}</h3>
+              <p>{p.text}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -91,14 +167,26 @@ export default async function Home() {
         </section>
       )}
 
+      <section className="home-section">
+        <h2>Everything you need to go from signal to shipped</h2>
+        <div className="home-features">
+          {FEATURES.map((f) => (
+            <a key={f.title} href={f.href} className="home-feature">
+              <div className="icon" aria-hidden>
+                {f.icon}
+              </div>
+              <h3>{f.title}</h3>
+              <p>{f.text}</p>
+            </a>
+          ))}
+        </div>
+      </section>
+
       <section className="home-section" id="how">
         <h2>How it works</h2>
         <div className="home-steps">
           {STEPS.map((s, i) => (
             <div key={s.title} className="home-step">
-              <div className="home-step-icon" aria-hidden>
-                {s.icon}
-              </div>
               <h3>
                 <span className="home-step-num">{i + 1}</span> {s.title}
               </h3>
@@ -123,9 +211,14 @@ export default async function Home() {
 
       <section className="home-final">
         <h2>Find your next thing to build.</h2>
-        <a className="home-btn home-btn-primary" href="/trends">
-          Browse all trends →
-        </a>
+        <div className="home-cta" style={{ justifyContent: "center" }}>
+          <a className="home-btn home-btn-primary" href="/trends">
+            Browse all trends →
+          </a>
+          <a className="home-btn" href="/api/v1">
+            Read the API
+          </a>
+        </div>
       </section>
     </main>
   );
