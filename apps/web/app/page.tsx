@@ -1,5 +1,6 @@
 import { listTrendsPage, getSourceStats } from "@aioi/database";
 import { Badge } from "@aioi/ui";
+import { NewsletterSignup } from "./NewsletterSignup";
 
 export const dynamic = "force-dynamic";
 
@@ -207,6 +208,14 @@ export default async function Home() {
             <Badge key={s}>{s}</Badge>
           ))}
         </div>
+      </section>
+
+      <section className="home-section home-newsletter">
+        <h2>Get the week&rsquo;s top opportunities</h2>
+        <p className="home-muted">
+          A free weekly digest of the highest-opportunity AI trends — straight to your inbox.
+        </p>
+        <NewsletterSignup />
       </section>
 
       <section className="home-final">
