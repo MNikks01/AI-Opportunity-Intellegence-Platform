@@ -55,6 +55,7 @@ export {
   type QuadrantTrend,
   type Quadrant,
 } from "./quadrant";
+export { mineDemand, getTrendDemandHits } from "./demand";
 export {
   recordTrendSnapshots,
   getTrendMomentumMap,
