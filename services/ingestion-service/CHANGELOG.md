@@ -1,5 +1,19 @@
 # @aioi/ingestion-service
 
+## 0.4.0
+
+### Minor Changes
+
+- 1606922: arXiv source connector: ingest the latest cs.AI/cs.LG/cs.CL submissions from the official (keyless)
+  arXiv Atom API — a leading indicator (research precedes products). New `fetchPapers` + `runArxivIngestion`,
+  wired into the refresh pipeline; the source filter picks it up automatically.
+
+### Patch Changes
+
+- Updated dependencies [89fa03c]
+- Updated dependencies [f6907ac]
+  - @aioi/database@0.20.0
+
 ## 0.3.15
 
 ### Patch Changes
