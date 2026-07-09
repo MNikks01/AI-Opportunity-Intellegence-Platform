@@ -24,6 +24,19 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Weekly newsletter send** — format the top opportunities as an email (HTML + plain-text, with a
+  `List-Unsubscribe` header) and send to every active subscriber via Resend, each with a personal
+  unsubscribe link. New `buildNewsletterHtml`/`buildNewsletterText`/`sendEmail` + `scripts/newsletter.ts`
+  + a weekly `newsletter.yml` workflow (gated on `RESEND_API_KEY`; dry-run supported).
+- **Newsletter signup** — a homepage form to subscribe to a free weekly digest (new `Subscriber`
+  model + idempotent, case-insensitive `subscribe`/`unsubscribe`/`listActiveSubscribers`), and a
+  token-based `/unsubscribe` page. The top-of-funnel list starts building now; the weekly send follows.
+- **API keys** — manage read-API keys on `/team` (create with a one-time secret reveal, list, revoke;
+  RBAC-gated). The public API accepts an optional `Authorization: Bearer aioi_…` key that raises the
+  per-request limit cap (anonymous ≤25, authenticated ≤100) and records `lastUsedAt`. New `touchApiKey`.
+- **Social share images** — a dynamic, branded Open Graph image per trend (title + opportunity
+  score + build idea) and for the homepage (generated with `next/og`), so shared links render a rich
+  card on Twitter/Slack/LinkedIn/iMessage. New `getTrendOg` query.
 - **Per-org digest config** — a "Digest delivery" section on `/team` to connect a Slack/Discord
   incoming webhook and toggle the daily digest per organization (new `OrgIntegration` model). RBAC-gated,
   audited, webhook host-validated; the URL is never reflected back to the page. The cron delivers to each

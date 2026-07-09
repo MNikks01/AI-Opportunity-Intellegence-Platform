@@ -7,3 +7,4 @@
 export const PACKAGE_NAME = "@aioi/notification-service" as const;
 
 export * from "./digest";
+export * from "./newsletter";

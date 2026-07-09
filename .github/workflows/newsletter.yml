@@ -1,0 +1,47 @@
+# Weekly newsletter: email the top opportunities to every active subscriber. Runs Mondays 14:00 UTC and
+# on manual dispatch. No-ops (safe) unless RESEND_API_KEY is set. Reuses DEMO_DATABASE_URL.
+#
+# Secrets: DEMO_DATABASE_URL, RESEND_API_KEY, and (recommended) NEWSLETTER_FROM (a verified Resend
+# sender, e.g. "AI Opportunity Intelligence <news@yourdomain.com>"), NEXT_PUBLIC_SITE_URL.
+name: weekly-newsletter
+
+on:
+  schedule:
+    - cron: "0 14 * * 1" # Mondays 14:00 UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview counts only (no send)"
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: weekly-newsletter
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Send weekly newsletter
+        env:
+          DATABASE_URL: ${{ secrets.DEMO_DATABASE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEWSLETTER_FROM: ${{ secrets.NEWSLETTER_FROM }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          RESEND_DRY: ${{ inputs.dry_run && '1' || '' }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::DEMO_DATABASE_URL not set — skipping."
+            exit 0
+          fi
+          pnpm --filter @aioi/database exec prisma migrate deploy
+          pnpm exec tsx scripts/newsletter.ts

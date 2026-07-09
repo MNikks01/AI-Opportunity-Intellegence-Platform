@@ -17,6 +17,27 @@ export function getTrendSeo(
   return prisma.trend.findUnique({ where: { slug }, select: { title: true, summary: true } });
 }
 
+/** Fields for a trend's social share (OG) image: title + opportunity + top build idea. */
+export async function getTrendOg(
+  slug: string,
+): Promise<{ title: string; opportunity: number | null; topIdea: string | null } | null> {
+  const t = await prisma.trend.findUnique({
+    where: { slug },
+    select: {
+      title: true,
+      scores: { where: { dimension: "OPPORTUNITY" }, select: { value: true }, take: 1 },
+      actionPlan: { select: { content: true } },
+    },
+  });
+  if (!t) return null;
+  const plan = t.actionPlan?.content as { saasIdeas?: string[] } | null;
+  return {
+    title: t.title,
+    opportunity: t.scores[0]?.value ?? null,
+    topIdea: plan?.saasIdeas?.[0] ?? null,
+  };
+}
+
 /** Minimal fields for an entity's page metadata. Returns null on a malformed id. */
 export async function getEntitySeo(id: string): Promise<{ name: string; type: string } | null> {
   try {

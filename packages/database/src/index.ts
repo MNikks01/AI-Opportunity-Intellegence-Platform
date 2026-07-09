@@ -46,7 +46,7 @@ export {
   type BriefTrend,
 } from "./briefs";
 export { getPlan, getEntitlements, setPlan } from "./subscription";
-export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey } from "./apikeys";
+export { findApiKeyByHash, createApiKey, listApiKeys, revokeApiKey, touchApiKey } from "./apikeys";
 export { exportOrgData, deleteOrg } from "./gdpr";
 export { getSourceStats, type SourceStat } from "./source-stats";
 export {
@@ -57,7 +57,8 @@ export {
 } from "./quadrant";
 export { mineDemand, getTrendDemandHits } from "./demand";
 export { listTrendsForRescore, touchTrend, countScoredTrends } from "./rescore";
-export { listTrendSlugs, getTrendSeo, getEntitySeo } from "./seo";
+export { listTrendSlugs, getTrendSeo, getTrendOg, getEntitySeo } from "./seo";
+export { subscribe, unsubscribe, listActiveSubscribers, countSubscribers } from "./newsletter";
 export {
   listMembers,
   inviteMember,
