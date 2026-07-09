@@ -4,12 +4,17 @@
  * ultimately calls `setPlan`; this package owns "what a plan grants" and the enforcement helpers.
  */
 
-export type Plan = "FREE" | "PRO";
+export type Plan = "FREE" | "PRO" | "TEAM";
+
+/** Paid plans a customer can check out into (everything but FREE). */
+export type PaidPlan = Exclude<Plan, "FREE">;
 
 export interface Entitlements {
   /** -1 = unlimited. */
   maxWatchlists: number;
   maxAlerts: number;
+  /** Team members (including pending invites) allowed on the org. */
+  maxSeats: number;
   semanticSearch: boolean;
   dailyBrief: boolean;
   /** Public-API requests per day per key. */
@@ -20,6 +25,7 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
   FREE: {
     maxWatchlists: 5,
     maxAlerts: 10,
+    maxSeats: 1,
     semanticSearch: false,
     dailyBrief: true,
     apiDailyQuota: 1000,
@@ -27,16 +33,30 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
   PRO: {
     maxWatchlists: -1,
     maxAlerts: -1,
+    maxSeats: 3,
     semanticSearch: true,
     dailyBrief: true,
     apiDailyQuota: 50000,
+  },
+  TEAM: {
+    maxWatchlists: -1,
+    maxAlerts: -1,
+    maxSeats: 25,
+    semanticSearch: true,
+    dailyBrief: true,
+    apiDailyQuota: 200000,
   },
 };
 
 export const PLANS = Object.keys(PLAN_ENTITLEMENTS) as Plan[];
 
 export function isPlan(value: string): value is Plan {
-  return value === "FREE" || value === "PRO";
+  return value === "FREE" || value === "PRO" || value === "TEAM";
+}
+
+/** True for a real paid plan (not FREE and not garbage). */
+export function isPaidPlan(value: string): value is PaidPlan {
+  return value === "PRO" || value === "TEAM";
 }
 
 /** Entitlements for a plan string; unknown/absent plans fall back to FREE. */
@@ -61,7 +81,12 @@ export class PlanLimitError extends Error {
 export {
   StubBillingProvider,
   planForStripeSubscription,
+  syncFromCheckoutSession,
+  syncFromSubscription,
   type BillingProvider,
   type CheckoutSession,
   type CheckoutInput,
+  type PlanSync,
+  type StripeCheckoutSessionLike,
+  type StripeSubscriptionLike,
 } from "./provider";

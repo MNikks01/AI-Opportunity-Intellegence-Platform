@@ -24,6 +24,23 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+
+- **Team tier + seat enforcement** — a new **TEAM** plan (25 seats, 200k/day API) alongside
+  Free/Pro. Every plan gains a `maxSeats` entitlement (Free 1, Pro 3, Team 25), enforced at
+  `inviteMember` (throws `PlanLimitError`, surfaced as an upgrade notice). Stripe checkout is now
+  plan-aware — Pro/Team price ids, with the plan carried in subscription metadata so the webhook
+  needs no price→plan table. Pricing shows three tiers; `/billing` offers per-plan upgrades; the
+  team page shows seat usage and blocks invites once full.
+- **Entitlement enforcement at the write paths** — `createAlert` now enforces the plan's
+  `maxAlerts` (Free 10) the way `createWatchlist` already enforced `maxWatchlists`, throwing
+  `PlanLimitError`; semantic search on `/trends` is gated on the `semanticSearch` entitlement (Free
+  falls back to keyword search with an upgrade prompt). Blocked creates redirect back with an inline
+  “upgrade to Pro” banner instead of surfacing an error.
+- **Stripe checkout & webhook** — self-serve upgrades on `/billing`: *Upgrade to Pro* opens Stripe
+  Checkout (or applies Pro directly in test mode), a signature-verified webhook at
+  `/api/stripe/webhook` is the source of truth for plan changes (pure, unit-tested event→plan
+  helpers in `@aioi/billing`; `applyStripeSubscription` persists ids + audit), and cancel/manage go
+  through the Stripe Billing Portal. Falls back to the offline Stub when Stripe env is unset.
 - **Public pricing page** (`/pricing`) — Free vs Pro tiers rendered from the live plan
   entitlements (single source of truth in `@aioi/billing`): unlimited watchlists/alerts, semantic
   search, and a 50,000/day API quota on Pro. Comparison + "included in every plan" + FAQ; linked

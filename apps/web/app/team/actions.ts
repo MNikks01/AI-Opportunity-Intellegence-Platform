@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { PlanLimitError } from "@aioi/billing";
 import {
   inviteMember,
   updateMemberRole,
@@ -30,7 +32,12 @@ export async function inviteMemberAction(formData: FormData) {
   const { organizationId, userId } = await requireManage();
   const email = String(formData.get("email") ?? "").trim();
   if (!email.includes("@")) return;
-  await inviteMember(organizationId, userId, { email, role: parseRole(formData.get("role")) });
+  try {
+    await inviteMember(organizationId, userId, { email, role: parseRole(formData.get("role")) });
+  } catch (e) {
+    if (e instanceof PlanLimitError) redirect("/team?limit=seats");
+    throw e;
+  }
   revalidatePath("/team");
 }
 

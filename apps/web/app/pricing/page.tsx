@@ -4,34 +4,52 @@ import { entitlementsFor, type Entitlements } from "@aioi/database";
 export const metadata: Metadata = {
   title: "Pricing",
   description:
-    "Simple plans for the AI Opportunity Intelligence Platform. Start free; upgrade to Pro for unlimited watchlists, semantic search, and a 50,000/day API quota.",
+    "Simple plans for the AI Opportunity Intelligence Platform. Start free; Pro unlocks unlimited watchlists, semantic search, and a 50,000/day API quota; Team adds 25 seats and 200k/day.",
 };
-
-const free = entitlementsFor("FREE");
-const pro = entitlementsFor("PRO");
 
 const fmtLimit = (n: number) => (n < 0 ? "Unlimited" : n.toLocaleString());
 
-type Row = {
-  label: string;
-  free: (e: Entitlements) => string | boolean;
-  pro: (e: Entitlements) => string | boolean;
+// A feature row, rendered per tier from the plan's live entitlements.
+const FEATURES: { label: string; value: (e: Entitlements) => string | boolean }[] = [
+  { label: "Watchlists", value: (e) => fmtLimit(e.maxWatchlists) },
+  { label: "Alert rules", value: (e) => fmtLimit(e.maxAlerts) },
+  { label: "Team seats", value: (e) => fmtLimit(e.maxSeats) },
+  { label: "Daily brief", value: (e) => e.dailyBrief },
+  { label: "Semantic search", value: (e) => e.semanticSearch },
+  { label: "API requests / day per key", value: (e) => e.apiDailyQuota.toLocaleString() },
+];
+
+type Tier = {
+  plan: "FREE" | "PRO" | "TEAM";
+  name: string;
+  price: string;
+  tagline: string;
+  cta: { label: string; href: string };
+  featured?: boolean;
 };
 
-// Entitlement-driven rows — the single source of truth is @aioi/billing.
-const ROWS: Row[] = [
+const TIERS: Tier[] = [
   {
-    label: "Watchlists",
-    free: (e) => fmtLimit(e.maxWatchlists),
-    pro: (e) => fmtLimit(e.maxWatchlists),
+    plan: "FREE",
+    name: "Free",
+    price: "$0",
+    tagline: "Everything you need to find your next thing to build.",
+    cta: { label: "Get started →", href: "/trends" },
   },
-  { label: "Alert rules", free: (e) => fmtLimit(e.maxAlerts), pro: (e) => fmtLimit(e.maxAlerts) },
-  { label: "Daily brief", free: (e) => e.dailyBrief, pro: (e) => e.dailyBrief },
-  { label: "Semantic search", free: (e) => e.semanticSearch, pro: (e) => e.semanticSearch },
   {
-    label: "API requests / day per key",
-    free: (e) => `${e.apiDailyQuota.toLocaleString()}`,
-    pro: (e) => `${e.apiDailyQuota.toLocaleString()}`,
+    plan: "PRO",
+    name: "Pro",
+    price: "$29",
+    tagline: "For the solo builder shipping on AI signal, at full throughput.",
+    cta: { label: "Upgrade to Pro →", href: "/billing" },
+    featured: true,
+  },
+  {
+    plan: "TEAM",
+    name: "Team",
+    price: "$99",
+    tagline: "For teams — 25 seats, shared watchlists, and the highest API limits.",
+    cta: { label: "Upgrade to Team →", href: "/billing" },
   },
 ];
 
@@ -42,7 +60,7 @@ const INCLUDED = [
   "10-dimension opportunity scores with evidence",
   "Build-kit scaffold prompts for your AI coding agent",
   "Public read API + MCP server",
-  "Slack / Discord team digests & seat-based collaboration",
+  "Slack / Discord team digests & role-based access",
 ];
 
 function Cell({ value }: { value: string | boolean }) {
@@ -68,56 +86,42 @@ export default function PricingPage() {
         <span className="pricing-eyebrow">Pricing</span>
         <h1>Start free. Upgrade when you scale.</h1>
         <p>
-          The full opportunity engine is free to use. Pro removes the limits — unlimited watchlists
-          and alerts, semantic search, and a {pro.apiDailyQuota.toLocaleString()}/day API quota.
+          The full opportunity engine is free to use. Paid plans lift the limits — unlimited
+          watchlists and alerts, semantic search, more seats, and a bigger API quota.
         </p>
       </header>
 
-      <section className="pricing-tiers" aria-label="Plans">
-        <article className="pricing-card">
-          <div className="pricing-card-head">
-            <h2>Free</h2>
-            <div className="pricing-price">
-              <span className="amount">$0</span>
-              <span className="per">/month</span>
-            </div>
-            <p className="pricing-tagline">Everything you need to find your next thing to build.</p>
-          </div>
-          <a className="pricing-cta pricing-cta-ghost" href="/trends">
-            Get started →
-          </a>
-          <ul className="pricing-list">
-            {ROWS.map((r) => (
-              <li key={r.label}>
-                <Cell value={r.free(free)} />
-                <span>{r.label}</span>
-              </li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="pricing-card is-featured">
-          <span className="pricing-flag">Recommended</span>
-          <div className="pricing-card-head">
-            <h2>Pro</h2>
-            <div className="pricing-price">
-              <span className="amount">$29</span>
-              <span className="per">/month</span>
-            </div>
-            <p className="pricing-tagline">For teams shipping on AI signal, at full throughput.</p>
-          </div>
-          <a className="pricing-cta pricing-cta-primary" href="/billing">
-            Upgrade to Pro →
-          </a>
-          <ul className="pricing-list">
-            {ROWS.map((r) => (
-              <li key={r.label}>
-                <Cell value={r.pro(pro)} />
-                <span>{r.label}</span>
-              </li>
-            ))}
-          </ul>
-        </article>
+      <section className="pricing-tiers pricing-tiers-3" aria-label="Plans">
+        {TIERS.map((t) => {
+          const ent = entitlementsFor(t.plan);
+          return (
+            <article key={t.plan} className={`pricing-card${t.featured ? " is-featured" : ""}`}>
+              {t.featured && <span className="pricing-flag">Most popular</span>}
+              <div className="pricing-card-head">
+                <h2>{t.name}</h2>
+                <div className="pricing-price">
+                  <span className="amount">{t.price}</span>
+                  <span className="per">/month</span>
+                </div>
+                <p className="pricing-tagline">{t.tagline}</p>
+              </div>
+              <a
+                className={`pricing-cta ${t.featured ? "pricing-cta-primary" : "pricing-cta-ghost"}`}
+                href={t.cta.href}
+              >
+                {t.cta.label}
+              </a>
+              <ul className="pricing-list">
+                {FEATURES.map((f) => (
+                  <li key={f.label}>
+                    <Cell value={f.value(ent)} />
+                    <span>{f.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          );
+        })}
       </section>
 
       <section className="pricing-included">
@@ -152,10 +156,10 @@ export default function PricingPage() {
             </p>
           </div>
           <div>
-            <h3>Can I change plans later?</h3>
+            <h3>How do team seats work?</h3>
             <p>
-              Anytime, from <a href="/billing">Billing</a>. Entitlements apply immediately — no
-              proration surprises.
+              A seat is any member or pending invite on your org. Pro includes 3; Team includes 25.
+              Invites are blocked once you hit the limit — upgrade for more.
             </p>
           </div>
           <div>

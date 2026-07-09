@@ -45,7 +45,14 @@ export {
   type BriefContent,
   type BriefTrend,
 } from "./briefs";
-export { getPlan, getEntitlements, setPlan } from "./subscription";
+export {
+  getPlan,
+  getEntitlements,
+  setPlan,
+  getSubscription,
+  applyStripeSubscription,
+  type StripeSync,
+} from "./subscription";
 export {
   entitlementsFor,
   PLAN_ENTITLEMENTS,
@@ -81,6 +88,7 @@ export {
   updateMemberRole,
   removeMember,
   canManageMembers,
+  countMembers,
   ROLES,
   type Role,
   type Member,

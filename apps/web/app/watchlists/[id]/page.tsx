@@ -10,6 +10,7 @@ import {
   toggleAlertAction,
   deleteAlertAction,
 } from "../actions";
+import { UpgradeNotice } from "../UpgradeNotice";
 
 type AlertTrigger =
   { type: "NEW_TREND" } | { type: "SCORE_CROSSES"; dimension: string; gte: number };
@@ -30,8 +31,15 @@ const inputStyle = {
   color: "var(--fg)",
 } as const;
 
-export default async function WatchlistDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function WatchlistDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ limit?: string }>;
+}) {
   const { id } = await params;
+  const { limit } = await searchParams;
   const { organizationId } = await getDevOrg();
 
   const watchlist = await getWatchlist(organizationId, id).catch(() => null);
@@ -167,6 +175,8 @@ export default async function WatchlistDetailPage({ params }: { params: Promise<
         Get notified when a watched trend matches. (Dimension &amp; threshold apply to “score
         crosses”.)
       </p>
+
+      {limit === "alerts" && <UpgradeNotice feature="alerts" />}
 
       <form
         action={createAlertAction}

@@ -113,6 +113,9 @@ importers:
       '@aioi/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@aioi/billing':
+        specifier: workspace:*
+        version: link:../../packages/billing
       '@aioi/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -137,6 +140,9 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.7(react@19.2.7)
+      stripe:
+        specifier: ^17.7.0
+        version: 17.7.0
     devDependencies:
       '@aioi/eslint-config':
         specifier: workspace:*

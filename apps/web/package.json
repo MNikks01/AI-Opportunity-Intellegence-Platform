@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@aioi/auth": "workspace:*",
+    "@aioi/billing": "workspace:*",
     "@aioi/database": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/ui": "workspace:*",
@@ -21,7 +22,8 @@
     "@clerk/nextjs": "^6.19.0",
     "next": "^16.2.10",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "stripe": "^17.7.0"
   },
   "devDependencies": {
     "@aioi/eslint-config": "workspace:*",

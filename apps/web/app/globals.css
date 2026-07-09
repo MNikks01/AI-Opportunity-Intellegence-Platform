@@ -1443,7 +1443,7 @@ a.resource-link:hover {
 
 /* ---- Pricing ---- */
 .pricing {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
 }
 .pricing-head {
@@ -1474,6 +1474,9 @@ a.resource-link:hover {
   grid-template-columns: repeat(2, 1fr);
   gap: 20px;
   margin: 36px 0;
+}
+.pricing-tiers-3 {
+  grid-template-columns: repeat(3, 1fr);
 }
 .pricing-card {
   position: relative;
@@ -1657,4 +1660,33 @@ a.resource-link:hover {
   .pricing-faq-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ---- Billing buttons ---- */
+.billing-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+.billing-btn:hover {
+  border-color: var(--primary);
+}
+.billing-btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-fg);
+}
+.billing-btn-primary:hover {
+  filter: brightness(1.08);
+}
+.billing-btn-danger {
+  color: var(--danger);
+}
+.billing-btn-danger:hover {
+  border-color: var(--danger);
 }

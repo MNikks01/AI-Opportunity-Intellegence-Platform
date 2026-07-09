@@ -6,6 +6,7 @@ import {
   listWatchlists,
   listWatchedTargetIds,
   getTrendMomentumMap,
+  getEntitlements,
 } from "@aioi/database";
 import { TrendCard } from "@aioi/ui";
 import { TrendControls } from "./TrendControls";
@@ -67,9 +68,14 @@ export default async function TrendsPage({
     ? await listWatchedTargetIds(organizationId, primaryWatchlistId)
     : new Set<string>();
 
+  // Semantic search is a Pro entitlement — gate it here and fall back to keyword for Free.
+  const canSemantic = (await getEntitlements(organizationId)).semanticSearch;
+  const useSemantic = semantic && canSemantic;
+  const semanticBlocked = semantic && !canSemantic;
+
   const result = searching
     ? {
-        trends: semantic ? await semanticSearchTrends(query, 50) : await searchTrends(query, 50),
+        trends: useSemantic ? await semanticSearchTrends(query, 50) : await searchTrends(query, 50),
         page: 1,
         pageCount: 1,
         total: 0,
@@ -181,7 +187,7 @@ export default async function TrendsPage({
           }}
         >
           <option value="keyword">Keyword</option>
-          <option value="semantic">Semantic</option>
+          <option value="semantic">{canSemantic ? "Semantic" : "Semantic (Pro)"}</option>
         </select>
         <button
           type="submit"
@@ -212,6 +218,28 @@ export default async function TrendsPage({
           </a>
         )}
       </form>
+
+      {semanticBlocked && (
+        <p
+          role="status"
+          style={{
+            margin: "0 0 20px",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            border: "1px solid var(--border)",
+            background: "var(--bg-muted)",
+            color: "var(--fg-muted)",
+            fontSize: "0.875rem",
+            maxWidth: 640,
+          }}
+        >
+          Semantic search is a <strong>Pro</strong> feature — showing keyword results.{" "}
+          <a href="/pricing" style={{ color: "var(--primary)" }}>
+            Upgrade to Pro
+          </a>{" "}
+          to search by meaning.
+        </p>
+      )}
 
       {!searching && (
         <TrendControls
