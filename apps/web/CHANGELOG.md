@@ -1,5 +1,20 @@
 # @aioi/web
 
+## 0.18.0
+
+### Minor Changes
+
+- 149dd8d: Per-org digest config: an OrgIntegration model + a "Digest delivery" section on /team to connect a
+  Slack/Discord incoming webhook and toggle the daily digest. RBAC-gated, audited, webhook host-validated;
+  the cron delivers to each org's configured webhook (env is the fallback). New getOrgIntegration/setOrgIntegration.
+
+### Patch Changes
+
+- 1c0b0f7: Landing page refresh: sharper USP hero, the three differentiation pillars, a feature grid (Golden
+  Quadrant, momentum, build kit, entities, API+MCP, digests), a 5-step pipeline, 8 sources, and API CTA.
+- Updated dependencies [149dd8d]
+  - @aioi/database@0.21.0
+
 ## 0.17.0
 
 ### Minor Changes
