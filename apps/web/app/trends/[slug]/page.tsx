@@ -4,12 +4,13 @@ import {
   listWatchlists,
   getTrendEntities,
   getRelatedTrends,
+  relatedTrends,
   getTrendMomentumMap,
 } from "@aioi/database";
 import { Badge, Card, Scorecard, Sparkline } from "@aioi/ui";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { buildScaffoldPrompt } from "@aioi/shared";
+import { buildScaffoldPrompt, bandForValue } from "@aioi/shared";
 import { getTrendSeo } from "@aioi/database";
 import { getSiteUrl } from "../../lib/site";
 import { ResourceItem } from "./ResourceItem";
@@ -101,14 +102,36 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
   if (!trend) notFound();
   const plan = trend.actionPlan?.content as ActionPlan | undefined;
   const { organizationId } = await getDevOrg();
-  const [resources, watchlists, entities, related, momentumMap] = await Promise.all([
+  const [resources, watchlists, entities, related, semantic, momentumMap] = await Promise.all([
     getTrendResources(trend.id),
     listWatchlists(organizationId),
     getTrendEntities(trend.id),
     getRelatedTrends(trend.id, 6),
+    relatedTrends(trend.id, 6),
     getTrendMomentumMap([trend.id]),
   ]);
   const momentum = momentumMap.get(trend.id);
+
+  // "Related opportunities": explicit shared-entity matches first, then fill with embedding-similar
+  // trends (broader recall for sparsely-tagged trends), deduped, capped at 6.
+  const relatedSlugs = new Set(related.map((r) => r.slug));
+  const relatedList: { slug: string; title: string; opportunity: number | null; reason: string }[] =
+    [
+      ...related.map((r) => ({
+        slug: r.slug,
+        title: r.title,
+        opportunity: r.opportunity,
+        reason: `${r.shared} shared`,
+      })),
+      ...semantic
+        .filter((t) => t.slug !== slug && !relatedSlugs.has(t.slug))
+        .map((t) => ({
+          slug: t.slug,
+          title: t.title,
+          opportunity: t.scores.find((s) => s.dimension === "opportunity")?.value ?? null,
+          reason: "similar",
+        })),
+    ].slice(0, 6);
   const sourceCount = new Set(resources.map((r) => r.source)).size;
   // Sub-dimension rationales (opportunity's rationale already leads the scorecard).
   const rationales = trend.scores.filter((s) => s.dimension !== "opportunity" && s.rationale);
@@ -235,21 +258,21 @@ export default async function TrendDetailPage({ params }: { params: Promise<{ sl
         <Scorecard scores={trend.scores} />
       </div>
 
-      {related.length > 0 && (
+      {relatedList.length > 0 && (
         <>
-          <h2 style={{ fontSize: "1.25rem", margin: "32px 0 8px" }}>Related trends</h2>
+          <h2 style={{ fontSize: "1.25rem", margin: "32px 0 8px" }}>Related opportunities</h2>
           <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "0 0 12px" }}>
-            Trends that share entities with this one.
+            Trends that share entities with this one, plus others that are semantically similar.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {related.map((r) => (
+            {relatedList.map((r) => (
               <a key={r.slug} href={`/trends/${r.slug}`} className="entity-trend">
                 <span>{r.title}</span>
                 <span style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <span style={{ color: "var(--fg-muted)", fontSize: "0.75rem" }}>
-                    {r.shared} shared
-                  </span>
-                  {r.opportunity !== null && r.band && <Badge band={r.band}>{r.opportunity}</Badge>}
+                  <span style={{ color: "var(--fg-muted)", fontSize: "0.75rem" }}>{r.reason}</span>
+                  {r.opportunity !== null && (
+                    <Badge band={bandForValue(r.opportunity)}>{r.opportunity}</Badge>
+                  )}
                 </span>
               </a>
             ))}

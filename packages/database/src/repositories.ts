@@ -664,3 +664,37 @@ export async function semanticSearchTrends(query: string, limit = 25): Promise<T
       scores: t.scores.map(toScore),
     }));
 }
+
+/**
+ * Trends most similar to a given trend, by embedding cosine distance (pgvector `<=>`), excluding the
+ * trend itself. Powers the "Related opportunities" section on a trend page. Empty when the trend has
+ * no embedding yet (or nothing else is embedded). Global read — no org scope.
+ */
+export async function relatedTrends(trendId: string, limit = 4): Promise<TrendView[]> {
+  const matches = await prisma.$queryRaw<Array<{ id: string }>>`
+    WITH target AS (SELECT embedding FROM "Trend" WHERE id = ${trendId}::uuid)
+    SELECT t.id
+    FROM "Trend" t, target
+    WHERE t.embedding IS NOT NULL
+      AND target.embedding IS NOT NULL
+      AND t.id <> ${trendId}::uuid
+    ORDER BY t.embedding <=> target.embedding
+    LIMIT ${limit}`;
+  if (matches.length === 0) return [];
+
+  const order = new Map(matches.map((m, i) => [m.id, i]));
+  const rows = await prisma.trend.findMany({
+    where: { id: { in: matches.map((m) => m.id) } },
+    include: { scores: true },
+  });
+  return rows
+    .sort((a, b) => order.get(a.id)! - order.get(b.id)!)
+    .map((t) => ({
+      id: t.id,
+      slug: t.slug,
+      title: t.title,
+      summary: t.summary,
+      status: t.status as TrendStatus,
+      scores: t.scores.map(toScore),
+    }));
+}
