@@ -1,5 +1,26 @@
 # @aioi/web
 
+## 0.19.0
+
+### Minor Changes
+
+- a890f98: API keys: manage read-API keys on /team (create with one-time reveal, list, revoke) and optional
+  Bearer auth on /api/v1 that raises the limit cap (anon ≤25, authed ≤100) and records usage. New
+  touchApiKey; reuses the existing ApiKey infra.
+- 1009efc: Newsletter subscriber capture: a Subscriber model + subscribe/unsubscribe/list data layer, a homepage
+  signup form, and a token-based /unsubscribe page. The top-of-funnel list starts building now; the weekly
+  send follows.
+- a8f0a49: Dynamic Open Graph images: a branded social-share card per trend (title + opportunity score + build
+  idea) and for the homepage, generated with next/og. Improves click-through when links are shared. New
+  getTrendOg query.
+
+### Patch Changes
+
+- Updated dependencies [a890f98]
+- Updated dependencies [1009efc]
+- Updated dependencies [a8f0a49]
+  - @aioi/database@0.22.0
+
 ## 0.18.0
 
 ### Minor Changes
