@@ -1,5 +1,25 @@
 # @aioi/web
 
+## 0.20.0
+
+### Minor Changes
+
+- d122844: API rate limiting: authenticated API keys now count against a 1,000/day quota (DB-backed), return
+  X-RateLimit-* headers, and get a 429 when exhausted. Usage shown per key on /team. New ApiKeyUsage model
+
+  - recordApiKeyUsage/getApiKeyUsageToday.
+
+- 382081c: State of AI Opportunities report: a public /report page composing top opportunities, the Golden-Quadrant
+  distribution, momentum leaders, most-tracked entities, and the source breakdown into one shareable,
+  SEO-indexed snapshot. Added to the sitemap + a homepage feature card.
+
+### Patch Changes
+
+- 30ddabc: Plan-aware API quota: the daily API rate limit now comes from the org plan's entitlements (Free 1,000/day,
+  Pro 50,000/day) instead of a constant. New apiDailyQuota entitlement; /team shows the plan + quota.
+- Updated dependencies [d122844]
+  - @aioi/database@0.23.0
+
 ## 0.19.0
 
 ### Minor Changes
