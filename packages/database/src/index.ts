@@ -47,6 +47,13 @@ export {
 } from "./briefs";
 export { getPlan, getEntitlements, setPlan } from "./subscription";
 export {
+  entitlementsFor,
+  PLAN_ENTITLEMENTS,
+  PLANS,
+  type Plan,
+  type Entitlements,
+} from "@aioi/billing";
+export {
   findApiKeyByHash,
   createApiKey,
   listApiKeys,
