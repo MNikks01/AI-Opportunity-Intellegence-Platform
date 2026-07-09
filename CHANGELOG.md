@@ -15,6 +15,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   next 16, lint-staged 17, @commitlint/{cli,config-conventional} 21, zod 4, eslint 10. (TypeScript 6
   held back — fails typecheck; tracked as B-026.)
 
+### Fixed
+- **Scheduled data refresh** — `scripts/demo-data.ts` imported `@aioi/database` by package name, which
+  isn't linked into the repo-root `node_modules`, so it failed to resolve under `tsx` in CI
+  (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
+
 ### Added
 - **Demand mining (Golden Quadrant)** — detect demand-expressing signals ("Ask HN", "is there a
   tool for…", "I wish there was…", "alternative to…") and blend them into the quadrant's demand axis,
