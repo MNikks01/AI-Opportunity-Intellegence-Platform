@@ -24,6 +24,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **API rate limiting** — authenticated API keys count against a **1,000/day quota** (DB-backed
+  `ApiKeyUsage` counter): responses carry `X-RateLimit-Limit`/`X-RateLimit-Remaining`, and an exhausted
+  key gets a `429 rate_limit_exceeded`. Today's usage is shown per key on `/team`. New `recordApiKeyUsage`
+  / `getApiKeyUsageToday`.
 - **State of AI Opportunities report** — a public `/report` snapshot composing the top opportunities,
   the Golden-Quadrant distribution, momentum leaders, most-tracked entities, and the source breakdown
   into one shareable, SEO-indexed page (in the sitemap + a homepage feature card).

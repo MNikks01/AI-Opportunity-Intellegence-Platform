@@ -2,6 +2,7 @@ import {
   listMembers,
   getOrgIntegration,
   listApiKeys,
+  getApiKeyUsageToday,
   canManageMembers,
   ROLES,
 } from "@aioi/database";
@@ -29,6 +30,9 @@ export default async function TeamPage() {
     getOrgIntegration(organizationId),
     canManage ? listApiKeys(organizationId) : Promise.resolve([]),
   ]);
+  const usageToday = canManage
+    ? await getApiKeyUsageToday(apiKeys.map((k) => k.id))
+    : new Map<string, number>();
 
   return (
     <main>
@@ -193,7 +197,8 @@ export default async function TeamPage() {
                     </div>
                     <div className="member-email">
                       created {fmtDate(k.createdAt)} ·{" "}
-                      {k.lastUsedAt ? `last used ${fmtDate(k.lastUsedAt)}` : "never used"}
+                      {k.lastUsedAt ? `last used ${fmtDate(k.lastUsedAt)}` : "never used"} ·{" "}
+                      {usageToday.get(k.id) ?? 0} / 1,000 today
                     </div>
                   </div>
                   {!k.revokedAt && (

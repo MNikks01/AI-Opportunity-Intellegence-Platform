@@ -69,3 +69,31 @@ export function touchApiKey(orgId: string, id: string) {
     tx.apiKey.update({ where: { id }, data: { lastUsedAt: new Date() } }),
   );
 }
+
+/** UTC day bucket (YYYY-MM-DD) for the daily quota window. */
+export const utcDay = (d = new Date()): string => d.toISOString().slice(0, 10);
+
+/**
+ * Increment today's request counter for a key and return the new count (ApiKeyUsage has no RLS, so this
+ * runs on the app connection). One atomic upsert per request — the basis for the daily quota.
+ */
+export async function recordApiKeyUsage(apiKeyId: string): Promise<number> {
+  const day = utcDay();
+  const row = await prisma.apiKeyUsage.upsert({
+    where: { apiKeyId_day: { apiKeyId, day } },
+    create: { apiKeyId, day, count: 1 },
+    update: { count: { increment: 1 } },
+    select: { count: true },
+  });
+  return row.count;
+}
+
+/** Today's request count per key (for the management UI). Keyed by apiKeyId. */
+export async function getApiKeyUsageToday(apiKeyIds: string[]): Promise<Map<string, number>> {
+  if (apiKeyIds.length === 0) return new Map();
+  const rows = await prisma.apiKeyUsage.findMany({
+    where: { apiKeyId: { in: apiKeyIds }, day: utcDay() },
+    select: { apiKeyId: true, count: true },
+  });
+  return new Map(rows.map((r) => [r.apiKeyId, r.count]));
+}
