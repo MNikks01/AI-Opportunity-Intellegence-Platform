@@ -1,5 +1,17 @@
 # @aioi/database
 
+## 0.20.0
+
+### Minor Changes
+
+- 89fa03c: Public SEO pages: a dynamic sitemap.xml (all scored trends + entities + static routes) and robots.txt,
+  per-page metadata (title template, description, canonical, Open Graph/Twitter) for /trends/[slug] and
+  /entities/[id], JSON-LD on trend pages, and metadataBase in the root layout. New `listTrendSlugs` /
+  `getTrendSeo` / `getEntitySeo` + a `getSiteUrl` helper (NEXT_PUBLIC_SITE_URL for the canonical domain).
+- f6907ac: Team members & roles: a /team page to invite members by email, assign roles, and remove them — every
+  mutation RBAC-gated (owners/admins) and audit-logged. New members data layer (listMembers, inviteMember,
+  updateMemberRole, removeMember, canManageMembers) + getDevMembership (current user's role).
+
 ## 0.19.0
 
 ### Minor Changes
