@@ -21,6 +21,14 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **MCP server** (`@aioi/mcp-server`) — a Model Context Protocol server (stdio) exposing the platform
+  as tools: `search_trends`, `get_trend`, `list_build_now_opportunities`. A coding agent (Claude Desktop,
+  Cursor, Claude Code) can query live AI opportunities. Wraps the public API over HTTP (`AIOI_API_URL`) —
+  no database credentials required.
+- **Public read API (v1)** — `GET /api/v1` (self-documenting), `/api/v1/trends` (scored list, with
+  `limit`/`source`/`sort`), `/api/v1/trends/{slug}` (scores, momentum, entities, build plan), and
+  `/api/v1/opportunities` (the Golden-Quadrant "build now" list). Consistent JSON envelope + CORS —
+  programmatic access to the opportunity data, and the foundation for an MCP server.
 - **Slack/Discord digest delivery** — the daily brief is formatted as a Slack Block Kit / Discord
   message and posted to a webhook (best-effort, opt-in). New `formatSlackDigest`/`formatDiscordDigest`/
   `deliverDigest` in the notification service; the refresh cron delivers when `SLACK_WEBHOOK_URL` /

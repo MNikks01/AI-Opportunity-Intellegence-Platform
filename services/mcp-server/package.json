@@ -1,0 +1,26 @@
+{
+  "name": "@aioi/mcp-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MCP server exposing AI Opportunity Intelligence (trends, opportunities, build plans) as tools for coding agents.",
+  "bin": {
+    "aioi-mcp": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
+    "clean": "rm -rf dist .turbo *.tsbuildinfo"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@aioi/eslint-config": "workspace:*",
+    "@aioi/tsconfig": "workspace:*"
+  }
+}
