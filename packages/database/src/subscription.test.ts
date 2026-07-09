@@ -4,6 +4,7 @@ import { PlanLimitError } from "@aioi/billing";
 import { prisma } from "./client";
 import { bootstrapUser } from "./bootstrap";
 import { createWatchlist } from "./watchlists";
+import { createAlert } from "./alerts";
 import { getPlan, getEntitlements, setPlan } from "./subscription";
 
 const enabled = Boolean(process.env.DATABASE_URL) && Boolean(process.env.APP_DATABASE_URL);
@@ -46,5 +47,31 @@ describe.skipIf(!enabled)("subscription + entitlements (integration)", () => {
     await setPlan(orgId, "PRO");
     const extra = await createWatchlist(orgId, { workspaceId, name: "pro-ok" });
     expect(extra.name).toBe("pro-ok");
+  });
+
+  it("enforces the FREE alert limit; PRO lifts it", async () => {
+    const { orgId, workspaceId } = await tenant();
+    const wl = await createWatchlist(orgId, { workspaceId, name: "alerts-wl" });
+    const trigger = { type: "NEW_TREND" as const };
+    for (let i = 0; i < 10; i++) {
+      await createAlert(orgId, {
+        watchlistId: wl.id,
+        trigger,
+        channel: "IN_APP",
+        cadence: "INSTANT",
+      }); // FREE allows 10
+    }
+    await expect(
+      createAlert(orgId, { watchlistId: wl.id, trigger, channel: "IN_APP", cadence: "INSTANT" }),
+    ).rejects.toBeInstanceOf(PlanLimitError);
+
+    await setPlan(orgId, "PRO");
+    const ok = await createAlert(orgId, {
+      watchlistId: wl.id,
+      trigger,
+      channel: "IN_APP",
+      cadence: "INSTANT",
+    });
+    expect(ok.watchlistId).toBe(wl.id);
   });
 });
