@@ -58,6 +58,7 @@ export {
 export { mineDemand, getTrendDemandHits } from "./demand";
 export { listTrendsForRescore, touchTrend, countScoredTrends } from "./rescore";
 export { listTrendSlugs, getTrendSeo, getTrendOg, getEntitySeo } from "./seo";
+export { subscribe, unsubscribe, listActiveSubscribers, countSubscribers } from "./newsletter";
 export {
   listMembers,
   inviteMember,

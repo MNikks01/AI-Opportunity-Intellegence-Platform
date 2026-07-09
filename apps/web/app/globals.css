@@ -1122,6 +1122,41 @@ a.resource-link:hover {
   }
 }
 
+/* Newsletter signup */
+.home-newsletter {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg, 14px);
+  padding: 28px;
+  background: var(--bg-subtle);
+}
+.newsletter-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  max-width: 460px;
+}
+.newsletter-input {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.95rem;
+}
+.newsletter-error {
+  flex-basis: 100%;
+  color: #d64545;
+  font-size: 0.8125rem;
+}
+.newsletter-done {
+  margin-top: 16px;
+  font-weight: 600;
+  color: var(--primary);
+}
+
 .home-final {
   text-align: center;
   margin: 64px 0 24px;
