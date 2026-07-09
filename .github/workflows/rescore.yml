@@ -1,0 +1,67 @@
+# Manual backfill re-score: upgrade the existing Stub-era trend scores to the real model. The scheduled
+# refresh (refresh-demo-data) only scores NEW trends, so run this once — in batches — after adding the
+# OPENAI_API_KEY secret. Trigger from the Actions tab → "backfill-rescore" → Run workflow.
+#
+# Reuses the same secrets as the refresh workflow: DEMO_DATABASE_URL + OPENAI_API_KEY.
+name: backfill-rescore
+
+on:
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: "Trends per batch"
+        required: false
+        default: "25"
+      batches:
+        description: "How many batches to run this invocation"
+        required: false
+        default: "5"
+      dry_run:
+        description: "Estimate only (no scoring, no spend)"
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: backfill-rescore
+  cancel-in-progress: false
+
+jobs:
+  rescore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Backfill re-score
+        env:
+          DATABASE_URL: ${{ secrets.DEMO_DATABASE_URL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          BATCH: ${{ inputs.batch }}
+          BATCHES: ${{ inputs.batches }}
+          DRY: ${{ inputs.dry_run }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DEMO_DATABASE_URL secret is not set."
+            exit 1
+          fi
+          if [ -z "$OPENAI_API_KEY" ]; then
+            echo "::error::OPENAI_API_KEY is not set — re-scoring needs a real model (it refuses the Stub)."
+            exit 1
+          fi
+          # Point the AI SDK straight at OpenAI (no gateway), same as the refresh workflow.
+          export LITELLM_BASE_URL="https://api.openai.com/v1"
+          export AIOI_LLM_API_KEY="$OPENAI_API_KEY"
+          pnpm --filter @aioi/database exec prisma migrate deploy
+          if [ "$DRY" = "true" ]; then
+            RESCORE_DRY=1 pnpm rescore "$BATCH"
+            exit 0
+          fi
+          for i in $(seq 1 "$BATCHES"); do
+            echo "── batch $i/$BATCHES ──"
+            pnpm rescore "$BATCH"
+          done
