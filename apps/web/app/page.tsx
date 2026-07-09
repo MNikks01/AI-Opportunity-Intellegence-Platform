@@ -230,8 +230,8 @@ export default async function Home() {
           <a className="home-btn home-btn-primary" href="/trends">
             Browse all trends →
           </a>
-          <a className="home-btn" href="/api/v1">
-            Read the API
+          <a className="home-btn" href="/pricing">
+            See pricing
           </a>
         </div>
       </section>
