@@ -19,7 +19,14 @@ import {
   generateActionPlansForTopTrends,
   extractEntitiesForTrends,
 } from "../services/ai-service/src/index";
-import { bootstrapUser, generateDailyBrief, recordTrendSnapshots } from "@aioi/database";
+// Relative import (not the "@aioi/database" package name): this script lives at the repo root, which
+// has no @aioi/* dependency, so the package isn't linked into the root node_modules and would fail to
+// resolve under `tsx` in CI. The service imports above use the same relative style.
+import {
+  bootstrapUser,
+  generateDailyBrief,
+  recordTrendSnapshots,
+} from "../packages/database/src/index";
 
 /** Run one source; a failure (bad key, rate limit) is logged and skipped so others still run. */
 async function ingest(name: string, fn: () => Promise<unknown>): Promise<void> {
