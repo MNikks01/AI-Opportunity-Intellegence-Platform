@@ -1,23 +1,54 @@
 import { extractApiKey, hashApiKey } from "@aioi/auth";
-import { findApiKeyByHash, touchApiKey } from "@aioi/database";
+import { findApiKeyByHash, touchApiKey, recordApiKeyUsage } from "@aioi/database";
 
 /**
- * Optional API-key auth for the public read API. Anonymous requests are allowed (capped at a small
- * limit); a valid `Authorization: Bearer aioi_…` key raises the cap and records usage.
+ * Optional API-key auth + daily rate limiting for the public read API. Anonymous requests are allowed
+ * (capped at a small limit); a valid `Authorization: Bearer aioi_…` key raises the cap, records usage,
+ * and counts against a daily quota — over quota, the route returns 429.
  */
-export async function apiAuth(req: Request): Promise<{ authed: boolean; organizationId?: string }> {
+export interface ApiAuth {
+  authed: boolean;
+  organizationId?: string;
+  /** Requests made today with this key (authed only). */
+  used: number;
+  /** True once the daily quota is exhausted. */
+  overQuota: boolean;
+}
+
+export async function apiAuth(req: Request): Promise<ApiAuth> {
   const headers = Object.fromEntries(req.headers.entries());
   const raw = extractApiKey({ headers });
-  if (!raw) return { authed: false };
+  if (!raw) return { authed: false, used: 0, overQuota: false };
 
   const record = await findApiKeyByHash(hashApiKey(raw));
-  if (!record || record.revokedAt) return { authed: false };
+  if (!record || record.revokedAt) return { authed: false, used: 0, overQuota: false };
 
-  // Fire-and-forget usage stamp; never block the response on it.
   void touchApiKey(record.organizationId, record.id).catch(() => {});
-  return { authed: true, organizationId: record.organizationId };
+  let used = 0;
+  try {
+    used = await recordApiKeyUsage(record.id);
+  } catch {
+    // If the counter write fails, fail open (don't block a valid key).
+  }
+  return {
+    authed: true,
+    organizationId: record.organizationId,
+    used,
+    overQuota: used > DAILY_QUOTA,
+  };
 }
 
 /** Anonymous requests are capped low; authenticated keys get the full limit. */
 export const ANON_MAX_LIMIT = 25;
 export const AUTHED_MAX_LIMIT = 100;
+/** Per-key daily request quota. */
+export const DAILY_QUOTA = 1000;
+
+/** Standard rate-limit response headers for an authenticated request. */
+export function rateLimitHeaders(auth: ApiAuth): Record<string, string> {
+  if (!auth.authed) return {};
+  return {
+    "x-ratelimit-limit": String(DAILY_QUOTA),
+    "x-ratelimit-remaining": String(Math.max(0, DAILY_QUOTA - auth.used)),
+  };
+}

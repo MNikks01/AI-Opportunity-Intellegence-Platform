@@ -4,7 +4,14 @@ import { ApiKeyAuthProvider, hashApiKey } from "@aioi/auth";
 import { prisma } from "./client";
 import { bootstrapUser } from "./bootstrap";
 import { NotFoundError } from "./watchlists";
-import { createApiKey, findApiKeyByHash, listApiKeys, revokeApiKey } from "./apikeys";
+import {
+  createApiKey,
+  findApiKeyByHash,
+  listApiKeys,
+  revokeApiKey,
+  recordApiKeyUsage,
+  getApiKeyUsageToday,
+} from "./apikeys";
 
 const enabled = Boolean(process.env.DATABASE_URL) && Boolean(process.env.APP_DATABASE_URL);
 const orgIds: string[] = [];
@@ -60,6 +67,14 @@ describe.skipIf(!enabled)("api keys (integration)", () => {
     expect(
       await provider.authenticate({ headers: { authorization: `Bearer ${created.raw}` } }),
     ).toBeNull();
+  });
+
+  it("records per-day usage and reports today's counts", async () => {
+    const created = await createApiKey(orgA, "usage key", []);
+    expect(await recordApiKeyUsage(created.id)).toBe(1);
+    expect(await recordApiKeyUsage(created.id)).toBe(2);
+    expect((await getApiKeyUsageToday([created.id])).get(created.id)).toBe(2);
+    expect((await getApiKeyUsageToday(["00000000-0000-0000-0000-000000000000"])).size).toBe(0);
   });
 
   it("isolates keys across orgs", async () => {
