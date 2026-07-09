@@ -13,6 +13,7 @@ import {
   runProductHuntIngestion,
   runYouTubeIngestion,
   runArxivIngestion,
+  runNpmIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -28,6 +29,7 @@ import {
   bootstrapUser,
   generateDailyBrief,
   recordTrendSnapshots,
+  getOrgIntegration,
 } from "../packages/database/src/index";
 
 /** Run one source; a failure (bad key, rate limit) is logged and skipped so others still run. */
@@ -48,6 +50,7 @@ async function main() {
   await ingest("producthunt", () => runProductHuntIngestion(20));
   await ingest("youtube", () => runYouTubeIngestion(20));
   await ingest("arxiv", () => runArxivIngestion(30));
+  await ingest("npm", () => runNpmIngestion(30));
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
@@ -69,10 +72,12 @@ async function main() {
   const brief = await generateDailyBrief(organizationId);
   console.log("brief…", { id: brief.id });
 
-  // Deliver the digest to Slack/Discord when a webhook is configured (best-effort, opt-in).
-  const slackWebhookUrl = process.env.SLACK_WEBHOOK_URL;
-  const discordWebhookUrl = process.env.DISCORD_WEBHOOK_URL;
-  if (slackWebhookUrl || discordWebhookUrl) {
+  // Deliver the digest — prefer the org's configured webhooks, falling back to env for the demo.
+  const integration = await getOrgIntegration(organizationId);
+  const slackWebhookUrl = integration?.slackWebhookUrl ?? process.env.SLACK_WEBHOOK_URL;
+  const discordWebhookUrl = integration?.discordWebhookUrl ?? process.env.DISCORD_WEBHOOK_URL;
+  const digestEnabled = integration ? integration.digestEnabled : true;
+  if (digestEnabled && (slackWebhookUrl || discordWebhookUrl)) {
     const delivered = await deliverDigest({
       content: brief.content as unknown as DigestContent,
       slackWebhookUrl,
