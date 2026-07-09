@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { prisma, listTrendSlugs, getTrendSeo, getEntitySeo } from "./index";
+import { prisma, listTrendSlugs, getTrendSeo, getTrendOg, getEntitySeo } from "./index";
 
 const enabled = Boolean(process.env.DATABASE_URL);
 
@@ -26,6 +26,9 @@ describe.skipIf(!enabled)("seo helpers (integration)", () => {
 
     const seo = await getTrendSeo(trend.slug);
     expect(seo).toEqual({ title: "SEO trend", summary: "A concise summary." });
+
+    const og = await getTrendOg(trend.slug);
+    expect(og).toEqual({ title: "SEO trend", opportunity: 60, topIdea: null });
 
     await prisma.trend.delete({ where: { id: trend.id } });
   });

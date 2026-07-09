@@ -24,6 +24,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Social share images** — a dynamic, branded Open Graph image per trend (title + opportunity
+  score + build idea) and for the homepage (generated with `next/og`), so shared links render a rich
+  card on Twitter/Slack/LinkedIn/iMessage. New `getTrendOg` query.
 - **Per-org digest config** — a "Digest delivery" section on `/team` to connect a Slack/Discord
   incoming webhook and toggle the daily digest per organization (new `OrgIntegration` model). RBAC-gated,
   audited, webhook host-validated; the URL is never reflected back to the page. The cron delivers to each
