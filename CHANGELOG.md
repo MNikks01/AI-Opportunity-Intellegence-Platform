@@ -24,6 +24,16 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Plan-aware API quota** — the daily API rate limit now derives from the org plan's entitlements
+  (Free 1,000/day, Pro 50,000/day) via a new `apiDailyQuota` entitlement, instead of a fixed constant.
+  `/team` shows the current plan + quota; `X-RateLimit-Limit` reflects it.
+- **API rate limiting** — authenticated API keys count against a **1,000/day quota** (DB-backed
+  `ApiKeyUsage` counter): responses carry `X-RateLimit-Limit`/`X-RateLimit-Remaining`, and an exhausted
+  key gets a `429 rate_limit_exceeded`. Today's usage is shown per key on `/team`. New `recordApiKeyUsage`
+  / `getApiKeyUsageToday`.
+- **State of AI Opportunities report** — a public `/report` snapshot composing the top opportunities,
+  the Golden-Quadrant distribution, momentum leaders, most-tracked entities, and the source breakdown
+  into one shareable, SEO-indexed page (in the sitemap + a homepage feature card).
 - **Weekly newsletter send** — format the top opportunities as an email (HTML + plain-text, with a
   `List-Unsubscribe` header) and send to every active subscriber via Resend, each with a personal
   unsubscribe link. New `buildNewsletterHtml`/`buildNewsletterText`/`sendEmail` + `scripts/newsletter.ts`

@@ -15,12 +15,17 @@ export function apiJson(data: unknown, meta: Record<string, unknown> = {}, statu
   );
 }
 
-export function apiError(code: string, status: number): Response {
+export function apiError(
+  code: string,
+  status: number,
+  extraHeaders: Record<string, string> = {},
+): Response {
   return new Response(JSON.stringify({ error: code }), {
     status,
     headers: {
       "content-type": "application/json; charset=utf-8",
       "access-control-allow-origin": "*",
+      ...extraHeaders,
     },
   });
 }
