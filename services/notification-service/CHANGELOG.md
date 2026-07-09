@@ -1,5 +1,13 @@
 # @aioi/notification-service
 
+## 0.2.0
+
+### Minor Changes
+
+- 4f0e6f0: Weekly newsletter send: format the top opportunities as an email (HTML + text, List-Unsubscribe header)
+  and send to every active subscriber via Resend. New buildNewsletterHtml/buildNewsletterText/sendEmail +
+  scripts/newsletter.ts + a weekly workflow (gated on RESEND_API_KEY, dry-run supported).
+
 ## 0.1.0
 
 ### Minor Changes
