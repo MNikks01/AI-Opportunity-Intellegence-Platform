@@ -1,5 +1,19 @@
 # @aioi/web
 
+## 0.21.0
+
+### Minor Changes
+
+- ea8c984: Public `/pricing` page — Free vs Pro tiers driven by the real plan entitlements (unlimited
+  watchlists/alerts, semantic search, 50,000/day API quota on Pro), with a comparison, an
+  "included in every plan" list, and FAQ. Added to nav + sitemap; `@aioi/database` now re-exports
+  the billing entitlements.
+
+### Patch Changes
+
+- Updated dependencies [ea8c984]
+  - @aioi/database@0.23.1
+
 ## 0.20.0
 
 ### Minor Changes
