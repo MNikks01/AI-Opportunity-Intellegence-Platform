@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
 import { entitlementsFor, type Entitlements } from "@aioi/database";
+import {
+  PLAN_PRICING,
+  monthlyEquivalent,
+  isBillingInterval,
+  isPaidPlan,
+  type BillingInterval,
+} from "@aioi/billing";
 
 export const metadata: Metadata = {
   title: "Pricing",
@@ -22,9 +29,8 @@ const FEATURES: { label: string; value: (e: Entitlements) => string | boolean }[
 type Tier = {
   plan: "FREE" | "PRO" | "TEAM";
   name: string;
-  price: string;
   tagline: string;
-  cta: { label: string; href: string };
+  cta: string;
   featured?: boolean;
 };
 
@@ -32,24 +38,21 @@ const TIERS: Tier[] = [
   {
     plan: "FREE",
     name: "Free",
-    price: "$0",
     tagline: "Everything you need to find your next thing to build.",
-    cta: { label: "Get started →", href: "/trends" },
+    cta: "Get started →",
   },
   {
     plan: "PRO",
     name: "Pro",
-    price: "$29",
     tagline: "For the solo builder shipping on AI signal, at full throughput.",
-    cta: { label: "Upgrade to Pro →", href: "/billing" },
+    cta: "Upgrade to Pro →",
     featured: true,
   },
   {
     plan: "TEAM",
     name: "Team",
-    price: "$99",
     tagline: "For teams — 25 seats, shared watchlists, and the highest API limits.",
-    cta: { label: "Upgrade to Team →", href: "/billing" },
+    cta: "Upgrade to Team →",
   },
 ];
 
@@ -79,7 +82,16 @@ function Cell({ value }: { value: string | boolean }) {
   return <span>{value}</span>;
 }
 
-export default function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ interval?: string }>;
+}) {
+  const { interval: rawInterval } = await searchParams;
+  const interval: BillingInterval =
+    rawInterval && isBillingInterval(rawInterval) ? rawInterval : "monthly";
+  const annual = interval === "annual";
+
   return (
     <main className="pricing">
       <header className="pricing-head">
@@ -89,27 +101,53 @@ export default function PricingPage() {
           The full opportunity engine is free to use. Paid plans lift the limits — unlimited
           watchlists and alerts, semantic search, more seats, and a bigger API quota.
         </p>
+        <div className="pricing-toggle" role="group" aria-label="Billing interval">
+          <a
+            href="/pricing?interval=monthly"
+            className={annual ? "" : "is-active"}
+            aria-current={!annual}
+          >
+            Monthly
+          </a>
+          <a
+            href="/pricing?interval=annual"
+            className={annual ? "is-active" : ""}
+            aria-current={annual}
+          >
+            Annual <span className="pricing-save">2 months free</span>
+          </a>
+        </div>
       </header>
 
       <section className="pricing-tiers pricing-tiers-3" aria-label="Plans">
         {TIERS.map((t) => {
           const ent = entitlementsFor(t.plan);
+          const price = isPaidPlan(t.plan)
+            ? { perMonth: monthlyEquivalent(t.plan, interval), annual: PLAN_PRICING[t.plan].annual }
+            : null;
           return (
             <article key={t.plan} className={`pricing-card${t.featured ? " is-featured" : ""}`}>
               {t.featured && <span className="pricing-flag">Most popular</span>}
               <div className="pricing-card-head">
                 <h2>{t.name}</h2>
                 <div className="pricing-price">
-                  <span className="amount">{t.price}</span>
+                  <span className="amount">${price ? price.perMonth : 0}</span>
                   <span className="per">/month</span>
                 </div>
+                <p className="pricing-billed">
+                  {price && annual
+                    ? `billed annually — $${price.annual}/yr`
+                    : price
+                      ? "billed monthly"
+                      : "free forever"}
+                </p>
                 <p className="pricing-tagline">{t.tagline}</p>
               </div>
               <a
                 className={`pricing-cta ${t.featured ? "pricing-cta-primary" : "pricing-cta-ghost"}`}
-                href={t.cta.href}
+                href={price ? `/billing?interval=${interval}` : "/trends"}
               >
-                {t.cta.label}
+                {t.cta}
               </a>
               <ul className="pricing-list">
                 {FEATURES.map((f) => (

@@ -11,11 +11,13 @@ describe("StubBillingProvider", () => {
     const { url } = await new StubBillingProvider().createCheckoutSession({
       orgId: "org1",
       plan: "PRO",
+      interval: "annual",
       successUrl: "https://app.test/billing",
       cancelUrl: "https://app.test/billing",
     });
     expect(url).toContain("stub_checkout=1");
     expect(url).toContain("plan=PRO");
+    expect(url).toContain("interval=annual");
     expect(url).toContain("org=org1");
   });
 });

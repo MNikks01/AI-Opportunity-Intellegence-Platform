@@ -1,5 +1,6 @@
+import { randomUUID } from "node:crypto";
 import { beforeAll, describe, expect, it } from "vitest";
-import { persistScoredTrend } from "@aioi/database";
+import { persistScoredTrend, bootstrapUser, setPlan, prisma } from "@aioi/database";
 import type { Score, TrendLike } from "@aioi/shared";
 import { appRouter } from "./router";
 import { createContext } from "./trpc";
@@ -59,10 +60,27 @@ describe.skipIf(!hasDb)("api router (integration)", () => {
     expect(results.some((t) => t.slug === slug)).toBe(true);
   });
 
-  it("trends.semanticSearch returns the seeded trend for its embedded text", async () => {
-    const caller = appRouter.createCaller(await createContext());
-    const results = await caller.trends.semanticSearch({ q: `${trend.title}\n${trend.summary}` });
+  it("trends.semanticSearch is gated on the plan entitlement (FREE forbidden, PRO unlocks)", async () => {
+    const clerkId = `sem_${randomUUID().slice(0, 12)}`;
+    const { organizationId, userId } = await bootstrapUser({
+      clerkId,
+      email: `${clerkId}@example.com`,
+    });
+    const caller = appRouter.createCaller({
+      auth: { userId, orgId: organizationId, role: "OWNER" },
+    });
+    const q = `${trend.title}\n${trend.summary}`;
+
+    // FREE has no semantic search → FORBIDDEN.
+    await expect(caller.trends.semanticSearch({ q })).rejects.toMatchObject({ code: "FORBIDDEN" });
+
+    // PRO unlocks it.
+    await setPlan(organizationId, "PRO");
+    const results = await caller.trends.semanticSearch({ q });
     expect(results.some((t) => t.slug === slug)).toBe(true);
+
+    await prisma.organization.delete({ where: { id: organizationId } }).catch(() => {});
+    await prisma.user.delete({ where: { id: userId } }).catch(() => {});
   });
 
   it("trends.generateActionPlan persists a plan surfaced by bySlug", async () => {
