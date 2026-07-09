@@ -15,7 +15,7 @@ export async function GET() {
       "GET /api/v1/opportunities":
         "The Golden-Quadrant 'build now' list (high demand, low supply).",
     },
-    auth: "Optional. Send 'Authorization: Bearer aioi_…' to raise the per-request limit (25 → 100) and get a 1,000/day quota. Create keys under Team.",
+    auth: "Optional. Send 'Authorization: Bearer aioi_…' to raise the per-request limit (25 → 100) and a plan-based daily quota (Free 1,000/day, Pro 50,000/day). Create keys under Team.",
     docs: `${base}`,
   });
 }

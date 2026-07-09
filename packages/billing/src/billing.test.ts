@@ -7,6 +7,8 @@ describe("entitlements", () => {
     expect(entitlementsFor("FREE").semanticSearch).toBe(false);
     expect(entitlementsFor("PRO").maxWatchlists).toBe(-1);
     expect(entitlementsFor("PRO").semanticSearch).toBe(true);
+    expect(entitlementsFor("FREE").apiDailyQuota).toBe(1000);
+    expect(entitlementsFor("PRO").apiDailyQuota).toBe(50000);
   });
 
   it("unknown plans fall back to FREE", () => {

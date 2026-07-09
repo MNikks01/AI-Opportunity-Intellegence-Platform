@@ -3,6 +3,8 @@ import {
   getOrgIntegration,
   listApiKeys,
   getApiKeyUsageToday,
+  getPlan,
+  getEntitlements,
   canManageMembers,
   ROLES,
 } from "@aioi/database";
@@ -30,9 +32,14 @@ export default async function TeamPage() {
     getOrgIntegration(organizationId),
     canManage ? listApiKeys(organizationId) : Promise.resolve([]),
   ]);
-  const usageToday = canManage
-    ? await getApiKeyUsageToday(apiKeys.map((k) => k.id))
-    : new Map<string, number>();
+  const [usageToday, plan, entitlements] = canManage
+    ? await Promise.all([
+        getApiKeyUsageToday(apiKeys.map((k) => k.id)),
+        getPlan(organizationId),
+        getEntitlements(organizationId),
+      ])
+    : [new Map<string, number>(), "FREE", null];
+  const quota = entitlements?.apiDailyQuota ?? 0;
 
   return (
     <main>
@@ -175,7 +182,8 @@ export default async function TeamPage() {
         <>
           <h2 style={{ fontSize: "1.25rem", margin: "36px 0 4px" }}>API keys</h2>
           <p style={{ color: "var(--fg-muted)", fontSize: "0.8125rem", margin: "0 0 14px" }}>
-            Programmatic access to the read API — a key raises your rate limit. See the{" "}
+            Programmatic access to the read API. Plan: <strong>{plan}</strong> ·{" "}
+            {quota.toLocaleString()} requests/day per key. See the{" "}
             <a href="/api/v1" style={{ color: "var(--primary)" }}>
               API docs
             </a>
@@ -198,7 +206,8 @@ export default async function TeamPage() {
                     <div className="member-email">
                       created {fmtDate(k.createdAt)} ·{" "}
                       {k.lastUsedAt ? `last used ${fmtDate(k.lastUsedAt)}` : "never used"} ·{" "}
-                      {usageToday.get(k.id) ?? 0} / 1,000 today
+                      {(usageToday.get(k.id) ?? 0).toLocaleString()} / {quota.toLocaleString()}{" "}
+                      today
                     </div>
                   </div>
                   {!k.revokedAt && (
