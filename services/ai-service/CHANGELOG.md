@@ -1,5 +1,22 @@
 # @aioi/ai-service
 
+## 0.7.0
+
+### Minor Changes
+
+- 2d70e24: Opt-in backfill re-score: `pnpm rescore` upgrades existing (Stub-era) trend scores to the configured
+  real model, overwriting in place. Batched + queue-rotating (stalest first) so a full backfill runs
+  incrementally under cost control; refuses to run on the Stub; RESCORE_DRY estimates without spend.
+  New `rescoreTrends` + `listTrendsForRescore`/`touchTrend`/`countScoredTrends`.
+
+### Patch Changes
+
+- Updated dependencies [2d70e24]
+- Updated dependencies [746979c]
+  - @aioi/database@0.19.0
+  - @aioi/shared@0.2.0
+  - @aioi/ai-sdk@0.6.1
+
 ## 0.6.3
 
 ### Patch Changes

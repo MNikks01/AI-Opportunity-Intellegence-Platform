@@ -1,6 +1,6 @@
 {
   "name": "@aioi/notification-service",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "type": "module",
   "description": "Alerts, briefs, and signed webhooks (email/Slack/Discord/Telegram).",
