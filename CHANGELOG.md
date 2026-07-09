@@ -24,6 +24,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Stripe checkout & webhook** — self-serve upgrades on `/billing`: *Upgrade to Pro* opens Stripe
+  Checkout (or applies Pro directly in test mode), a signature-verified webhook at
+  `/api/stripe/webhook` is the source of truth for plan changes (pure, unit-tested event→plan
+  helpers in `@aioi/billing`; `applyStripeSubscription` persists ids + audit), and cancel/manage go
+  through the Stripe Billing Portal. Falls back to the offline Stub when Stripe env is unset.
 - **Public pricing page** (`/pricing`) — Free vs Pro tiers rendered from the live plan
   entitlements (single source of truth in `@aioi/billing`): unlimited watchlists/alerts, semantic
   search, and a 50,000/day API quota on Pro. Comparison + "included in every plan" + FAQ; linked
