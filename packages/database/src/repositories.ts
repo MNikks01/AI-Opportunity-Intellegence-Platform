@@ -670,6 +670,43 @@ export async function semanticSearchTrends(query: string, limit = 25): Promise<T
  * trend itself. Powers the "Related opportunities" section on a trend page. Empty when the trend has
  * no embedding yet (or nothing else is embedded). Global read — no org scope.
  */
+/** A newest-first feed item: the fields an RSS/Atom entry needs. Global read — no org scope. */
+export interface FeedTrend {
+  slug: string;
+  title: string;
+  summary: string | null;
+  opportunity: number | null;
+  topIdea: string | null;
+  createdAt: Date;
+}
+
+/** The most recently discovered trends for the public RSS/Atom feed (newest first). */
+export async function listTrendFeed(limit = 30): Promise<FeedTrend[]> {
+  const rows = await prisma.trend.findMany({
+    orderBy: { createdAt: "desc" },
+    take: Math.min(100, Math.max(1, limit)),
+    select: {
+      slug: true,
+      title: true,
+      summary: true,
+      createdAt: true,
+      scores: { where: { dimension: "OPPORTUNITY" }, select: { value: true } },
+      actionPlan: { select: { content: true } },
+    },
+  });
+  return rows.map((r) => {
+    const c = r.actionPlan?.content as { saasIdeas?: string[] } | undefined;
+    return {
+      slug: r.slug,
+      title: r.title,
+      summary: r.summary,
+      createdAt: r.createdAt,
+      opportunity: r.scores[0]?.value ?? null,
+      topIdea: c?.saasIdeas?.[0] ?? null,
+    };
+  });
+}
+
 export async function relatedTrends(trendId: string, limit = 4): Promise<TrendView[]> {
   const matches = await prisma.$queryRaw<Array<{ id: string }>>`
     WITH target AS (SELECT embedding FROM "Trend" WHERE id = ${trendId}::uuid)

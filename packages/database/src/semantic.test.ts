@@ -7,6 +7,7 @@ import {
   semanticSearchTrends,
   relatedTrends,
   getTrendBySlug,
+  listTrendFeed,
 } from "./repositories";
 
 // Integration — needs a live Postgres with pgvector. persistScoredTrend backfills the embedding
@@ -58,6 +59,19 @@ describe.skipIf(!hasDb)("semanticSearchTrends (integration)", () => {
 
   it("returns empty for a blank query", async () => {
     expect(await semanticSearchTrends("   ")).toHaveLength(0);
+  });
+
+  it("listTrendFeed returns newest-first items with the feed shape", async () => {
+    const feed = await listTrendFeed(50);
+    expect(feed.length).toBeGreaterThanOrEqual(2);
+    // Newest-first: createdAt is non-increasing.
+    for (let i = 1; i < feed.length; i++) {
+      expect(feed[i - 1]!.createdAt.getTime()).toBeGreaterThanOrEqual(feed[i]!.createdAt.getTime());
+    }
+    const item = feed.find((f) => f.slug === target.slug)!;
+    expect(item).toBeDefined();
+    expect(typeof item.title).toBe("string");
+    expect(item.opportunity).toBe(70); // the seeded opportunity score
   });
 
   it("relatedTrends returns nearest neighbours, excluding the trend itself", async () => {
