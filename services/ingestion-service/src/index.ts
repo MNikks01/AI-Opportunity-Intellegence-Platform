@@ -41,6 +41,8 @@ export {
   fetchVideos,
   type YouTubeItem,
 } from "./connectors/youtube";
+// Selective re-export: arxiv shares names (normalize/IngestResult) with hackernews.
+export { ARXIV_SOURCE_KEY, fetchPapers, parseAtom, type ArxivEntry } from "./connectors/arxiv";
 export * from "./repository";
 export * from "./repository.prisma";
 
@@ -52,6 +54,7 @@ import { fetchRepositories } from "./connectors/github";
 import { fetchModels } from "./connectors/huggingface";
 import { fetchTopPosts, productHuntConfigured } from "./connectors/producthunt";
 import { fetchVideos, youtubeConfigured } from "./connectors/youtube";
+import { fetchPapers } from "./connectors/arxiv";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -71,6 +74,23 @@ export async function runHackerNewsIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "hackernews", ...result }, "ingestion pass complete");
   await recordIngestionRun("hackernews", result, startedAt);
+  return result;
+}
+
+/**
+ * Run one arXiv ingestion pass (latest cs.AI/cs.LG/cs.CL submissions). Keyless, always safe to
+ * schedule — a leading indicator (research precedes products).
+ */
+export async function runArxivIngestion(
+  limit = 30,
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
+  const { records, skipped } = await fetchPapers(limit);
+  const inserted = await repo.upsertMany(records);
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "arxiv", ...result }, "ingestion pass complete");
+  await recordIngestionRun("arxiv", result, startedAt);
   return result;
 }
 
