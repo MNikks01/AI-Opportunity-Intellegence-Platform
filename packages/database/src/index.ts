@@ -70,6 +70,7 @@ export {
   touchApiKey,
   recordApiKeyUsage,
   getApiKeyUsageToday,
+  getApiUsageHistory,
   utcDay,
 } from "./apikeys";
 export { exportOrgData, deleteOrg } from "./gdpr";

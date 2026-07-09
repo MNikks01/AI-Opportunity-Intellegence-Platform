@@ -25,6 +25,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 
 ### Added
 
+- **API usage history sparkline** on `/billing` — a 14-day SVG sparkline of daily API requests
+  (summed across the org's keys) with the running total, from a new `getApiUsageHistory` helper that
+  zero-fills the existing per-day `ApiKeyUsage` rows. No new retention needed.
 - **Annual billing** — paid plans can be billed annually at 10× the monthly rate (two months
   free). Shared `PLAN_PRICING` + `monthlyEquivalent` in `@aioi/billing`, a monthly/annual toggle on
   the pricing and billing pages, and interval-aware Stripe checkout (`STRIPE_PRICE_PRO_ANNUAL` /
