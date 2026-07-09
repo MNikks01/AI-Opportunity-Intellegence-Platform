@@ -21,6 +21,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Slack/Discord digest delivery** — the daily brief is formatted as a Slack Block Kit / Discord
+  message and posted to a webhook (best-effort, opt-in). New `formatSlackDigest`/`formatDiscordDigest`/
+  `deliverDigest` in the notification service; the refresh cron delivers when `SLACK_WEBHOOK_URL` /
+  `DISCORD_WEBHOOK_URL` is configured.
 - **Team members & roles** — a `/team` page to invite teammates by email, assign roles (owner/admin/
   member/billing/viewer), and remove them; every mutation is RBAC-gated (owners & admins only) and
   audit-logged. Invited-but-not-signed-in users show as `pending`. New members data layer +
