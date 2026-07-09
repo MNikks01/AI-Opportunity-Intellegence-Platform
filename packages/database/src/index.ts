@@ -57,7 +57,7 @@ export {
 } from "./quadrant";
 export { mineDemand, getTrendDemandHits } from "./demand";
 export { listTrendsForRescore, touchTrend, countScoredTrends } from "./rescore";
-export { listTrendSlugs, getTrendSeo, getEntitySeo } from "./seo";
+export { listTrendSlugs, getTrendSeo, getTrendOg, getEntitySeo } from "./seo";
 export {
   listMembers,
   inviteMember,
