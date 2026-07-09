@@ -1,5 +1,17 @@
 # @aioi/ingestion-service
 
+## 0.5.0
+
+### Minor Changes
+
+- f1f316e: npm source connector: ingest top AI packages by popularity from the official (keyless) npm registry
+  search API — package adoption is a leading indicator. New fetchPackages + runNpmIngestion.
+
+### Patch Changes
+
+- Updated dependencies [149dd8d]
+  - @aioi/database@0.21.0
+
 ## 0.4.0
 
 ### Minor Changes
