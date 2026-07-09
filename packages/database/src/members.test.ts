@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { PlanLimitError } from "@aioi/billing";
 import {
   prisma,
   listMembers,
@@ -6,6 +7,8 @@ import {
   updateMemberRole,
   removeMember,
   canManageMembers,
+  countMembers,
+  setPlan,
 } from "./index";
 
 const enabled = Boolean(process.env.DATABASE_URL);
@@ -43,5 +46,30 @@ describe.skipIf(!enabled)("members (integration)", () => {
 
     await prisma.organization.delete({ where: { id: org.id } });
     await prisma.user.delete({ where: { id: userId } }).catch(() => {});
+  });
+
+  it("enforces the plan's seat limit; upgrading lifts it", async () => {
+    const org = await prisma.organization.create({ data: { name: "S", slug: `s-${Date.now()}` } });
+    const uids: string[] = [];
+
+    // FREE = 1 seat. First invite fills it; the second is blocked.
+    const first = await inviteMember(org.id, null, {
+      email: `a-${Date.now()}@x.com`,
+      role: "MEMBER",
+    });
+    uids.push(first.userId);
+    expect(await countMembers(org.id)).toBe(1);
+    await expect(
+      inviteMember(org.id, null, { email: `b-${Date.now()}@x.com`, role: "MEMBER" }),
+    ).rejects.toBeInstanceOf(PlanLimitError);
+
+    // TEAM = 25 seats — the same invite now succeeds.
+    await setPlan(org.id, "TEAM");
+    const ok = await inviteMember(org.id, null, { email: `c-${Date.now()}@x.com`, role: "MEMBER" });
+    uids.push(ok.userId);
+    expect(ok.created).toBe(true);
+
+    await prisma.organization.delete({ where: { id: org.id } });
+    for (const id of uids) await prisma.user.delete({ where: { id } }).catch(() => {});
   });
 });

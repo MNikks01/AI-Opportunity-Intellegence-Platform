@@ -24,7 +24,11 @@ export const dynamic = "force-dynamic";
 
 const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleDateString() : null);
 
-export default async function TeamPage() {
+export default async function TeamPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ limit?: string }>;
+}) {
   const { organizationId, userId, role } = await getDevMembership();
   const canManage = canManageMembers(role);
   const [members, integration, apiKeys] = await Promise.all([
@@ -40,36 +44,77 @@ export default async function TeamPage() {
       ])
     : [new Map<string, number>(), "FREE", null];
   const quota = entitlements?.apiDailyQuota ?? 0;
+  const maxSeats = entitlements?.maxSeats ?? 0;
+  const seatsFull = maxSeats >= 0 && members.length >= maxSeats;
+  const seatLabel = `${maxSeats} ${maxSeats === 1 ? "seat" : "seats"}`;
+  const { limit } = await searchParams;
 
   return (
     <main>
       <h1 style={{ fontSize: "1.5rem", margin: "0 0 4px" }}>Team</h1>
       <p style={{ color: "var(--fg-muted)", margin: "0 0 20px" }}>
-        {members.length} {members.length === 1 ? "member" : "members"} · you are{" "}
-        <strong>{role}</strong>.
+        {members.length} {members.length === 1 ? "member" : "members"}
+        {canManage && (
+          <>
+            {" "}
+            of {maxSeats < 0 ? "unlimited seats" : seatLabel} ({plan})
+          </>
+        )}{" "}
+        · you are <strong>{role}</strong>.
       </p>
 
+      {limit === "seats" && (
+        <p
+          role="status"
+          style={{
+            margin: "0 0 20px",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            border: "1px solid var(--border)",
+            background: "var(--bg-muted)",
+            color: "var(--fg-muted)",
+            fontSize: "0.875rem",
+          }}
+        >
+          You&rsquo;ve used all {seatLabel} on the {plan} plan.{" "}
+          <a href="/pricing" style={{ color: "var(--primary)" }}>
+            Upgrade
+          </a>{" "}
+          to invite more teammates.
+        </p>
+      )}
+
       {canManage ? (
-        <form action={inviteMemberAction} className="team-invite">
-          <input
-            name="email"
-            type="email"
-            required
-            placeholder="teammate@company.com"
-            aria-label="Invite by email"
-            className="team-input"
-          />
-          <select name="role" defaultValue="MEMBER" aria-label="Role" className="team-select">
-            {ROLES.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </select>
-          <button type="submit" className="watch-btn">
-            Invite
-          </button>
-        </form>
+        seatsFull ? (
+          <p className="trend-meta">
+            All {seatLabel} are used.{" "}
+            <a href="/pricing" style={{ color: "var(--primary)" }}>
+              Upgrade
+            </a>{" "}
+            to invite more teammates.
+          </p>
+        ) : (
+          <form action={inviteMemberAction} className="team-invite">
+            <input
+              name="email"
+              type="email"
+              required
+              placeholder="teammate@company.com"
+              aria-label="Invite by email"
+              className="team-input"
+            />
+            <select name="role" defaultValue="MEMBER" aria-label="Role" className="team-select">
+              {ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {r}
+                </option>
+              ))}
+            </select>
+            <button type="submit" className="watch-btn">
+              Invite
+            </button>
+          </form>
+        )
       ) : (
         <p className="trend-meta">Only owners and admins can manage the team.</p>
       )}

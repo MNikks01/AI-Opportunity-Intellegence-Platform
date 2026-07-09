@@ -49,6 +49,16 @@ describe("syncFromCheckoutSession", () => {
     expect(syncFromCheckoutSession({ metadata: { orgId: "org-9" } })?.orgId).toBe("org-9");
     expect(syncFromCheckoutSession({ customer: "cus_x" })).toBeNull();
   });
+
+  it("reads the plan from metadata (TEAM) and defaults to PRO when absent/invalid", () => {
+    expect(
+      syncFromCheckoutSession({ client_reference_id: "o", metadata: { plan: "TEAM" } })?.plan,
+    ).toBe("TEAM");
+    expect(
+      syncFromCheckoutSession({ client_reference_id: "o", metadata: { plan: "FREE" } })?.plan,
+    ).toBe("PRO");
+    expect(syncFromCheckoutSession({ client_reference_id: "o" })?.plan).toBe("PRO");
+  });
 });
 
 describe("syncFromSubscription", () => {
@@ -69,5 +79,14 @@ describe("syncFromSubscription", () => {
       syncFromSubscription("customer.subscription.deleted", { metadata: { orgId: "o" } })?.plan,
     ).toBe("FREE");
     expect(syncFromSubscription("customer.subscription.updated", { status: "active" })).toBeNull();
+  });
+
+  it("carries the TEAM plan from subscription metadata on an active update", () => {
+    expect(
+      syncFromSubscription("customer.subscription.updated", {
+        status: "active",
+        metadata: { orgId: "o", plan: "TEAM" },
+      })?.plan,
+    ).toBe("TEAM");
   });
 });
