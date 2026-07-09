@@ -21,6 +21,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Build kit (scaffold export)** — a trend's action plan is assembled into a ready-to-paste scaffold
+  prompt for an AI coding agent (Claude Code / Cursor / v0), with copy + download, on the detail page.
+  Deterministic `buildScaffoldPrompt` (@aioi/shared) — the last mile of "signal → shipped".
 - **Backfill re-score workflow** — a manual `backfill-rescore` GitHub Action (Actions tab → Run
   workflow) to run the opt-in re-score in batches with a dry-run estimate toggle, instead of locally.
 - **Opt-in backfill re-score** — `pnpm rescore [batch]` upgrades existing (Stub-era) trend scores to

@@ -221,6 +221,65 @@
   letter-spacing: 0.02em;
 }
 
+/* Build kit scaffold block */
+.scaffold {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+.scaffold-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 16px;
+  background: var(--bg-subtle);
+  border-bottom: 1px solid var(--border);
+}
+.scaffold-hint {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+}
+.scaffold-hint strong {
+  color: var(--fg);
+  font-weight: 600;
+}
+.scaffold-actions {
+  display: flex;
+  gap: 8px;
+}
+.scaffold-btn {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.scaffold-btn:hover {
+  border-color: var(--primary);
+}
+.scaffold-btn-primary {
+  background: var(--primary);
+  color: var(--primary-fg);
+  border-color: var(--primary);
+}
+.scaffold-pre {
+  margin: 0;
+  padding: 16px;
+  max-height: 340px;
+  overflow: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  color: var(--fg);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
 /* Golden Quadrant */
 .quadrant-chart-wrap {
   max-width: 560px;
