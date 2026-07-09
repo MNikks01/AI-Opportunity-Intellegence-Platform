@@ -21,6 +21,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Opt-in backfill re-score** — `pnpm rescore [batch]` upgrades existing (Stub-era) trend scores to
+  the configured real model, overwriting in place (same rubric → no duplicate rows). Batched and
+  queue-rotating (stalest first) so a full backfill runs incrementally; refuses to run on the Stub;
+  `RESCORE_DRY=1` estimates the model-call count without spending. New `rescoreTrends` +
+  `listTrendsForRescore` / `touchTrend` / `countScoredTrends`; shared `toTrendLike` helper.
 - **Demand mining (Golden Quadrant)** — detect demand-expressing signals ("Ask HN", "is there a
   tool for…", "I wish there was…", "alternative to…") and blend them into the quadrant's demand axis,
   so articulated demand lifts a trend toward "build now". Build-now rows show an "N wanted" tag. New
