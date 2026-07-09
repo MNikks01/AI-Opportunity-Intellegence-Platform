@@ -1746,6 +1746,39 @@ a.resource-link:hover {
   );
 }
 
+.spark-block {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.spark-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.875rem;
+  margin-bottom: 8px;
+}
+.spark {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.spark-line {
+  stroke: var(--primary);
+  stroke-width: 1.5;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+.spark-area {
+  fill: color-mix(in srgb, var(--primary) 14%, transparent);
+  stroke: none;
+}
+.spark-dot {
+  fill: var(--primary);
+}
+
 @media (max-width: 560px) {
   .usage-grid {
     grid-template-columns: 1fr;

@@ -7,12 +7,14 @@ import {
   countMembers,
   listApiKeys,
   getApiKeyUsageToday,
+  getApiUsageHistory,
 } from "@aioi/database";
 import { Badge, Card } from "@aioi/ui";
 import { getDevOrg } from "../lib/dev-org";
 import { stripeConfigured } from "../lib/billing";
 import { startCheckoutAction, openPortalAction, cancelSubscriptionAction } from "./actions";
 import { UsageMeter } from "./UsageMeter";
+import { Sparkline } from "./Sparkline";
 
 export const dynamic = "force-dynamic";
 
@@ -41,11 +43,14 @@ export default async function BillingPage({
     countMembers(organizationId),
     listApiKeys(organizationId),
   ]);
-  const usageToday = apiKeys.length
-    ? await getApiKeyUsageToday(apiKeys.map((k) => k.id))
-    : new Map<string, number>();
+  const keyIds = apiKeys.map((k) => k.id);
+  const [usageToday, history] = await Promise.all([
+    apiKeys.length ? getApiKeyUsageToday(keyIds) : new Map<string, number>(),
+    getApiUsageHistory(keyIds, 14),
+  ]);
   // The quota is per key per day, so the meaningful "closest to the cap" figure is the busiest key.
   const apiPeak = usageToday.size ? Math.max(...usageToday.values()) : 0;
+  const history14 = history.reduce((a, d) => a + d.count, 0);
   const { checkout } = await searchParams;
   const banner = checkout ? BANNERS[checkout] : undefined;
   const isPaid = plan === "PRO" || plan === "TEAM";
@@ -141,6 +146,17 @@ export default async function BillingPage({
           <UsageMeter label="Alerts" used={alerts} limit={ent.maxAlerts} />
           <UsageMeter label="Team seats" used={seats} limit={ent.maxSeats} />
           <UsageMeter label="API today (busiest key)" used={apiPeak} limit={ent.apiDailyQuota} />
+        </div>
+
+        <div className="spark-block">
+          <div className="spark-head">
+            <span className="usage-label">API requests · last 14 days</span>
+            <span className="usage-count">{history14.toLocaleString()} total</span>
+          </div>
+          <Sparkline
+            values={history.map((d) => d.count)}
+            title={`API requests per day over the last 14 days — ${history14} total`}
+          />
         </div>
       </Card>
 
