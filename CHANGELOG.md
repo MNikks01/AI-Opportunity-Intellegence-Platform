@@ -24,6 +24,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Public "What's new" page** (`/changelog`) — curated, user-facing product updates grouped by
+  month with New/Improved/Fixed tags (a separate surface from this engineering changelog). Linked
+  from the nav + sitemap; points to the RSS feed.
 - **Related opportunities** on the trend page — a new `relatedTrends` query finds the
   embedding-nearest trends (pgvector `<=>`, excluding itself); the trend detail "Related" section
   now shows shared-entity matches first and fills with semantically-similar trends, so even
