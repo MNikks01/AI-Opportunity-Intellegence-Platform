@@ -285,6 +285,7 @@ export const appRouter = router({
         return getBillingProvider().createCheckoutSession({
           orgId: ctx.auth.orgId,
           plan: "PRO",
+          interval: "monthly",
           successUrl: input.successUrl,
           cancelUrl: input.cancelUrl,
         });

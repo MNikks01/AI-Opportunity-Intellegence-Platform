@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { entitlementsFor, withinLimit, isPlan, isPaidPlan, PlanLimitError, PLANS } from "./index";
+import {
+  entitlementsFor,
+  withinLimit,
+  isPlan,
+  isPaidPlan,
+  PlanLimitError,
+  PLANS,
+  PLAN_PRICING,
+  monthlyEquivalent,
+  isBillingInterval,
+} from "./index";
 
 describe("entitlements", () => {
   it("FREE is limited; PRO is unlimited", () => {
@@ -26,6 +36,15 @@ describe("entitlements", () => {
     expect(isPaidPlan("TEAM")).toBe(true);
     expect(isPaidPlan("FREE")).toBe(false);
     expect(PLANS).toContain("TEAM");
+  });
+
+  it("annual pricing is 10× monthly (two months free)", () => {
+    expect(PLAN_PRICING.PRO.annual).toBe(PLAN_PRICING.PRO.monthly * 10);
+    expect(PLAN_PRICING.TEAM.annual).toBe(PLAN_PRICING.TEAM.monthly * 10);
+    expect(monthlyEquivalent("PRO", "monthly")).toBe(29);
+    expect(monthlyEquivalent("PRO", "annual")).toBe(Math.round(290 / 12));
+    expect(isBillingInterval("annual")).toBe(true);
+    expect(isBillingInterval("weekly")).toBe(false);
   });
 
   it("withinLimit respects -1 as unlimited", () => {
