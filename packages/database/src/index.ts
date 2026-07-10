@@ -129,6 +129,7 @@ export {
 } from "./entities";
 export {
   recordIngestionRun,
+  recordFailedIngestionRun,
   getLatestRuns,
   type RunResult,
   type LatestRun,

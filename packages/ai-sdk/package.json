@@ -17,6 +17,7 @@
   "dependencies": {
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",
+    "langfuse": "^3.38.0",
     "zod": "^4.4.3"
   },
   "devDependencies": {

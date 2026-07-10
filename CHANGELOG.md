@@ -11,6 +11,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Docs: closed roadmap phases 19–27** — added the closing-phase deliverables so documentation matches
+  the shipped system: `06-infra/CICD.md`, `08-quality/TESTING_STRATEGY.md`, `06-infra/DEPLOYMENT_GUIDE.md`,
+  `06-infra/OBSERVABILITY.md`, `02-architecture/SCALABILITY_PLAN.md`, and `09-process/MILESTONES.md`.
+  Marked phases 19–27 ✅ in the ROADMAP, refreshed the IMPLEMENTATION_STATUS one-liner + §7 (alert email
+  delivery, RSS feed, and `/changelog` shipped), and recorded the honest test state (194 green; the
+  DB-integration tier is exercised against real Postgres+pgvector in CI).
 - **Docs: implementation status + ADR-0004** — a new `docs/01-product/IMPLEMENTATION_STATUS.md`
   (what's built, decisions, business model, forward roadmap), `ADR-0004` (billing & entitlements
   architecture), and refreshed ROADMAP current-position + BACKLOG to match the shipped monetization
@@ -19,8 +25,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   three differentiation pillars, a feature grid (Golden Quadrant, momentum, build kit, entities, API+MCP,
   digests), a 5-step pipeline, 8 sources, and an API CTA.
 - deps: adopt safe major dependency bumps validated by CI — turbo 2.10, @types/node 26, pino 10,
-  next 16, lint-staged 17, @commitlint/{cli,config-conventional} 21, zod 4, eslint 10. (TypeScript 6
-  held back — fails typecheck; tracked as B-026.)
+  next 16, lint-staged 17, @commitlint/{cli,config-conventional} 21, zod 4, eslint 10.
+- **TypeScript 5→6 (B-026)** — bumped `typescript` to ^6.0.3 across the workspace. TS 6 requires an
+  explicit `rootDir` when emitting (error TS5011), so each emitting package/service tsconfig now sets
+  `rootDir`/`outDir` locally (the shared preset can't — extends-relative paths anchor to the preset).
+  Also turned off core `no-undef` in the shared ESLint config (typescript-eslint 8.x no longer disables
+  it under TS 6; `tsc` already resolves undefined identifiers). Typecheck/lint/build/tests all green.
 
 ### Fixed
 - **CSS syntax fix** — a merge-introduced unbalanced brace in `globals.css` (after the referrals
@@ -31,9 +41,26 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
-- **Dormant-source indicator** on `/sources` — the full connector catalog with each source's
-  status: **Live** (count), **Idle** (awaiting next run), or **Needs setup** (names the env var), so
-  operators see which key-gated sources (Reddit/YouTube/Product Hunt) are dormant and why.
+- **Langfuse LLM tracing (B-007)** — a provider-agnostic tracing seam in `@aioi/ai-sdk`
+  (`Tracer`/`NoopTracer`/`LangfuseTracer` + `getTracer`) wraps every real model call (scoring, action
+  plans, entity extraction) in a generation span with model, input, output, latency, and token usage.
+  Activates only when `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` are set; a `NoopTracer` otherwise, so
+  CI stays green with zero keys. The client is imported lazily (no-keys path never loads the dep) and
+  tracing is best-effort. Closes the last keys-gated observability gap.
+- **Prisma 5→7 (B-025)** — adopted Prisma 7 in `@aioi/database`. Prisma 7 runs queries through a
+  **driver adapter** (`@prisma/adapter-pg` over node-postgres) instead of a bundled query-engine binary,
+  and connection URLs move out of `schema.prisma`: the CLI/`migrate` URL now lives in a new
+  `packages/database/prisma.config.ts`, and the runtime client passes `APP_DATABASE_URL` (the restricted
+  `aioi_app` role) to the adapter — RLS still enforced (ADR-0003). Removing `binaryTargets` also drops the
+  old `rhel-openssl-3.0.x` serverless-binary footgun. Validated end-to-end: `migrate deploy` + **62
+  DB-integration tests (incl. RLS fail-closed) green against live Postgres+pgvector**. `@prisma/client`
+  imports and all repositories are unchanged.
+- **Source observability on `/sources`** — the full connector catalog with a **data-driven** status
+  per source: **Live** (count), **Failing** (with the connector's actual error), **Idle**, or **Not set
+  up**. Failed ingestion passes are now recorded (`recordFailedIngestionRun`; error surfaced via
+  `getLatestRuns`), so a configured-but-broken source (e.g. an expired token) shows *why* it produced
+  nothing instead of silently reading zero. Status no longer guesses the web app's env (the cron owns
+  the keys).
 - **Report PDF export** — the State-of-AI report (`/report`) gains a **Save as PDF** button and a
   print-optimized stylesheet (hides app chrome, renders on white, avoids awkward page breaks) plus a
   dateline, so teams can export a clean, dated, shareable PDF. Dependency-free (browser print-to-PDF).

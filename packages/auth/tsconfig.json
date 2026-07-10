@@ -1,5 +1,9 @@
 {
   "extends": "@aioi/tsconfig/node-service.json",
   "include": ["src", "*.ts", "*.tsx"],
-  "exclude": ["node_modules", "dist", ".next"]
+  "exclude": ["node_modules", "dist", ".next"],
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist"
+  }
 }

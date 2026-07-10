@@ -54,9 +54,11 @@ jobs:
       - name: Apply database migrations
         run: pnpm --filter @aioi/database exec prisma migrate deploy
       - name: Grant restricted role login (dev/CI only; prod sets this via secrets)
+        # Prisma 7 `db execute` reads the datasource URL from prisma.config.ts (env DATABASE_URL),
+        # not a `--url` flag.
         run: |
           printf "ALTER ROLE aioi_app WITH LOGIN PASSWORD 'aioi_app';" \
-            | pnpm --filter @aioi/database exec prisma db execute --url "$DATABASE_URL" --stdin
+            | pnpm --filter @aioi/database exec prisma db execute --stdin
       - name: Format check
         run: pnpm format:check
       - name: Lint
