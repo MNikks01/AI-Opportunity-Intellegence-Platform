@@ -13,6 +13,7 @@ import {
   type ExtractedEntity,
 } from "@aioi/validation";
 import type { ScoreDimension } from "@aioi/shared";
+import { type Tracer, NoopTracer, getTracer, usageFrom } from "./tracing";
 
 export interface ScoreRequest {
   dimension: ScoreDimension;
@@ -120,6 +121,8 @@ export class LiteLLMProvider implements LLMProvider {
     // Optional bearer token — set when hitting a provider directly (e.g. https://api.openai.com/v1);
     // leave unset for a LiteLLM proxy that injects the key itself.
     private readonly apiKey?: string,
+    // LLM observability (B-007). No-op unless Langfuse keys are configured.
+    private readonly tracer: Tracer = new NoopTracer(),
   ) {}
 
   private headers(): Record<string, string> {
@@ -138,24 +141,39 @@ export class LiteLLMProvider implements LLMProvider {
       `Dimension: ${req.dimension}\nRubric anchors: ${req.rubricAnchor}\n` +
       `Trend: ${req.trendTitle}\nEvidence ids: ${req.evidenceIds.join(", ")}\n\nContext:\n${req.context}`;
 
-    const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: this.headers(),
-      body: JSON.stringify({
-        model: this.model,
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-      }),
+    const gen = this.tracer.generation({
+      name: "score-dimension",
+      model: this.model,
+      input: { dimension: req.dimension, trend: req.trendTitle },
     });
-    if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
-    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    const content = data.choices?.[0]?.message?.content ?? "";
-    // Strict validation; one repair pass could be added here before throwing.
-    return rawModelScoreSchema.parse(JSON.parse(content));
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: this.headers(),
+        body: JSON.stringify({
+          model: this.model,
+          temperature: 0,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+        usage?: Record<string, number>;
+      };
+      const content = data.choices?.[0]?.message?.content ?? "";
+      // Strict validation; one repair pass could be added here before throwing.
+      const parsed = rawModelScoreSchema.parse(JSON.parse(content));
+      gen.end({ output: parsed, usage: usageFrom(data) });
+      return parsed;
+    } catch (e) {
+      gen.end({ error: e instanceof Error ? e.message : String(e) });
+      throw e;
+    }
   }
 
   async generateActionPlan(req: ActionPlanRequest): Promise<ActionPlanContent> {
@@ -169,23 +187,38 @@ export class LiteLLMProvider implements LLMProvider {
       `Trend: ${req.trendTitle}\n${req.trendSummary ? `Summary: ${req.trendSummary}\n` : ""}` +
       `Scores: ${JSON.stringify(req.scores)}\nEvidence ids: ${req.evidenceIds.join(", ")}`;
 
-    const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: this.headers(),
-      body: JSON.stringify({
-        model: this.model,
-        temperature: 0.4,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-      }),
+    const gen = this.tracer.generation({
+      name: "generate-action-plan",
+      model: this.model,
+      input: { trend: req.trendTitle },
     });
-    if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
-    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    const content = data.choices?.[0]?.message?.content ?? "";
-    return actionPlanContentSchema.parse(JSON.parse(content));
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: this.headers(),
+        body: JSON.stringify({
+          model: this.model,
+          temperature: 0.4,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+        usage?: Record<string, number>;
+      };
+      const content = data.choices?.[0]?.message?.content ?? "";
+      const parsed = actionPlanContentSchema.parse(JSON.parse(content));
+      gen.end({ output: parsed, usage: usageFrom(data) });
+      return parsed;
+    } catch (e) {
+      gen.end({ error: e instanceof Error ? e.message : String(e) });
+      throw e;
+    }
   }
 
   async extractEntities(text: string): Promise<ExtractedEntity[]> {
@@ -195,23 +228,38 @@ export class LiteLLMProvider implements LLMProvider {
       "No generic terms. Return STRICT JSON: " +
       '{"entities":[{"name":string,"type":"COMPANY"|"MODEL"|"REPO"|"TOOL"|"MCP_SERVER"|"PAPER"|"PERSON"}]}. ' +
       "Max 8 entities.";
-    const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: this.headers(),
-      body: JSON.stringify({
-        model: this.model,
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: text.slice(0, 4000) },
-        ],
-      }),
+    const gen = this.tracer.generation({
+      name: "extract-entities",
+      model: this.model,
+      input: { chars: Math.min(text.length, 4000) },
     });
-    if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
-    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    const content = data.choices?.[0]?.message?.content ?? "{}";
-    return extractedEntitiesSchema.parse(JSON.parse(content)).entities;
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: this.headers(),
+        body: JSON.stringify({
+          model: this.model,
+          temperature: 0,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: text.slice(0, 4000) },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+        usage?: Record<string, number>;
+      };
+      const content = data.choices?.[0]?.message?.content ?? "{}";
+      const entities = extractedEntitiesSchema.parse(JSON.parse(content)).entities;
+      gen.end({ output: { count: entities.length }, usage: usageFrom(data) });
+      return entities;
+    } catch (e) {
+      gen.end({ error: e instanceof Error ? e.message : String(e) });
+      throw e;
+    }
   }
 }
 
@@ -239,8 +287,22 @@ export function getProvider(env: NodeJS.ProcessEnv = process.env): LLMProvider {
     env.OPENAI_API_KEY ?? env.ANTHROPIC_API_KEY ?? env.GEMINI_API_KEY ?? env.AIOI_LLM_API_KEY,
   );
   if (base && hasKey)
-    return new LiteLLMProvider(base, defaultChatModel(env), fetch, env.AIOI_LLM_API_KEY);
+    return new LiteLLMProvider(
+      base,
+      defaultChatModel(env),
+      fetch,
+      env.AIOI_LLM_API_KEY,
+      getTracer(env),
+    );
   return new StubProvider();
 }
 
 export { EMBED_DIM, StubEmbedder, LiteLLMEmbedder, getEmbedder, type Embedder } from "./embed";
+export {
+  type Tracer,
+  type LlmGeneration,
+  type TokenUsage,
+  NoopTracer,
+  LangfuseTracer,
+  getTracer,
+} from "./tracing";

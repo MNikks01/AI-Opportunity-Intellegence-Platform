@@ -41,6 +41,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Langfuse LLM tracing (B-007)** — a provider-agnostic tracing seam in `@aioi/ai-sdk`
+  (`Tracer`/`NoopTracer`/`LangfuseTracer` + `getTracer`) wraps every real model call (scoring, action
+  plans, entity extraction) in a generation span with model, input, output, latency, and token usage.
+  Activates only when `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` are set; a `NoopTracer` otherwise, so
+  CI stays green with zero keys. The client is imported lazily (no-keys path never loads the dep) and
+  tracing is best-effort. Closes the last keys-gated observability gap.
 - **Source observability on `/sources`** — the full connector catalog with a **data-driven** status
   per source: **Live** (count), **Failing** (with the connector's actual error), **Idle**, or **Not set
   up**. Failed ingestion passes are now recorded (`recordFailedIngestionRun`; error surfaced via
