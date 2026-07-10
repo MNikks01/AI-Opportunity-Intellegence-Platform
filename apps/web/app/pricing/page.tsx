@@ -64,7 +64,7 @@ const TIERS: Tier[] = [
 
 // Constant across plans — the whole product surface is available on Free.
 const INCLUDED = [
-  "All 9 official sources — HackerNews, GitHub, Hugging Face, arXiv, npm, PyPI, YouTube, Reddit, Product Hunt",
+  "All 10 official sources — HackerNews (incl. Who's Hiring), GitHub, Hugging Face, arXiv, npm, PyPI, YouTube, Reddit, Product Hunt",
   "Golden Quadrant (supply × demand) & momentum tracking",
   "10-dimension opportunity scores with evidence",
   "Build-kit scaffold prompts for your AI coding agent",
