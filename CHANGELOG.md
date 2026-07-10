@@ -29,6 +29,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 
 ### Added
 
+- **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
+  `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /
+  `markNotificationsEmailed` helpers, an alert-email builder in the notification service, and a
+  `scripts/deliver-alerts.ts` job on an hourly `deliver-alerts.yml` workflow (gated on
+  `RESEND_API_KEY`, dry-run supported). Emails deep-link to the trend; best-effort + idempotent.
 - **Public "What's new" page** (`/changelog`) — curated, user-facing product updates grouped by
   month with New/Improved/Fixed tags (a separate surface from this engineering changelog). Linked
   from the nav + sitemap; points to the RSS feed.
