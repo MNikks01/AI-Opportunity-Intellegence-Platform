@@ -54,8 +54,8 @@ strict-typecheck clean; 19 build targets pass; released via Changesets on `main`
 > For the full narrative — what's implemented, decisions taken, business model, and forward roadmap —
 > see **[`../01-product/IMPLEMENTATION_STATUS.md`](../01-product/IMPLEMENTATION_STATUS.md)**.
 
-Autonomous pipeline (scheduler-driven): ingest from **8 sources** (HN, GitHub, Hugging Face, arXiv,
-npm, YouTube, Reddit, Product Hunt) → **cluster signals into trends** (embed + cosine, B-006) → score
+Autonomous pipeline (scheduler-driven): ingest from **9 sources** (HN, GitHub, Hugging Face, arXiv,
+npm, PyPI, YouTube, Reddit, Product Hunt) → **cluster signals into trends** (embed + cosine, B-006) → score
 (10-dimensional composite, eval-gated B-009) → embed (pgvector) → momentum snapshots → auto-evaluate
 alerts → daily briefs (in-app **and emailed**) → per-org Slack/Discord digests. Discovery surfaces:
 keyword + semantic search, the **Golden Quadrant** (demand × supply) with demand mining, momentum,

@@ -32,6 +32,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   a code and the referrer sees how many teams joined via their link. New `Organization.referralCode`
   / `referredByCode` (+ migration) and `getOrCreateReferralCode` / `getReferralStats` /
   `applyReferralCode` helpers, with a copy-link + apply-code page. Auto-capture at signup is a follow-on.
+- **PyPI source** — a 9th connector ingesting the newest AI-relevant packages from the official,
+  keyless PyPI RSS feed (a brand-new AI package is a leading indicator; PyPI has no popularity search,
+  so we filter the newest-packages feed by AI keywords). New `pypi` connector + `runPypiIngestion`,
+  wired into the refresh pipeline; appears in the source filter automatically.
 
 - **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
   `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /
