@@ -47,6 +47,14 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   Activates only when `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` are set; a `NoopTracer` otherwise, so
   CI stays green with zero keys. The client is imported lazily (no-keys path never loads the dep) and
   tracing is best-effort. Closes the last keys-gated observability gap.
+- **Prisma 5→7 (B-025)** — adopted Prisma 7 in `@aioi/database`. Prisma 7 runs queries through a
+  **driver adapter** (`@prisma/adapter-pg` over node-postgres) instead of a bundled query-engine binary,
+  and connection URLs move out of `schema.prisma`: the CLI/`migrate` URL now lives in a new
+  `packages/database/prisma.config.ts`, and the runtime client passes `APP_DATABASE_URL` (the restricted
+  `aioi_app` role) to the adapter — RLS still enforced (ADR-0003). Removing `binaryTargets` also drops the
+  old `rhel-openssl-3.0.x` serverless-binary footgun. Validated end-to-end: `migrate deploy` + **62
+  DB-integration tests (incl. RLS fail-closed) green against live Postgres+pgvector**. `@prisma/client`
+  imports and all repositories are unchanged.
 - **Source observability on `/sources`** — the full connector catalog with a **data-driven** status
   per source: **Live** (count), **Failing** (with the connector's actual error), **Idle**, or **Not set
   up**. Failed ingestion passes are now recorded (`recordFailedIngestionRun`; error surfaced via

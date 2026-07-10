@@ -1,7 +1,9 @@
 {
   "extends": "@aioi/tsconfig/node-service.json",
-  "include": ["src", "*.ts", "*.tsx"],
-  "exclude": ["node_modules", "dist", ".next"],
+  // Only compile package source. `prisma.config.ts` at the package root is a Prisma CLI config file
+  // (loaded by Prisma itself, not part of the build) and lives outside `rootDir: src`, so it's excluded.
+  "include": ["src"],
+  "exclude": ["node_modules", "dist", ".next", "prisma.config.ts"],
   "compilerOptions": {
     "rootDir": "src",
     "outDir": "dist"
