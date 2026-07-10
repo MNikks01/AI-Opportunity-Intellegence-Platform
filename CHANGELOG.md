@@ -33,6 +33,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   newsletter. New watchlist-digest email builder + `scripts/weekly-digest.ts` on a weekly
   `weekly-digest.yml` workflow (gated on `RESEND_API_KEY`, dry-run supported). Composed from existing
   helpers — no migration. Orgs with no watched trends are skipped.
+- **Get-started checklist** (`/start`) — a 4-step onboarding checklist (watchlist → alert → API
+  key → team digest) whose done-state is derived live from the org's data, with a progress bar. An
+  activation surface toward the north-star; linked from the nav + sitemap.
 - **Business tier** — a 4th plan (100 seats, 500k/day API, $299/mo · $2,990/yr) above Team,
   following the ADR-0004 entitlements pattern. New `PLAN_ORDER` / `planRank`; `/billing` offers an
   upgrade to every plan ranked above the current one; the pricing page renders four tiers. Stripe
