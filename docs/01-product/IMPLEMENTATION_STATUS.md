@@ -42,12 +42,14 @@ opens a build plan).
 
 ## 3. Where we are, in one line
 
-Phases 1–22 complete; **Phase 23 implementation is feature-complete across the core loop, the growth
-engine, collaboration, programmatic access, and a full three-tier monetization surface.** The
-platform runs end-to-end and renders in the browser. **262 automated tests green; all workspaces
-strict-typecheck clean; 19 build targets pass.** Every external integration (Clerk, Stripe, Resend,
-LiteLLM, Slack/Discord) sits behind an adapter + deterministic Stub, so CI is green with zero keys
-and each activates on configuration.
+**All 27 roadmap phases complete.** Implementation is feature-complete across the core loop, the growth
+engine, collaboration, programmatic access, and a full three-tier monetization surface, and the
+closing-phase docs (CI/CD, testing strategy, deployment, observability, scalability, milestones) now
+match the shipped system. The platform runs end-to-end, renders in the browser, and is deployed live.
+**194 automated tests green (the DB-integration tier is exercised against real Postgres+pgvector in
+CI); all workspaces strict-typecheck clean; build targets pass.** Every external integration (Clerk,
+Stripe, Resend, LiteLLM, Slack/Discord) sits behind an adapter + deterministic Stub, so CI is green with
+zero keys and each activates on configuration.
 
 ## 4. What is implemented
 
@@ -172,14 +174,28 @@ path is already in place.
 Prioritised by impact against the north star. Nothing here is committed until it enters "Now" in the
 backlog with acceptance criteria.
 
-### Near term (next)
+### Recently shipped (former "near term")
 
-- **Alert email delivery** — alerts already let a user pick an `EMAIL` channel, but firing one only
-  writes an in-app notification. Close the loop: add `Notification.emailedAt`, a cross-org delivery
-  job (mirroring the newsletter send), and a workflow. _Needs a DB migration._
-- **RSS/Atom feed** of new high-opportunity trends — a clean, no-migration distribution channel that
-  feeds automation (Zapier/n8n), consistent with the API/MCP theme.
-- **Public "what's new" changelog** (`/changelog`, R3) — curated product release notes.
+- **Alert email delivery** ✅ — `Notification.emailedAt` + the hourly `deliver-alerts` job/workflow now
+  email undelivered `EMAIL`-channel alerts per org (mirrors the newsletter send; no-op without keys).
+- **RSS/Atom feed** ✅ — `/feed.xml` serves the newest scored opportunities (hourly ISR), a
+  no-migration distribution channel for feed readers and automation (Zapier/n8n).
+- **Public "what's new" changelog** ✅ — `/changelog` renders curated release notes.
+
+Also shipped since (the M14 retention/revenue levers): the **per-org personalised weekly digest** (a
+`weekly-digest` job over each org's watchlists, distinct from the generic newsletter), the **referral
+loop** (`Organization.referralCode` + `referredByCode`), the **`/start` onboarding checklist**, the
+**HN "Who is hiring?"** leading-indicator source (10th source, keyless HN Algolia), and a **Business
+tier** (4th plan) — so the monetization ladder is Free/Pro/Team/Business.
+
+### Near term (next) — M15 moat & expansion
+
+_Future scope, uncommitted until it enters "Now" with acceptance criteria (CLAUDE.md: no speculative
+features):_
+
+- **Competitor / funding / market dashboards** and model/prompt/MCP tracking.
+- **Browser extension** and deeper agent integrations.
+- **Funding-announcement source** (a licensed/official feed) to complement the hiring signal.
 
 ### Mid term (retention + revenue levers)
 

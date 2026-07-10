@@ -11,6 +11,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Docs: closed roadmap phases 19–27** — added the closing-phase deliverables so documentation matches
+  the shipped system: `06-infra/CICD.md`, `08-quality/TESTING_STRATEGY.md`, `06-infra/DEPLOYMENT_GUIDE.md`,
+  `06-infra/OBSERVABILITY.md`, `02-architecture/SCALABILITY_PLAN.md`, and `09-process/MILESTONES.md`.
+  Marked phases 19–27 ✅ in the ROADMAP, refreshed the IMPLEMENTATION_STATUS one-liner + §7 (alert email
+  delivery, RSS feed, and `/changelog` shipped), and recorded the honest test state (194 green; the
+  DB-integration tier is exercised against real Postgres+pgvector in CI).
 - **Docs: implementation status + ADR-0004** — a new `docs/01-product/IMPLEMENTATION_STATUS.md`
   (what's built, decisions, business model, forward roadmap), `ADR-0004` (billing & entitlements
   architecture), and refreshed ROADMAP current-position + BACKLOG to match the shipped monetization
@@ -31,9 +37,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
-- **Dormant-source indicator** on `/sources` — the full connector catalog with each source's
-  status: **Live** (count), **Idle** (awaiting next run), or **Needs setup** (names the env var), so
-  operators see which key-gated sources (Reddit/YouTube/Product Hunt) are dormant and why.
+- **Source observability on `/sources`** — the full connector catalog with a **data-driven** status
+  per source: **Live** (count), **Failing** (with the connector's actual error), **Idle**, or **Not set
+  up**. Failed ingestion passes are now recorded (`recordFailedIngestionRun`; error surfaced via
+  `getLatestRuns`), so a configured-but-broken source (e.g. an expired token) shows *why* it produced
+  nothing instead of silently reading zero. Status no longer guesses the web app's env (the cron owns
+  the keys).
 - **Report PDF export** — the State-of-AI report (`/report`) gains a **Save as PDF** button and a
   print-optimized stylesheet (hides app chrome, renders on white, avoids awkward page breaks) plus a
   dateline, so teams can export a clean, dated, shareable PDF. Dependency-free (browser print-to-PDF).
