@@ -11,6 +11,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **deps: safe minor/patch bumps** — `msw` 2.15, `prettier` 3.9, `typescript-eslint` 8.63,
+  `turbo` 2.10.4, `@types/node` 26.1.1, `@commitlint/cli` 21.2.1 (root); `fastify` 5.10
+  (`services/api`); `bullmq` 5.80 (`services/scheduler`). All within-major; full gate green
+  (lint/typecheck/build + 288 tests). Consolidates Dependabot's grouped PRs.
 - **Docs: Prisma 7 reconcile** — `DEPLOYMENT_GUIDE.md` and `CICD.md` no longer describe the obsolete
   `binaryTargets = ["native","rhel-openssl-3.0.x"]` requirement. Under Prisma 7 the client runs through
   the `@prisma/adapter-pg` driver adapter (no query-engine binary), and connection URLs live in
