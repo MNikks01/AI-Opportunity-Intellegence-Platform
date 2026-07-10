@@ -28,6 +28,10 @@ export default tseslint.config(
       "@typescript-eslint/consistent-type-imports": "error",
       "no-console": ["warn", { allow: ["warn", "error"] }],
       eqeqeq: ["error", "always"],
+      // TypeScript itself resolves undefined identifiers (incl. Node globals like `process`/`Buffer`)
+      // far more accurately than eslint's static `no-undef`. typescript-eslint recommends disabling the
+      // core rule for TS sources; we enforce real undefined-symbol safety via `tsc` (typecheck).
+      "no-undef": "off",
     },
   },
 );
