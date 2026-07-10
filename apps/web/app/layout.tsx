@@ -46,6 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <header className="app-header">
           <span className="app-brand">◧ AI Opportunity Intelligence</span>
           <nav className="app-nav" aria-label="Primary">
+            <a href="/start">Get started</a>
             <a href="/trends">Trends</a>
             <a href="/quadrant">Quadrant</a>
             <a href="/entities">Entities</a>
