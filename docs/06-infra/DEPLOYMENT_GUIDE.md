@@ -63,12 +63,15 @@ the local `apps/web/link-root-env.mjs` symlink is a **local-only** convenience).
 - **Apply migrations:** `pnpm --filter @aioi/database exec prisma migrate deploy`, run against the
   **direct** (non-pooled) Neon host as the **owner** role. The runtime app connects as `aioi_app`
   (restricted) so RLS is enforced.
+- **Prisma 7 connection config (B-025):** connection URLs no longer live in `schema.prisma`. The CLI /
+  `migrate` URL lives in `packages/database/prisma.config.ts` (reads `DATABASE_URL`), and the runtime
+  client connects through the **`@prisma/adapter-pg` driver adapter** with `APP_DATABASE_URL`. There is
+  **no query-engine binary** under adapters, so no `binaryTargets` is needed — this removes the old
+  `rhel-openssl-3.0.x` serverless-binary footgun entirely.
 - **Neon connection-string gotchas (all learned live, all fixed):**
   - Use the **pooled** host for the app/Vercel, the **direct** host for `prisma migrate`.
   - Add `connect_timeout=30` to survive cold-start `P1001`.
   - **Strip `channel_binding=require`** — Prisma auth-fails on it.
-- **Prisma on Vercel's Linux runtime** requires `binaryTargets = ["native","rhel-openssl-3.0.x"]` in the
-  generator, or the client crashes at runtime.
 
 ## 5. Scheduled jobs (the production scheduler)
 

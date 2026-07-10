@@ -2,7 +2,7 @@ import "@aioi/ui/tokens.css";
 import "./globals.css";
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
-import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { ClerkProvider, SignInButton, Show, UserButton } from "@clerk/nextjs";
 import { clerkEnabled } from "./lib/dev-org";
 import { getSiteUrl } from "./lib/site";
 
@@ -27,14 +27,15 @@ export const viewport = {
 };
 
 function AuthControls() {
+  // Clerk v7: the <SignedIn>/<SignedOut> control components were replaced by <Show when=…>.
   return (
     <>
-      <SignedOut>
+      <Show when="signed-out">
         <SignInButton mode="modal" />
-      </SignedOut>
-      <SignedIn>
-        <UserButton afterSignOutUrl="/trends" />
-      </SignedIn>
+      </Show>
+      <Show when="signed-in">
+        <UserButton />
+      </Show>
     </>
   );
 }
@@ -67,5 +68,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     </html>
   );
 
-  return clerkEnabled ? <ClerkProvider>{body}</ClerkProvider> : body;
+  // Clerk v7: `afterSignOutUrl` moved off <UserButton> to <ClerkProvider>.
+  return clerkEnabled ? <ClerkProvider afterSignOutUrl="/trends">{body}</ClerkProvider> : body;
 }

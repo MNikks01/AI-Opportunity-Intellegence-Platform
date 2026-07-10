@@ -11,6 +11,27 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **deps: Clerk majors — `@clerk/nextjs` 6→7 + `@clerk/backend` 1→3** — the only breaking changes were in
+  `apps/web/app/layout.tsx`: Clerk 7 removed the `<SignedIn>`/`<SignedOut>` control components (use
+  `<Show when="signed-in">` / `<Show when="signed-out">`) and moved `afterSignOutUrl` off `<UserButton>`
+  onto `<ClerkProvider>`. `clerkMiddleware`/`auth.protect()` (proxy.ts), `auth`/`currentUser` (dev-org),
+  and `verifyToken` (`@clerk/backend`, services/api) were all source-compatible. Web compiles; full gate
+  green (typecheck/build/lint + 288 tests).
+- **deps: stripe 17→22 (major)** — bumped `stripe` in `services/api` + `apps/web`. Stripe 22 pins a new
+  API version, so the one breaking change was the typed `apiVersion` literal in `apps/web/app/lib/billing.ts`
+  (`2025-02-24.acacia` → `2026-06-24.dahlia`). `services/api` passes no `apiVersion`, so it was unaffected;
+  checkout/webhook/portal APIs are unchanged. Full gate green (typecheck/build/lint + 288 tests).
+- **deps: dotenv 16→17 (major)** — bumped `dotenv` (dev; used by `packages/database/prisma.config.ts`).
+  The `config()` API is unchanged; added `quiet: true` to silence dotenv 17's new promotional startup
+  banner so Prisma CLI output stays clean. Verified `prisma db execute`/`generate` + full gate.
+- **deps: safe minor/patch bumps** — `msw` 2.15, `prettier` 3.9, `typescript-eslint` 8.63,
+  `turbo` 2.10.4, `@types/node` 26.1.1, `@commitlint/cli` 21.2.1 (root); `fastify` 5.10
+  (`services/api`); `bullmq` 5.80 (`services/scheduler`). All within-major; full gate green
+  (lint/typecheck/build + 288 tests). Consolidates Dependabot's grouped PRs.
+- **Docs: Prisma 7 reconcile** — `DEPLOYMENT_GUIDE.md` and `CICD.md` no longer describe the obsolete
+  `binaryTargets = ["native","rhel-openssl-3.0.x"]` requirement. Under Prisma 7 the client runs through
+  the `@prisma/adapter-pg` driver adapter (no query-engine binary), and connection URLs live in
+  `prisma.config.ts` / the runtime adapter rather than `schema.prisma`.
 - **Docs: closed roadmap phases 19–27** — added the closing-phase deliverables so documentation matches
   the shipped system: `06-infra/CICD.md`, `08-quality/TESTING_STRATEGY.md`, `06-infra/DEPLOYMENT_GUIDE.md`,
   `06-infra/OBSERVABILITY.md`, `02-architecture/SCALABILITY_PLAN.md`, and `09-process/MILESTONES.md`.
