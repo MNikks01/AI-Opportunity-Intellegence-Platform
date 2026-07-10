@@ -31,6 +31,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 - **Get-started checklist** (`/start`) — a 4-step onboarding checklist (watchlist → alert → API
   key → team digest) whose done-state is derived live from the org's data, with a progress bar. An
   activation surface toward the north-star; linked from the nav + sitemap.
+- **Business tier** — a 4th plan (100 seats, 500k/day API, $299/mo · $2,990/yr) above Team,
+  following the ADR-0004 entitlements pattern. New `PLAN_ORDER` / `planRank`; `/billing` offers an
+  upgrade to every plan ranked above the current one; the pricing page renders four tiers. Stripe
+  price ids: `STRIPE_PRICE_BUSINESS` / `STRIPE_PRICE_BUSINESS_ANNUAL`.
 - **PyPI source** — a 9th connector ingesting the newest AI-relevant packages from the official,
   keyless PyPI RSS feed (a brand-new AI package is a leading indicator; PyPI has no popularity search,
   so we filter the newest-packages feed by AI keywords). New `pypi` connector + `runPypiIngestion`,

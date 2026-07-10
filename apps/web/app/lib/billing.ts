@@ -20,6 +20,10 @@ const secret = process.env.STRIPE_SECRET_KEY;
 const PRICES: Record<PaidPlan, Record<BillingInterval, string | undefined>> = {
   PRO: { monthly: process.env.STRIPE_PRICE_PRO, annual: process.env.STRIPE_PRICE_PRO_ANNUAL },
   TEAM: { monthly: process.env.STRIPE_PRICE_TEAM, annual: process.env.STRIPE_PRICE_TEAM_ANNUAL },
+  BUSINESS: {
+    monthly: process.env.STRIPE_PRICE_BUSINESS,
+    annual: process.env.STRIPE_PRICE_BUSINESS_ANNUAL,
+  },
 };
 
 /** True when a secret key + the monthly Pro price id are configured — real checkout is available. */
