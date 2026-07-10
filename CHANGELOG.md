@@ -32,6 +32,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   a code and the referrer sees how many teams joined via their link. New `Organization.referralCode`
   / `referredByCode` (+ migration) and `getOrCreateReferralCode` / `getReferralStats` /
   `applyReferralCode` helpers, with a copy-link + apply-code page. Auto-capture at signup is a follow-on.
+- **Personalized weekly digest** — a per-org weekly email of movement in *that org's* watched
+  trends (opportunity + momentum arrows) and new alert matches, distinct from the generic
+  newsletter. New watchlist-digest email builder + `scripts/weekly-digest.ts` on a weekly
+  `weekly-digest.yml` workflow (gated on `RESEND_API_KEY`, dry-run supported). Composed from existing
+  helpers — no migration. Orgs with no watched trends are skipped.
 - **Get-started checklist** (`/start`) — a 4-step onboarding checklist (watchlist → alert → API
   key → team digest) whose done-state is derived live from the org's data, with a progress bar. An
   activation surface toward the north-star; linked from the nav + sitemap.
