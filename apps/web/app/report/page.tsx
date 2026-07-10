@@ -7,6 +7,7 @@ import {
   getTrendMomentumMap,
 } from "@aioi/database";
 import { Badge } from "@aioi/ui";
+import { ReportActions } from "./ReportActions";
 
 export const dynamic = "force-dynamic";
 
@@ -60,10 +61,21 @@ export default async function ReportPage() {
   const opp = (t: (typeof topTrends)[number]) =>
     t.scores.find((s) => s.dimension === "opportunity");
 
+  const asOf = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
   return (
     <main className="report">
-      <p className="report-eyebrow">Live snapshot · updated continuously</p>
+      <div className="report-topline">
+        <p className="report-eyebrow">Live snapshot · updated continuously</p>
+        <ReportActions />
+      </div>
       <h1 className="report-title">The State of AI Opportunities</h1>
+      {/* Dateline so the exported PDF (and the page) reads as a dated, standalone artifact. */}
+      <p className="report-asof">As of {asOf}</p>
       <p className="report-sub">
         Where the AI opportunity is right now — scored, quantified, and sourced from where builders
         ship first.

@@ -2128,3 +2128,62 @@ a.resource-link:hover {
 .onboard-step-cta:hover {
   text-decoration: underline;
 }
+
+/* ---- Report export (PDF/print) ---- */
+.report-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.report-pdf-btn {
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.report-pdf-btn:hover {
+  border-color: var(--primary);
+}
+.report-asof {
+  color: var(--fg-muted);
+  font-size: 0.85rem;
+  margin: 4px 0 0;
+}
+
+@media print {
+  /* Hide app chrome + interactive-only affordances; render on white for ink economy. */
+  .app-header,
+  .home-newsletter,
+  .no-print,
+  .report .home-link {
+    display: none !important;
+  }
+  :root {
+    --bg: #ffffff;
+    --bg-subtle: #ffffff;
+    --bg-muted: #f3f4f6;
+    --fg: #0b0c0f;
+    --fg-muted: #444a54;
+    --border: #d8dbe0;
+  }
+  body {
+    background: #ffffff;
+  }
+  .app-container {
+    padding: 0;
+    max-width: 100%;
+  }
+  .report-section {
+    break-inside: avoid;
+  }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+}
