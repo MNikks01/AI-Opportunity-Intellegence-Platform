@@ -1,5 +1,19 @@
 # @aioi/notification-service
 
+## 0.3.0
+
+### Minor Changes
+
+- eb1fc88: Alert email delivery. EMAIL-channel alert notifications are now delivered by email: a new
+  Notification.emailedAt column + listPendingEmailNotifications / markNotificationsEmailed helpers, an
+  alert-email builder in the notification service, and a `scripts/deliver-alerts.ts` job (hourly
+  `deliver-alerts.yml` workflow, gated on RESEND_API_KEY, dry-run supported). Closes the loop on the
+  alert channel users could already select.
+- 48003f9: Personalized weekly digest. A per-org weekly email summarizing movement in THAT org's watched trends
+  (opportunity + momentum) and new alert matches — distinct from the generic newsletter. New
+  watchlist-digest email builder + scripts/weekly-digest.ts (weekly deliver-alerts-style workflow,
+  gated on RESEND_API_KEY, dry-run supported). Composed from existing DB helpers; no migration.
+
 ## 0.2.0
 
 ### Minor Changes

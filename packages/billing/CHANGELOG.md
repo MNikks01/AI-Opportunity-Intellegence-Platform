@@ -1,5 +1,27 @@
 # @aioi/billing
 
+## 0.4.0
+
+### Minor Changes
+
+- a4f5de6: Annual billing option. Paid plans can now be billed annually at 10× the monthly rate (two months
+  free): shared PLAN_PRICING + monthlyEquivalent in @aioi/billing, a monthly/annual toggle on the
+  pricing and billing pages, and interval-aware Stripe checkout (STRIPE_PRICE_*_ANNUAL price ids;
+  interval threaded through CheckoutInput). Entitlements are unchanged by interval.
+- 97f8bf4: Business tier — a 4th plan (100 seats, 500k/day API, $299/mo) rounding out the ladder, following the
+  ADR-0004 entitlements pattern. New PLAN_ORDER / planRank; the billing page offers an upgrade to every
+  plan above the current one; pricing renders four tiers. SSO/enterprise controls are a follow-on.
+- 4011ff2: Stripe checkout & webhook for self-serve upgrades. The `/billing` "Upgrade to Pro" button opens
+  Stripe Checkout (or applies Pro directly in test mode); a signature-verified webhook is the source
+  of truth for plan changes, mapping subscription events → plan via pure, unit-tested helpers and
+  persisting the Stripe ids. Manage/cancel via the Stripe Billing Portal. Falls back to the offline
+  Stub when STRIPE_SECRET_KEY / STRIPE_PRICE_PRO are unset.
+- 7edad2e: Team tier + seat enforcement. New TEAM plan (25 seats, 200k/day API) alongside Free/Pro; every plan
+  now has a maxSeats entitlement (Free 1, Pro 3, Team 25) enforced at inviteMember (throws
+  PlanLimitError). Stripe checkout is plan-aware (Pro/Team prices; plan carried in metadata so the
+  webhook needs no price→plan table). Pricing page shows 3 tiers; billing offers per-plan upgrades;
+  the team page shows seat usage and blocks invites when full.
+
 ## 0.3.0
 
 ### Minor Changes

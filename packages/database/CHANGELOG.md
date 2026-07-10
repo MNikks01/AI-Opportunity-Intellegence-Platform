@@ -1,5 +1,81 @@
 # @aioi/database
 
+## 0.24.0
+
+### Minor Changes
+
+- eb1fc88: Alert email delivery. EMAIL-channel alert notifications are now delivered by email: a new
+  Notification.emailedAt column + listPendingEmailNotifications / markNotificationsEmailed helpers, an
+  alert-email builder in the notification service, and a `scripts/deliver-alerts.ts` job (hourly
+  `deliver-alerts.yml` workflow, gated on RESEND_API_KEY, dry-run supported). Closes the loop on the
+  alert channel users could already select.
+- e6dd752: Source observability on /sources. The page now shows the full connector catalog with a data-driven
+  status per source — Live (count), Failing (with the connector's actual error), Idle, or Not set up.
+  Failed ingestion passes are now recorded (new recordFailedIngestionRun + error surfaced via
+  getLatestRuns), so a configured-but-broken source (e.g. an expired token) shows why it produced
+  nothing instead of silently reading zero. Also fixes a merge-introduced unbalanced brace in
+  globals.css that had broken all CSS after the referrals block.
+- 6a8f4d4: Enforce plan entitlements at the write paths. `createAlert` now enforces `maxAlerts` (Free 10)
+  like `createWatchlist` already did for `maxWatchlists`, throwing `PlanLimitError`. Semantic search
+  on `/trends` is gated on the `semanticSearch` entitlement (Free falls back to keyword with an
+  upgrade prompt). Blocked creates redirect back with a friendly "upgrade" banner instead of erroring.
+- b80c3c5: Prisma 5→7 migration (B-025). Prisma 7 replaces the bundled query-engine binary with a **driver adapter**
+  (`@prisma/adapter-pg` over node-postgres) and moves connection URLs out of `schema.prisma`:
+
+  - New `packages/database/prisma.config.ts` holds the CLI/`migrate` datasource URL (owner `DATABASE_URL`);
+    it loads the monorepo-root `.env` and falls back to a localhost URL so `prisma generate` (which never
+    connects) still succeeds during `pnpm install`.
+  - `src/client.ts` now instantiates `PrismaClient({ adapter: new PrismaPg({ connectionString }) })` using
+    `APP_DATABASE_URL ?? DATABASE_URL`, so the runtime keeps connecting as the restricted `aioi_app` role
+    and RLS still enforces (ADR-0003 / B-027). The integration test's fresh connection uses its own adapter.
+  - Dropped `binaryTargets` (no engine binary under adapters — removes the `rhel-openssl-3.0.x` serverless
+    footgun). Kept the `prisma-client-js` generator, so `@prisma/client` imports and every repository are
+    unchanged.
+
+  Validated end-to-end: `prisma migrate deploy` via the new config + **62 DB-integration tests (including
+  the RLS fail-closed suite) green against live Postgres 16 + pgvector**. Dependabot continues to hold the
+  next Prisma major for a deliberate migration.
+
+- 9d6d986: Referral loop. Each org gets a shareable referral code (Organization.referralCode); a new org can
+  apply a code (referredByCode) and the referrer sees how many teams joined via their link. New
+  getOrCreateReferralCode / getReferralStats / applyReferralCode helpers + a /referrals page (link,
+  copy, stats, apply form). Full auto-capture at signup is a follow-on.
+- 7daf15f: Related opportunities on the trend page. New relatedTrends query finds embedding-nearest trends
+  (pgvector, excluding the trend itself); the trend detail "Related" section now shows shared-entity
+  matches first and fills with semantically-similar trends, so even sparsely-tagged trends surface
+  relevant neighbours.
+- 8a17bc7: Public RSS feed. A new `/feed.xml` RSS 2.0 route serves the newest scored opportunities (title, link,
+  opportunity score, build idea, pubDate) from a new `listTrendFeed` query, with feed-reader
+  autodiscovery via `<link rel="alternate" type="application/rss+xml">` in the document head. A
+  distribution channel for readers and automation, alongside the API/MCP surfaces.
+- 4011ff2: Stripe checkout & webhook for self-serve upgrades. The `/billing` "Upgrade to Pro" button opens
+  Stripe Checkout (or applies Pro directly in test mode); a signature-verified webhook is the source
+  of truth for plan changes, mapping subscription events → plan via pure, unit-tested helpers and
+  persisting the Stripe ids. Manage/cancel via the Stripe Billing Portal. Falls back to the offline
+  Stub when STRIPE_SECRET_KEY / STRIPE_PRICE_PRO are unset.
+- 7edad2e: Team tier + seat enforcement. New TEAM plan (25 seats, 200k/day API) alongside Free/Pro; every plan
+  now has a maxSeats entitlement (Free 1, Pro 3, Team 25) enforced at inviteMember (throws
+  PlanLimitError). Stripe checkout is plan-aware (Pro/Team prices; plan carried in metadata so the
+  webhook needs no price→plan table). Pricing page shows 3 tiers; billing offers per-plan upgrades;
+  the team page shows seat usage and blocks invites when full.
+- d3eec43: API usage history sparkline on /billing. New getApiUsageHistory helper aggregates the existing
+  per-day ApiKeyUsage rows into a zero-filled 14-day series (summed across the org's keys), rendered
+  as a small SVG sparkline with the 14-day total beneath the usage meters.
+- 7d8b33c: Usage-vs-limits panel on /billing. New countWatchlists / countAlerts helpers feed a set of usage
+  meters (watchlists, alerts, seats, busiest-key API today) that show consumption against the plan's
+  entitlements, colouring amber at ≥80% and red at the limit. Unlimited entitlements show a running
+  count with no cap.
+
+### Patch Changes
+
+- Updated dependencies [a4f5de6]
+- Updated dependencies [97f8bf4]
+- Updated dependencies [b902d2c]
+- Updated dependencies [4011ff2]
+- Updated dependencies [7edad2e]
+  - @aioi/billing@0.4.0
+  - @aioi/ai-sdk@0.7.0
+
 ## 0.23.1
 
 ### Patch Changes
