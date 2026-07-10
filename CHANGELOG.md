@@ -28,6 +28,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+
+- **Public "What's new" page** (`/changelog`) — curated, user-facing product updates grouped by
+  month with New/Improved/Fixed tags (a separate surface from this engineering changelog). Linked
+  from the nav + sitemap; points to the RSS feed.
 - **Public RSS feed** (`/feed.xml`) — an RSS 2.0 feed of the newest scored opportunities (title,
   link, opportunity score, build idea, `pubDate`) from a new `listTrendFeed` query, with feed-reader
   autodiscovery in the document head. A distribution channel for readers + automation alongside the
