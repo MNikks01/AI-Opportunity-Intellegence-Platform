@@ -46,6 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <header className="app-header">
           <span className="app-brand">◧ AI Opportunity Intelligence</span>
           <nav className="app-nav" aria-label="Primary">
+            <a href="/start">Get started</a>
             <a href="/trends">Trends</a>
             <a href="/quadrant">Quadrant</a>
             <a href="/entities">Entities</a>
@@ -55,6 +56,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/team">Team</a>
             <a href="/pricing">Pricing</a>
             <a href="/billing">Billing</a>
+            <a href="/referrals">Refer</a>
             <a href="/changelog">What&rsquo;s new</a>
             <a href="/sources">Sources</a>
             {clerkEnabled && <AuthControls />}

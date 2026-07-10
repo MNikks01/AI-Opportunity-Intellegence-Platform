@@ -23,11 +23,40 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Fixed
+- **CSS syntax fix** — a merge-introduced unbalanced brace in `globals.css` (after the referrals
+  block) had silently broken every rule after it (onboarding, referrals, report). Restored the
+  balance; those pages now style correctly again.
 - **Scheduled data refresh** — `scripts/demo-data.ts` imported `@aioi/database` by package name, which
   isn't linked into the repo-root `node_modules`, so it failed to resolve under `tsx` in CI
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Dormant-source indicator** on `/sources` — the full connector catalog with each source's
+  status: **Live** (count), **Idle** (awaiting next run), or **Needs setup** (names the env var), so
+  operators see which key-gated sources (Reddit/YouTube/Product Hunt) are dormant and why.
+- **Report PDF export** — the State-of-AI report (`/report`) gains a **Save as PDF** button and a
+  print-optimized stylesheet (hides app chrome, renders on white, avoids awkward page breaks) plus a
+  dateline, so teams can export a clean, dated, shareable PDF. Dependency-free (browser print-to-PDF).
+- **HN "Who is hiring?" source** — a 10th connector reading the latest monthly Who-is-hiring
+  thread via the official, keyless HN Algolia API and keeping the AI/ML job posts (hiring is a
+  leading indicator of demand). Posts flow through the normal clustering, adding demand/momentum to
+  the matching trend. New `hnhiring` connector + `runHnHiringIngestion`.
+- **Referral loop** (`/referrals`) — each org gets a shareable referral code; a new org can apply
+  a code and the referrer sees how many teams joined via their link. New `Organization.referralCode`
+  / `referredByCode` (+ migration) and `getOrCreateReferralCode` / `getReferralStats` /
+  `applyReferralCode` helpers, with a copy-link + apply-code page. Auto-capture at signup is a follow-on.
+- **Personalized weekly digest** — a per-org weekly email of movement in *that org's* watched
+  trends (opportunity + momentum arrows) and new alert matches, distinct from the generic
+  newsletter. New watchlist-digest email builder + `scripts/weekly-digest.ts` on a weekly
+  `weekly-digest.yml` workflow (gated on `RESEND_API_KEY`, dry-run supported). Composed from existing
+  helpers — no migration. Orgs with no watched trends are skipped.
+- **Get-started checklist** (`/start`) — a 4-step onboarding checklist (watchlist → alert → API
+  key → team digest) whose done-state is derived live from the org's data, with a progress bar. An
+  activation surface toward the north-star; linked from the nav + sitemap.
+- **Business tier** — a 4th plan (100 seats, 500k/day API, $299/mo · $2,990/yr) above Team,
+  following the ADR-0004 entitlements pattern. New `PLAN_ORDER` / `planRank`; `/billing` offers an
+  upgrade to every plan ranked above the current one; the pricing page renders four tiers. Stripe
+  price ids: `STRIPE_PRICE_BUSINESS` / `STRIPE_PRICE_BUSINESS_ANNUAL`.
 - **PyPI source** — a 9th connector ingesting the newest AI-relevant packages from the official,
   keyless PyPI RSS feed (a brand-new AI package is a leading indicator; PyPI has no popularity search,
   so we filter the newest-packages feed by AI keywords). New `pypi` connector + `runPypiIngestion`,
