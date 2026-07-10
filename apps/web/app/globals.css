@@ -1825,3 +1825,111 @@ a.resource-link:hover {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- Changelog / what's new ---- */
+.changelog {
+  max-width: 720px;
+  margin: 0 auto;
+}
+.changelog-head {
+  padding: 8px 0;
+  margin-bottom: 8px;
+}
+.changelog-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.changelog-head h1 {
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+  margin: 8px 0;
+}
+.changelog-head p {
+  color: var(--fg-muted);
+  margin: 0;
+}
+.changelog-head a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.changelog-month {
+  margin-top: 28px;
+}
+.changelog-month-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  margin: 0 0 4px;
+}
+.changelog-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.changelog-item {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 20px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
+}
+.changelog-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.changelog-meta time {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+.changelog-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+.tag-new {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: var(--primary);
+}
+.tag-improved {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+}
+.tag-fixed {
+  background: var(--bg-muted);
+  color: var(--fg-muted);
+}
+.changelog-body h3 {
+  font-size: 1.02rem;
+  margin: 0 0 6px;
+  text-wrap: balance;
+}
+.changelog-body p {
+  color: var(--fg-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .changelog-item {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .changelog-meta {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+  }
+}

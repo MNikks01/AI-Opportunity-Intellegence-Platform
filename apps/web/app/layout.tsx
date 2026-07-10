@@ -55,6 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/team">Team</a>
             <a href="/pricing">Pricing</a>
             <a href="/billing">Billing</a>
+            <a href="/changelog">What&rsquo;s new</a>
             <a href="/sources">Sources</a>
             {clerkEnabled && <AuthControls />}
           </nav>

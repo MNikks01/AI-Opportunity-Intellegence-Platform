@@ -34,6 +34,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   `markNotificationsEmailed` helpers, an alert-email builder in the notification service, and a
   `scripts/deliver-alerts.ts` job on an hourly `deliver-alerts.yml` workflow (gated on
   `RESEND_API_KEY`, dry-run supported). Emails deep-link to the trend; best-effort + idempotent.
+- **Public "What's new" page** (`/changelog`) — curated, user-facing product updates grouped by
+  month with New/Improved/Fixed tags (a separate surface from this engineering changelog). Linked
+  from the nav + sitemap; points to the RSS feed.
 - **Public RSS feed** (`/feed.xml`) — an RSS 2.0 feed of the newest scored opportunities (title,
   link, opportunity score, build idea, `pubDate`) from a new `listTrendFeed` query, with feed-reader
   autodiscovery in the document head. A distribution channel for readers + automation alongside the
