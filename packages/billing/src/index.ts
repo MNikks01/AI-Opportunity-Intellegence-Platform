@@ -4,10 +4,19 @@
  * ultimately calls `setPlan`; this package owns "what a plan grants" and the enforcement helpers.
  */
 
-export type Plan = "FREE" | "PRO" | "TEAM";
+export type Plan = "FREE" | "PRO" | "TEAM" | "BUSINESS";
 
 /** Paid plans a customer can check out into (everything but FREE). */
 export type PaidPlan = Exclude<Plan, "FREE">;
+
+/** Plan ordering (low → high) — used to decide which upgrades to offer. */
+export const PLAN_ORDER: Plan[] = ["FREE", "PRO", "TEAM", "BUSINESS"];
+
+/** Rank of a plan in the ladder (unknown → 0/FREE). Higher = more entitlements. */
+export function planRank(plan: string): number {
+  const i = PLAN_ORDER.indexOf(plan as Plan);
+  return i < 0 ? 0 : i;
+}
 
 /** Billing cadence. Annual is priced at 10× the monthly rate (two months free). */
 export type BillingInterval = "monthly" | "annual";
@@ -20,6 +29,7 @@ export function isBillingInterval(value: string): value is BillingInterval {
 export const PLAN_PRICING: Record<PaidPlan, { monthly: number; annual: number }> = {
   PRO: { monthly: 29, annual: 290 },
   TEAM: { monthly: 99, annual: 990 },
+  BUSINESS: { monthly: 299, annual: 2990 },
 };
 
 /** Effective USD/month for an interval (annual total ÷ 12), rounded. */
@@ -65,17 +75,25 @@ export const PLAN_ENTITLEMENTS: Record<Plan, Entitlements> = {
     dailyBrief: true,
     apiDailyQuota: 200000,
   },
+  BUSINESS: {
+    maxWatchlists: -1,
+    maxAlerts: -1,
+    maxSeats: 100,
+    semanticSearch: true,
+    dailyBrief: true,
+    apiDailyQuota: 500000,
+  },
 };
 
 export const PLANS = Object.keys(PLAN_ENTITLEMENTS) as Plan[];
 
 export function isPlan(value: string): value is Plan {
-  return value === "FREE" || value === "PRO" || value === "TEAM";
+  return value === "FREE" || value === "PRO" || value === "TEAM" || value === "BUSINESS";
 }
 
 /** True for a real paid plan (not FREE and not garbage). */
 export function isPaidPlan(value: string): value is PaidPlan {
-  return value === "PRO" || value === "TEAM";
+  return value === "PRO" || value === "TEAM" || value === "BUSINESS";
 }
 
 /** Entitlements for a plan string; unknown/absent plans fall back to FREE. */

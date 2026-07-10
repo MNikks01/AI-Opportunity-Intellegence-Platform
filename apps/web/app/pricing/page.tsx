@@ -27,7 +27,7 @@ const FEATURES: { label: string; value: (e: Entitlements) => string | boolean }[
 ];
 
 type Tier = {
-  plan: "FREE" | "PRO" | "TEAM";
+  plan: "FREE" | "PRO" | "TEAM" | "BUSINESS";
   name: string;
   tagline: string;
   cta: string;
@@ -51,8 +51,14 @@ const TIERS: Tier[] = [
   {
     plan: "TEAM",
     name: "Team",
-    tagline: "For teams — 25 seats, shared watchlists, and the highest API limits.",
+    tagline: "For teams — 25 seats, shared watchlists, and higher API limits.",
     cta: "Upgrade to Team →",
+  },
+  {
+    plan: "BUSINESS",
+    name: "Business",
+    tagline: "For scaling orgs — 100 seats and the highest API throughput.",
+    cta: "Upgrade to Business →",
   },
 ];
 
@@ -119,7 +125,7 @@ export default async function PricingPage({
         </div>
       </header>
 
-      <section className="pricing-tiers pricing-tiers-3" aria-label="Plans">
+      <section className="pricing-tiers pricing-tiers-4" aria-label="Plans">
         {TIERS.map((t) => {
           const ent = entitlementsFor(t.plan);
           const price = isPaidPlan(t.plan)

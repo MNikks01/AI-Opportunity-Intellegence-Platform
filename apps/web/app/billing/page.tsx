@@ -9,7 +9,13 @@ import {
   getApiKeyUsageToday,
   getApiUsageHistory,
 } from "@aioi/database";
-import { isBillingInterval, type BillingInterval } from "@aioi/billing";
+import {
+  isBillingInterval,
+  planRank,
+  PLAN_ORDER,
+  type BillingInterval,
+  type PaidPlan,
+} from "@aioi/billing";
 import { Badge, Card } from "@aioi/ui";
 import { getDevOrg } from "../lib/dev-org";
 import { stripeConfigured } from "../lib/billing";
@@ -18,6 +24,13 @@ import { UsageMeter } from "./UsageMeter";
 import { Sparkline } from "./Sparkline";
 
 export const dynamic = "force-dynamic";
+
+const PLAN_LABEL: Record<string, string> = {
+  FREE: "Free",
+  PRO: "Pro",
+  TEAM: "Team",
+  BUSINESS: "Business",
+};
 
 const BANNERS: Record<string, { text: string; band: "high" | "medium" }> = {
   success: { text: "Payment received — your plan is now active.", band: "high" },
@@ -56,7 +69,11 @@ export default async function BillingPage({
   const interval: BillingInterval =
     rawInterval && isBillingInterval(rawInterval) ? rawInterval : "monthly";
   const banner = checkout ? BANNERS[checkout] : undefined;
-  const isPaid = plan === "PRO" || plan === "TEAM";
+  const isPaid = plan !== "FREE";
+  // Offer an upgrade to every paid plan ranked above the current one.
+  const upgrades = PLAN_ORDER.filter(
+    (p) => p !== "FREE" && planRank(p) > planRank(plan),
+  ) as PaidPlan[];
   const hasStripeCustomer = Boolean(sub?.stripeCustomerId);
   const live = stripeConfigured();
   const testSuffix = live ? "" : " (test)";
@@ -111,9 +128,7 @@ export default async function BillingPage({
             fontSize: "0.9rem",
           }}
         >
-          <Badge band={banner.band}>
-            {plan === "FREE" ? "Free" : plan === "TEAM" ? "Team" : "Pro"}
-          </Badge>
+          <Badge band={banner.band}>{PLAN_LABEL[plan] ?? plan}</Badge>
           {banner.text}
         </div>
       )}
@@ -123,25 +138,17 @@ export default async function BillingPage({
           <span style={{ fontWeight: 600 }}>Current plan</span>
           <Badge band={isPaid ? "high" : "medium"}>{plan}</Badge>
 
-          <div style={{ marginLeft: "auto", display: "flex", gap: 8 }}>
-            {plan === "FREE" && (
-              <form action={startCheckoutAction}>
-                <input type="hidden" name="plan" value="PRO" />
+          <div style={{ marginLeft: "auto", display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {upgrades.map((p) => (
+              <form key={p} action={startCheckoutAction}>
+                <input type="hidden" name="plan" value={p} />
                 <input type="hidden" name="interval" value={interval} />
                 <button type="submit" className="billing-btn billing-btn-primary">
-                  Upgrade to Pro{testSuffix}
+                  Upgrade to {PLAN_LABEL[p]}
+                  {testSuffix}
                 </button>
               </form>
-            )}
-            {plan !== "TEAM" && (
-              <form action={startCheckoutAction}>
-                <input type="hidden" name="plan" value="TEAM" />
-                <input type="hidden" name="interval" value={interval} />
-                <button type="submit" className="billing-btn billing-btn-primary">
-                  Upgrade to Team{testSuffix}
-                </button>
-              </form>
-            )}
+            ))}
             {isPaid && hasStripeCustomer && live && (
               <form action={openPortalAction}>
                 <button type="submit" className="billing-btn">

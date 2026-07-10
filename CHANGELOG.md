@@ -28,6 +28,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Business tier** — a 4th plan (100 seats, 500k/day API, $299/mo · $2,990/yr) above Team,
+  following the ADR-0004 entitlements pattern. New `PLAN_ORDER` / `planRank`; `/billing` offers an
+  upgrade to every plan ranked above the current one; the pricing page renders four tiers. Stripe
+  price ids: `STRIPE_PRICE_BUSINESS` / `STRIPE_PRICE_BUSINESS_ANNUAL`.
 
 - **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
   `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /
