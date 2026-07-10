@@ -11,6 +11,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Docs: closed roadmap phases 19–27** — added the closing-phase deliverables so documentation matches
+  the shipped system: `06-infra/CICD.md`, `08-quality/TESTING_STRATEGY.md`, `06-infra/DEPLOYMENT_GUIDE.md`,
+  `06-infra/OBSERVABILITY.md`, `02-architecture/SCALABILITY_PLAN.md`, and `09-process/MILESTONES.md`.
+  Marked phases 19–27 ✅ in the ROADMAP, refreshed the IMPLEMENTATION_STATUS one-liner + §7 (alert email
+  delivery, RSS feed, and `/changelog` shipped), and recorded the honest test state (194 green; the
+  DB-integration tier is exercised against real Postgres+pgvector in CI).
 - **Docs: implementation status + ADR-0004** — a new `docs/01-product/IMPLEMENTATION_STATUS.md`
   (what's built, decisions, business model, forward roadmap), `ADR-0004` (billing & entitlements
   architecture), and refreshed ROADMAP current-position + BACKLOG to match the shipped monetization
