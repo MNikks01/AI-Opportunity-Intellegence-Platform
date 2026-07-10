@@ -182,11 +182,20 @@ backlog with acceptance criteria.
   no-migration distribution channel for feed readers and automation (Zapier/n8n).
 - **Public "what's new" changelog** ✅ — `/changelog` renders curated release notes.
 
-### Near term (next)
+Also shipped since (the M14 retention/revenue levers): the **per-org personalised weekly digest** (a
+`weekly-digest` job over each org's watchlists, distinct from the generic newsletter), the **referral
+loop** (`Organization.referralCode` + `referredByCode`), the **`/start` onboarding checklist**, the
+**HN "Who is hiring?"** leading-indicator source (10th source, keyless HN Algolia), and a **Business
+tier** (4th plan) — so the monetization ladder is Free/Pro/Team/Business.
 
-- **Per-org personalised weekly digest** (distinct from the generic newsletter), based on watchlists.
-- **Referral / affiliate** loop and in-product onboarding checklists.
-- **More leading-indicator sources** — job posts (hiring) and funding announcements.
+### Near term (next) — M15 moat & expansion
+
+_Future scope, uncommitted until it enters "Now" with acceptance criteria (CLAUDE.md: no speculative
+features):_
+
+- **Competitor / funding / market dashboards** and model/prompt/MCP tracking.
+- **Browser extension** and deeper agent integrations.
+- **Funding-announcement source** (a licensed/official feed) to complement the hiring signal.
 
 ### Mid term (retention + revenue levers)
 

@@ -56,8 +56,8 @@ workspaces strict-typecheck clean; build targets pass; released via Changesets o
 > For the full narrative — what's implemented, decisions taken, business model, and forward roadmap —
 > see **[`../01-product/IMPLEMENTATION_STATUS.md`](../01-product/IMPLEMENTATION_STATUS.md)**.
 
-Autonomous pipeline (scheduler-driven): ingest from **9 sources** (HN, GitHub, Hugging Face, arXiv,
-npm, PyPI, YouTube, Reddit, Product Hunt) → **cluster signals into trends** (embed + cosine, B-006) → score
+Autonomous pipeline (scheduler-driven): ingest from **10 sources** (HN, HN "Who is hiring?", GitHub,
+Hugging Face, arXiv, npm, PyPI, YouTube, Reddit, Product Hunt) → **cluster signals into trends** (embed + cosine, B-006) → score
 (10-dimensional composite, eval-gated B-009) → embed (pgvector) → momentum snapshots → auto-evaluate
 alerts → daily briefs (in-app **and emailed**) → per-org Slack/Discord digests. Discovery surfaces:
 keyword + semantic search, the **Golden Quadrant** (demand × supply) with demand mining, momentum,
@@ -65,7 +65,7 @@ trend comparison, and **related opportunities** (entity + embedding). Signal→S
 generators plus the **build-kit scaffold export**. Growth: SEO pages/sitemap/JSON-LD, OG images,
 `/report`, newsletter capture and send. Collaboration: **team seats/roles** with RBAC and audit.
 Programmatic: **public read API v1**, **API keys** with plan-aware rate limiting, and an **MCP
-server**. Monetization: **Free/Pro/Team, monthly or annual** — Stripe checkout, a signature-verified
+server**. Monetization: **Free/Pro/Team/Business, monthly or annual** — Stripe checkout, a signature-verified
 webhook, the Billing Portal, entitlements enforced at the write paths, and usage meters plus history
 (ADR-0004). Auth & compliance: Clerk (frontend, verifier, webhook, enforced sign-in) with API keys,
 RBAC (ADR-0002), Postgres **RLS** (ADR-0003, hardened), audit logging, and **GDPR export/erasure**
@@ -75,12 +75,14 @@ with no keys and each activates on config — see
 [../10-setup/ENV_SETUP.md](../10-setup/ENV_SETUP.md) and
 [../10-setup/RUNNING_LOCALLY.md](../10-setup/RUNNING_LOCALLY.md).
 
-The former "next up" trio all shipped: alert **email delivery** (`deliver-alerts` job +
-`Notification.emailedAt`), the **RSS/Atom feed** (`/feed.xml`), and the public **`/changelog`**. Next up
-(see IMPLEMENTATION_STATUS §7 and [MILESTONES](MILESTONES.md) M14): retention + revenue levers — a per-org
-personalised weekly digest, referral loop, and new leading-indicator sources (hiring, funding). Remaining
-**by design**: Langfuse tracing (B-007, keys-gated) and the deferred major migrations — Prisma 7 (B-025)
-and TypeScript 6 (B-026).
+The former "next up" items all shipped: alert **email delivery** (`deliver-alerts` job +
+`Notification.emailedAt`), the **RSS/Atom feed** (`/feed.xml`), the public **`/changelog`**, and the M14
+retention/revenue levers — the per-org **personalised weekly digest**, the **referral loop**, the
+**`/start` onboarding checklist**, the **HN hiring** source (10th), and a **Business tier**. Next up (see
+[MILESTONES](MILESTONES.md) M15): moat + expansion — competitor/funding/market dashboards, model/prompt/MCP
+tracking, a browser extension — genuine future scope, uncommitted until it enters "Now" with acceptance
+criteria. Remaining **by design**: Langfuse tracing (B-007, keys-gated) and the deferred major
+migrations — Prisma 7 (B-025) and TypeScript 6 (B-026).
 
 ## Working agreements (apply every phase)
 
