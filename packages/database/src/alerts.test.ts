@@ -18,6 +18,8 @@ import {
   unreadNotificationCount,
   markNotificationRead,
   markAllNotificationsRead,
+  listPendingEmailNotifications,
+  markNotificationsEmailed,
 } from "./notifications";
 
 describe("alertMatches (pure)", () => {
@@ -137,5 +139,37 @@ describe.skipIf(!enabled)("alerts engine (integration)", () => {
     const { updated } = await markAllNotificationsRead(orgA);
     expect(updated).toBeGreaterThanOrEqual(0);
     expect(await unreadNotificationCount(orgA)).toBe(0);
+  });
+
+  it("queues only EMAIL-channel notifications for delivery, and marks them sent", async () => {
+    const { orgId, workspaceId } = await tenant();
+    const tId = `trend-${randomUUID().slice(0, 8)}`;
+    const wl = await createWatchlist(orgId, { workspaceId, name: "email-alerts" });
+    await addWatchlistItem(orgId, { watchlistId: wl.id, targetType: "TREND", targetId: tId });
+    // One EMAIL alert and one IN_APP alert on the same watched trend.
+    await createAlert(orgId, {
+      watchlistId: wl.id,
+      trigger: { type: "NEW_TREND" },
+      channel: "EMAIL",
+      cadence: "INSTANT",
+    });
+    await createAlert(orgId, {
+      watchlistId: wl.id,
+      trigger: { type: "NEW_TREND" },
+      channel: "IN_APP",
+      cadence: "INSTANT",
+    });
+    const fired = await evaluateTrendForOrg(orgId, { trendId: tId, title: "T", scores: {} });
+    expect(fired).toHaveLength(2); // both alerts wrote a notification
+
+    // Only the EMAIL-channel one is pending delivery.
+    const pending = await listPendingEmailNotifications(orgId, 50);
+    expect(pending).toHaveLength(1);
+
+    const { updated } = await markNotificationsEmailed(orgId, [pending[0]!.id]);
+    expect(updated).toBe(1);
+    // Idempotent: nothing left to deliver, and re-marking is a no-op.
+    expect(await listPendingEmailNotifications(orgId, 50)).toHaveLength(0);
+    expect((await markNotificationsEmailed(orgId, [pending[0]!.id])).updated).toBe(0);
   });
 });

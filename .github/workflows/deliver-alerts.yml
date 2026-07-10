@@ -1,0 +1,49 @@
+# Alert email delivery: email undelivered EMAIL-channel alert notifications to each org's members.
+# Runs hourly and on manual dispatch. No-ops (safe) unless RESEND_API_KEY is set. Reuses
+# DEMO_DATABASE_URL (+ APP_DATABASE_URL for RLS).
+#
+# Secrets: DEMO_DATABASE_URL, APP_DATABASE_URL, RESEND_API_KEY, and (recommended) NEWSLETTER_FROM
+# (a verified Resend sender), NEXT_PUBLIC_SITE_URL.
+name: deliver-alerts
+
+on:
+  schedule:
+    - cron: "15 * * * *" # hourly at :15
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Preview counts only (no send)"
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: deliver-alerts
+  cancel-in-progress: false
+
+jobs:
+  deliver:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Deliver alert emails
+        env:
+          DATABASE_URL: ${{ secrets.DEMO_DATABASE_URL }}
+          APP_DATABASE_URL: ${{ secrets.APP_DATABASE_URL }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          NEWSLETTER_FROM: ${{ secrets.NEWSLETTER_FROM }}
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          RESEND_DRY: ${{ inputs.dry_run && '1' || '' }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::warning::DEMO_DATABASE_URL not set — skipping."
+            exit 0
+          fi
+          pnpm --filter @aioi/database exec prisma migrate deploy
+          pnpm exec tsx scripts/deliver-alerts.ts

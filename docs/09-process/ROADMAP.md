@@ -29,10 +29,10 @@ Legend: ✅ complete · 🟡 in progress · ⬜ not started
 | 17  | Folder Structure         | monorepo skeleton (`apps/ services/ packages/ infra/`)                 | ✅                                      |
 | 18  | Development Standards    | `08-quality/CODE_GUIDELINES.md`, `CLAUDE.md`                           | ✅                                      |
 | 19  | CI/CD                    | `.github/workflows/ci.yml` (baseline); full `06-infra/CICD.md` pending | 🟡                                      |
-| 20  | Documentation            | full `docs/` set + `API_DOCUMENTATION`                                 | 🟡 (foundation done)                    |
+| 20  | Documentation            | full `docs/` set + `API_DOCUMENTATION`                                 | 🟡 (docs set + IMPLEMENTATION_STATUS)   |
 | 21  | Phase Planning           | this file + `MILESTONES.md`                                            | 🟡                                      |
 | 22  | Sprint Planning          | `09-process/SPRINT_PLAN.md`, `BACKLOG.md`                              | ✅                                      |
-| 23  | Implementation           | code in `apps/`, `services/`, `packages/`                              | 🟡 (first vertical slice done)          |
+| 23  | Implementation           | code in `apps/`, `services/`, `packages/`                              | 🟡 (core loop + growth + monetization)  |
 | 24  | Testing                  | test suites + `08-quality/TESTING_STRATEGY.md`                         | 🟡 (slice tested; strategy doc pending) |
 | 25  | Deployment               | `06-infra/DEPLOYMENT_GUIDE.md`                                         | ⬜                                      |
 | 26  | Monitoring               | `06-infra/OBSERVABILITY.md`                                            | ⬜                                      |
@@ -46,23 +46,36 @@ legal templates (privacy/terms/cookie), risk register, changelog.
 
 ## Current position
 
-**Phases 1–22 complete; Phase 23 implementation feature-complete and released.** The platform runs
-end-to-end and renders in the browser. **162 tests green; all 24 workspaces strict-typecheck clean;
-released via Changesets on `main`.**
+**Phases 1–22 complete; Phase 23 implementation feature-complete across the core loop, growth
+engine, collaboration, programmatic access, and a full three-tier monetization surface.** The
+platform runs end-to-end and renders in the browser. **262 tests green; all workspaces
+strict-typecheck clean; 19 build targets pass; released via Changesets on `main`.**
 
-Autonomous pipeline (scheduler-driven): ingest (live HN) → **cluster signals → trends** (embed +
-cosine, B-006) → score (10-dim + composite, eval-gated B-009) → embed (pgvector) → auto-evaluate
-alerts → daily briefs (in-app **and emailed**). Product surfaces: keyword + semantic search,
-watchlists, alerts/notifications, action-plan generators, briefs, billing (Stripe checkout +
-webhooks). Auth & compliance: Clerk (frontend + verifier + webhook + enforced sign-in) + API keys,
-RBAC (ADR-0002), Postgres **RLS** (ADR-0003, hardened), audit logging, **GDPR export/erasure** (B-023).
-Foundation: `@aioi/ui` design system, Redis cache, CI/CD, GitFlow. Every external integration (Clerk,
-Stripe, Resend, LiteLLM) is behind an adapter+Stub, so CI stays green with no keys and each activates
-on config — see [../10-setup/ENV_SETUP.md](../10-setup/ENV_SETUP.md) and
+> For the full narrative — what's implemented, decisions taken, business model, and forward roadmap —
+> see **[`../01-product/IMPLEMENTATION_STATUS.md`](../01-product/IMPLEMENTATION_STATUS.md)**.
+
+Autonomous pipeline (scheduler-driven): ingest from **9 sources** (HN, GitHub, Hugging Face, arXiv,
+npm, PyPI, YouTube, Reddit, Product Hunt) → **cluster signals into trends** (embed + cosine, B-006) → score
+(10-dimensional composite, eval-gated B-009) → embed (pgvector) → momentum snapshots → auto-evaluate
+alerts → daily briefs (in-app **and emailed**) → per-org Slack/Discord digests. Discovery surfaces:
+keyword + semantic search, the **Golden Quadrant** (demand × supply) with demand mining, momentum,
+trend comparison, and **related opportunities** (entity + embedding). Signal→Shipped: action-plan
+generators plus the **build-kit scaffold export**. Growth: SEO pages/sitemap/JSON-LD, OG images,
+`/report`, newsletter capture and send. Collaboration: **team seats/roles** with RBAC and audit.
+Programmatic: **public read API v1**, **API keys** with plan-aware rate limiting, and an **MCP
+server**. Monetization: **Free/Pro/Team, monthly or annual** — Stripe checkout, a signature-verified
+webhook, the Billing Portal, entitlements enforced at the write paths, and usage meters plus history
+(ADR-0004). Auth & compliance: Clerk (frontend, verifier, webhook, enforced sign-in) with API keys,
+RBAC (ADR-0002), Postgres **RLS** (ADR-0003, hardened), audit logging, and **GDPR export/erasure**
+(B-023). Foundation: `@aioi/ui` design system, Redis cache, CI/CD, GitFlow. Every external integration
+(Clerk, Stripe, Resend, LiteLLM, Slack/Discord) sits behind an adapter plus Stub, so CI stays green
+with no keys and each activates on config — see
+[../10-setup/ENV_SETUP.md](../10-setup/ENV_SETUP.md) and
 [../10-setup/RUNNING_LOCALLY.md](../10-setup/RUNNING_LOCALLY.md).
 
-Remaining (by design): Langfuse tracing (B-007, keys-gated) and the deferred major migrations —
-Prisma 7 (B-025) and TypeScript 6 (B-026).
+Next up (see IMPLEMENTATION_STATUS §7): alert **email delivery** (needs a migration), an **RSS/Atom
+feed**, and a public **`/changelog`**. Remaining by design: Langfuse tracing (B-007, keys-gated) and
+the deferred major migrations — Prisma 7 (B-025) and TypeScript 6 (B-026).
 
 ## Working agreements (apply every phase)
 

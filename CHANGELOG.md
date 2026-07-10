@@ -11,6 +11,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Docs: implementation status + ADR-0004** — a new `docs/01-product/IMPLEMENTATION_STATUS.md`
+  (what's built, decisions, business model, forward roadmap), `ADR-0004` (billing & entitlements
+  architecture), and refreshed ROADMAP current-position + BACKLOG to match the shipped monetization
+  wave.
 - **Landing page refresh** — a sharper USP hero (“See what to build before it’s a trend”), the
   three differentiation pillars, a feature grid (Golden Quadrant, momentum, build kit, entities, API+MCP,
   digests), a 5-step pipeline, 8 sources, and an API CTA.
@@ -24,6 +28,27 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **PyPI source** — a 9th connector ingesting the newest AI-relevant packages from the official,
+  keyless PyPI RSS feed (a brand-new AI package is a leading indicator; PyPI has no popularity search,
+  so we filter the newest-packages feed by AI keywords). New `pypi` connector + `runPypiIngestion`,
+  wired into the refresh pipeline; appears in the source filter automatically.
+
+- **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
+  `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /
+  `markNotificationsEmailed` helpers, an alert-email builder in the notification service, and a
+  `scripts/deliver-alerts.ts` job on an hourly `deliver-alerts.yml` workflow (gated on
+  `RESEND_API_KEY`, dry-run supported). Emails deep-link to the trend; best-effort + idempotent.
+- **Public "What's new" page** (`/changelog`) — curated, user-facing product updates grouped by
+  month with New/Improved/Fixed tags (a separate surface from this engineering changelog). Linked
+  from the nav + sitemap; points to the RSS feed.
+- **Public RSS feed** (`/feed.xml`) — an RSS 2.0 feed of the newest scored opportunities (title,
+  link, opportunity score, build idea, `pubDate`) from a new `listTrendFeed` query, with feed-reader
+  autodiscovery in the document head. A distribution channel for readers + automation alongside the
+  API/MCP.
+- **Related opportunities** on the trend page — a new `relatedTrends` query finds the
+  embedding-nearest trends (pgvector `<=>`, excluding itself); the trend detail "Related" section
+  now shows shared-entity matches first and fills with semantically-similar trends, so even
+  sparsely-tagged trends surface relevant neighbours.
 
 - **API usage history sparkline** on `/billing` — a 14-day SVG sparkline of daily API requests
   (summed across the org's keys) with the running total, from a new `getApiUsageHistory` helper that

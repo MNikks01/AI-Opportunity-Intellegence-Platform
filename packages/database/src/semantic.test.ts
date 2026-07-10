@@ -2,7 +2,13 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Score, TrendLike } from "@aioi/shared";
 import { prisma } from "./client";
-import { persistScoredTrend, semanticSearchTrends } from "./repositories";
+import {
+  persistScoredTrend,
+  semanticSearchTrends,
+  relatedTrends,
+  getTrendBySlug,
+  listTrendFeed,
+} from "./repositories";
 
 // Integration — needs a live Postgres with pgvector. persistScoredTrend backfills the embedding
 // (StubEmbedder, deterministic), so a query equal to a trend's embedded text is its nearest neighbor.
@@ -53,5 +59,26 @@ describe.skipIf(!hasDb)("semanticSearchTrends (integration)", () => {
 
   it("returns empty for a blank query", async () => {
     expect(await semanticSearchTrends("   ")).toHaveLength(0);
+  });
+
+  it("listTrendFeed returns newest-first items with the feed shape", async () => {
+    const feed = await listTrendFeed(50);
+    expect(feed.length).toBeGreaterThanOrEqual(2);
+    // Newest-first: createdAt is non-increasing.
+    for (let i = 1; i < feed.length; i++) {
+      expect(feed[i - 1]!.createdAt.getTime()).toBeGreaterThanOrEqual(feed[i]!.createdAt.getTime());
+    }
+    const item = feed.find((f) => f.slug === target.slug)!;
+    expect(item).toBeDefined();
+    expect(typeof item.title).toBe("string");
+    expect(item.opportunity).toBe(70); // the seeded opportunity score
+  });
+
+  it("relatedTrends returns nearest neighbours, excluding the trend itself", async () => {
+    const self = await getTrendBySlug(target.slug);
+    const related = await relatedTrends(self!.id, 5);
+    expect(related.some((t) => t.id === self!.id)).toBe(false); // never itself
+    expect(related.length).toBeGreaterThan(0); // other seeded trends are embedded
+    expect(Array.isArray(related[0]!.scores)).toBe(true); // TrendView shape
   });
 });

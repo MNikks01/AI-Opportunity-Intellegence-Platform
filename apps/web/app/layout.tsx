@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   description: "Discover AI trends before everyone else. Validate opportunities. Build faster.",
   openGraph: { siteName: "AI Opportunity Intelligence", type: "website" },
   twitter: { card: "summary" },
+  alternates: {
+    types: { "application/rss+xml": "/feed.xml" },
+  },
 };
 
 // Ensure correct scaling on phones/tablets (device-width, no forced zoom).
@@ -52,6 +55,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/team">Team</a>
             <a href="/pricing">Pricing</a>
             <a href="/billing">Billing</a>
+            <a href="/changelog">What&rsquo;s new</a>
             <a href="/sources">Sources</a>
             {clerkEnabled && <AuthControls />}
           </nav>
