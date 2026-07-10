@@ -25,8 +25,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   three differentiation pillars, a feature grid (Golden Quadrant, momentum, build kit, entities, API+MCP,
   digests), a 5-step pipeline, 8 sources, and an API CTA.
 - deps: adopt safe major dependency bumps validated by CI — turbo 2.10, @types/node 26, pino 10,
-  next 16, lint-staged 17, @commitlint/{cli,config-conventional} 21, zod 4, eslint 10. (TypeScript 6
-  held back — fails typecheck; tracked as B-026.)
+  next 16, lint-staged 17, @commitlint/{cli,config-conventional} 21, zod 4, eslint 10.
+- **TypeScript 5→6 (B-026)** — bumped `typescript` to ^6.0.3 across the workspace. TS 6 requires an
+  explicit `rootDir` when emitting (error TS5011), so each emitting package/service tsconfig now sets
+  `rootDir`/`outDir` locally (the shared preset can't — extends-relative paths anchor to the preset).
+  Also turned off core `no-undef` in the shared ESLint config (typescript-eslint 8.x no longer disables
+  it under TS 6; `tsc` already resolves undefined identifiers). Typecheck/lint/build/tests all green.
 
 ### Fixed
 - **CSS syntax fix** — a merge-introduced unbalanced brace in `globals.css` (after the referrals

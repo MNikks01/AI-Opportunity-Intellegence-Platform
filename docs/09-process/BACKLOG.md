@@ -43,7 +43,7 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 | B-022 | Audit logging middleware (all mutations)                                                                 | E9    | 3   | ✅                                                                                                  |
 | B-023 | GDPR export/delete jobs                                                                                  | E9    | 5   | done (export + hard delete + RLS hardening)                                                         |
 | B-025 | Prisma 5→7 migration (breaking client/generator; ignored in dependabot until done)                       | infra | 5   | ⬜                                                                                                  |
-| B-026 | TypeScript 5→6 migration (fails typecheck; ignored in dependabot until done)                             | infra | 3   | ⬜                                                                                                  |
+| B-026 | TypeScript 5→6 migration (fails typecheck; ignored in dependabot until done)                             | infra | 3   | ✅ (bumped to ^6.0.3; per-package rootDir for TS5011; no-undef off in shared eslint)                |
 | B-027 | Runtime connects as a non-superuser DB role (`aioi_app`) + `APP_DATABASE_URL` so RLS enforces (ADR-0003) | infra | 3   | ✅                                                                                                  |
 
 ## Growth + monetization wave (R1.5 — shipped since B-023)
