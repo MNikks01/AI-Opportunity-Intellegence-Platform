@@ -11,6 +11,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Local dev env-link + setup-doc refresh** — added `apps/web/link-root-env.mjs` (idempotent,
+  keyless-safe; wired into `dev`/`build`/`start`) so Next.js loads the monorepo-root `.env` in every
+  runtime — the file `DEPLOYMENT_GUIDE.md` referenced but that was never committed. Also refreshed
+  `RUNNING_LOCALLY.md` to current reality (288 tests; 10 ingestion connectors; the scoring job). Salvaged
+  the useful bits from the abandoned `fix/clerk-next16-proxy` / `fix/local-dev-onboarding` branches.
 - **deps: Clerk majors — `@clerk/nextjs` 6→7 + `@clerk/backend` 1→3** — the only breaking changes were in
   `apps/web/app/layout.tsx`: Clerk 7 removed the `<SignedIn>`/`<SignedOut>` control components (use
   `<Show when="signed-in">` / `<Show when="signed-out">`) and moved `afterSignOutUrl` off `<UserButton>`

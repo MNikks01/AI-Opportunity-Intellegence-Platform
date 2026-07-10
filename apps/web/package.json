@@ -4,9 +4,9 @@
   "private": true,
   "description": "Authenticated product app (dashboards, trend detail, workspace).",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node link-root-env.mjs && next dev",
+    "build": "node link-root-env.mjs && next build",
+    "start": "node link-root-env.mjs && next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
