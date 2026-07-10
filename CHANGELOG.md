@@ -11,6 +11,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **Docs: Prisma 7 reconcile** — `DEPLOYMENT_GUIDE.md` and `CICD.md` no longer describe the obsolete
+  `binaryTargets = ["native","rhel-openssl-3.0.x"]` requirement. Under Prisma 7 the client runs through
+  the `@prisma/adapter-pg` driver adapter (no query-engine binary), and connection URLs live in
+  `prisma.config.ts` / the runtime adapter rather than `schema.prisma`.
 - **Docs: closed roadmap phases 19–27** — added the closing-phase deliverables so documentation matches
   the shipped system: `06-infra/CICD.md`, `08-quality/TESTING_STRATEGY.md`, `06-infra/DEPLOYMENT_GUIDE.md`,
   `06-infra/OBSERVABILITY.md`, `02-architecture/SCALABILITY_PLAN.md`, and `09-process/MILESTONES.md`.
