@@ -15,6 +15,9 @@ export const metadata: Metadata = {
   description: "Discover AI trends before everyone else. Validate opportunities. Build faster.",
   openGraph: { siteName: "AI Opportunity Intelligence", type: "website" },
   twitter: { card: "summary" },
+  alternates: {
+    types: { "application/rss+xml": "/feed.xml" },
+  },
 };
 
 // Ensure correct scaling on phones/tablets (device-width, no forced zoom).
