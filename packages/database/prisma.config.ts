@@ -14,7 +14,8 @@ import { defineConfig } from "prisma/config";
  * configured. A real `DATABASE_URL` is required for `migrate`/`db execute` (they connect).
  */
 for (const p of [resolve(process.cwd(), "../../.env"), resolve(process.cwd(), ".env")]) {
-  if (existsSync(p)) loadEnv({ path: p });
+  // `quiet` silences dotenv 17's promotional startup banner so Prisma CLI output stays clean.
+  if (existsSync(p)) loadEnv({ path: p, quiet: true });
 }
 
 export default defineConfig({
