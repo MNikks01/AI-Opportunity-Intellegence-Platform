@@ -31,9 +31,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
-- **Dormant-source indicator** on `/sources` — the full connector catalog with each source's
-  status: **Live** (count), **Idle** (awaiting next run), or **Needs setup** (names the env var), so
-  operators see which key-gated sources (Reddit/YouTube/Product Hunt) are dormant and why.
+- **Source observability on `/sources`** — the full connector catalog with a **data-driven** status
+  per source: **Live** (count), **Failing** (with the connector's actual error), **Idle**, or **Not set
+  up**. Failed ingestion passes are now recorded (`recordFailedIngestionRun`; error surfaced via
+  `getLatestRuns`), so a configured-but-broken source (e.g. an expired token) shows *why* it produced
+  nothing instead of silently reading zero. Status no longer guesses the web app's env (the cron owns
+  the keys).
 - **Report PDF export** — the State-of-AI report (`/report`) gains a **Save as PDF** button and a
   print-optimized stylesheet (hides app chrome, renders on white, avoids awkward page breaks) plus a
   dateline, so teams can export a clean, dated, shareable PDF. Dependency-free (browser print-to-PDF).

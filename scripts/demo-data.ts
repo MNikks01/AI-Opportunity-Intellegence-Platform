@@ -32,14 +32,20 @@ import {
   generateDailyBrief,
   recordTrendSnapshots,
   getOrgIntegration,
+  recordFailedIngestionRun,
 } from "../packages/database/src/index";
 
-/** Run one source; a failure (bad key, rate limit) is logged and skipped so others still run. */
+/**
+ * Run one source; a failure (bad key, rate limit, expired token) is logged, recorded as a FAILED
+ * ingestion run (so /sources shows *why* it produced nothing), and skipped so other sources still run.
+ */
 async function ingest(name: string, fn: () => Promise<unknown>): Promise<void> {
+  const startedAt = new Date();
   try {
     console.log(`  ${name}:`, await fn());
   } catch (e) {
     console.log(`  ${name}: skipped (${e instanceof Error ? e.message : String(e)})`);
+    await recordFailedIngestionRun(name, e, startedAt);
   }
 }
 

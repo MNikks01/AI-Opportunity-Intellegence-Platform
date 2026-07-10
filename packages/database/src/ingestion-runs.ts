@@ -35,9 +35,37 @@ export async function recordIngestionRun(
   }
 }
 
+/**
+ * Record a FAILED ingestion pass with its error, so the /sources view can show why a (configured)
+ * source produced nothing — e.g. an expired token or a quota error. Best-effort.
+ */
+export async function recordFailedIngestionRun(
+  sourceKey: string,
+  error: unknown,
+  startedAt: Date = new Date(),
+): Promise<void> {
+  try {
+    const sourceId = await ensureSource(sourceKey);
+    const message = (error instanceof Error ? error.message : String(error)).slice(0, 300);
+    await prisma.ingestionRun.create({
+      data: {
+        sourceId,
+        status: "FAILED",
+        itemCount: 0,
+        error: message,
+        startedAt,
+        finishedAt: new Date(),
+      },
+    });
+  } catch (err) {
+    logger.warn({ err, source: sourceKey }, "failed to record failed ingestion run");
+  }
+}
+
 export interface LatestRun {
   status: string;
   itemCount: number;
+  error: string | null;
   finishedAt: Date | null;
 }
 
@@ -49,6 +77,7 @@ export async function getLatestRuns(): Promise<Map<string, LatestRun>> {
     select: {
       status: true,
       itemCount: true,
+      error: true,
       finishedAt: true,
       source: { select: { key: true } },
     },
@@ -56,7 +85,7 @@ export async function getLatestRuns(): Promise<Map<string, LatestRun>> {
   return new Map(
     runs.map((r) => [
       r.source.key,
-      { status: r.status, itemCount: r.itemCount, finishedAt: r.finishedAt },
+      { status: r.status, itemCount: r.itemCount, error: r.error, finishedAt: r.finishedAt },
     ]),
   );
 }

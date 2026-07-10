@@ -2229,6 +2229,12 @@ a.resource-link:hover {
 .source-chip.is-dormant {
   border-style: dashed;
 }
+.source-chip.is-failed .source-dot {
+  background: var(--danger);
+}
+.source-chip.is-failed .source-chip-status {
+  color: var(--danger);
+}
 .source-chip-body {
   display: flex;
   flex-direction: column;
