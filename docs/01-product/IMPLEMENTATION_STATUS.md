@@ -55,9 +55,9 @@ Grouped by product area. Each line is live in the codebase and covered by the ga
 
 ### 4.1 Core intelligence pipeline (the engine)
 
-- **9 official, legality-classified sources** — HackerNews, GitHub, Hugging Face, **arXiv**,
-  **npm**, **PyPI**, YouTube, Reddit, Product Hunt. Official/licensed APIs only; no ToS-violating
-  scraping.
+- **10 official, legality-classified sources** — HackerNews (incl. the monthly **Who's Hiring**
+  thread), GitHub, Hugging Face, **arXiv**, **npm**, **PyPI**, YouTube, Reddit, Product Hunt.
+  Official/licensed APIs only; no ToS-violating scraping.
 - **Clustering** — signals about the same thing are grouped into a trend by meaning (embeddings +
   greedy cosine).
 - **Scoring** — every trend rated on **10 opportunity dimensions** + a composite, evidence-grounded,
