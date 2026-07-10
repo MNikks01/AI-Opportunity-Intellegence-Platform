@@ -1954,6 +1954,13 @@ a.resource-link:hover {
   margin: 0 auto;
 }
 .referrals-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
 /* ---- Onboarding / get started ---- */
 .onboard {
   max-width: 680px;
@@ -2028,6 +2035,7 @@ a.resource-link:hover {
   color: var(--fg-muted);
   font-size: 0.875rem;
   margin: 16px 2px 0;
+}
 .onboard-head h1 {
   font-size: clamp(1.6rem, 4vw, 2.1rem);
   margin: 8px 0;
@@ -2186,4 +2194,68 @@ a.resource-link:hover {
     text-decoration: none;
     color: inherit;
   }
+}
+
+/* ---- Sources: connector status grid ---- */
+.source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 240px), 1fr));
+  gap: 10px;
+  margin: 0 0 12px;
+}
+.source-chip {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+}
+.source-chip .source-dot {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  margin-top: 5px;
+  background: var(--fg-muted);
+}
+.source-chip.is-live .source-dot {
+  background: var(--success);
+}
+.source-chip.is-dormant .source-dot {
+  background: var(--warning);
+}
+.source-chip.is-dormant {
+  border-style: dashed;
+}
+.source-chip-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.source-chip-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.source-chip-status {
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.source-chip.is-dormant .source-chip-status {
+  color: var(--warning);
+}
+.source-hint {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+  margin: 0 0 4px;
+  line-height: 1.5;
+}
+.source-hint code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-muted);
+  padding: 1px 5px;
+  border-radius: 5px;
 }

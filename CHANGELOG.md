@@ -23,11 +23,17 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   held back — fails typecheck; tracked as B-026.)
 
 ### Fixed
+- **CSS syntax fix** — a merge-introduced unbalanced brace in `globals.css` (after the referrals
+  block) had silently broken every rule after it (onboarding, referrals, report). Restored the
+  balance; those pages now style correctly again.
 - **Scheduled data refresh** — `scripts/demo-data.ts` imported `@aioi/database` by package name, which
   isn't linked into the repo-root `node_modules`, so it failed to resolve under `tsx` in CI
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Dormant-source indicator** on `/sources` — the full connector catalog with each source's
+  status: **Live** (count), **Idle** (awaiting next run), or **Needs setup** (names the env var), so
+  operators see which key-gated sources (Reddit/YouTube/Product Hunt) are dormant and why.
 - **Report PDF export** — the State-of-AI report (`/report`) gains a **Save as PDF** button and a
   print-optimized stylesheet (hides app chrome, renders on white, avoids awkward page breaks) plus a
   dateline, so teams can export a clean, dated, shareable PDF. Dependency-free (browser print-to-PDF).
