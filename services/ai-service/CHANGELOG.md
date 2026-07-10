@@ -1,5 +1,24 @@
 # @aioi/ai-service
 
+## 0.7.6
+
+### Patch Changes
+
+- Updated dependencies [eb1fc88]
+- Updated dependencies [e6dd752]
+- Updated dependencies [6a8f4d4]
+- Updated dependencies [b902d2c]
+- Updated dependencies [b80c3c5]
+- Updated dependencies [9d6d986]
+- Updated dependencies [7daf15f]
+- Updated dependencies [8a17bc7]
+- Updated dependencies [4011ff2]
+- Updated dependencies [7edad2e]
+- Updated dependencies [d3eec43]
+- Updated dependencies [7d8b33c]
+  - @aioi/database@0.24.0
+  - @aioi/ai-sdk@0.7.0
+
 ## 0.7.5
 
 ### Patch Changes

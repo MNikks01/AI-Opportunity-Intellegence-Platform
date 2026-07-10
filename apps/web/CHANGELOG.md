@@ -1,5 +1,92 @@
 # @aioi/web
 
+## 0.22.0
+
+### Minor Changes
+
+- a4f5de6: Annual billing option. Paid plans can now be billed annually at 10× the monthly rate (two months
+  free): shared PLAN_PRICING + monthlyEquivalent in @aioi/billing, a monthly/annual toggle on the
+  pricing and billing pages, and interval-aware Stripe checkout (STRIPE_PRICE_*_ANNUAL price ids;
+  interval threaded through CheckoutInput). Entitlements are unchanged by interval.
+- 97f8bf4: Business tier — a 4th plan (100 seats, 500k/day API, $299/mo) rounding out the ladder, following the
+  ADR-0004 entitlements pattern. New PLAN_ORDER / planRank; the billing page offers an upgrade to every
+  plan above the current one; pricing renders four tiers. SSO/enterprise controls are a follow-on.
+- 38f4aa5: Public "What's new" changelog page. A new `/changelog` renders curated, product-facing release
+  entries (grouped by month, New/Improved/Fixed tags), distinct from the engineering CHANGELOG. Linked
+  from the nav and sitemap, with a pointer to the RSS feed.
+- e6dd752: Source observability on /sources. The page now shows the full connector catalog with a data-driven
+  status per source — Live (count), Failing (with the connector's actual error), Idle, or Not set up.
+  Failed ingestion passes are now recorded (new recordFailedIngestionRun + error surfaced via
+  getLatestRuns), so a configured-but-broken source (e.g. an expired token) shows why it produced
+  nothing instead of silently reading zero. Also fixes a merge-introduced unbalanced brace in
+  globals.css that had broken all CSS after the referrals block.
+- 6a8f4d4: Enforce plan entitlements at the write paths. `createAlert` now enforces `maxAlerts` (Free 10)
+  like `createWatchlist` already did for `maxWatchlists`, throwing `PlanLimitError`. Semantic search
+  on `/trends` is gated on the `semanticSearch` entitlement (Free falls back to keyword with an
+  upgrade prompt). Blocked creates redirect back with a friendly "upgrade" banner instead of erroring.
+- 85c3423: Onboarding / activation checklist. A new `/start` "Get started" page shows a 4-step setup checklist
+  (create a watchlist, set an alert, create an API key, connect a team digest) with each step's done
+  state derived live from the org's data and a progress bar. Linked from the nav + sitemap; drives
+  activation toward the north-star (Weekly Acted-On Opportunities).
+- 9d6d986: Referral loop. Each org gets a shareable referral code (Organization.referralCode); a new org can
+  apply a code (referredByCode) and the referrer sees how many teams joined via their link. New
+  getOrCreateReferralCode / getReferralStats / applyReferralCode helpers + a /referrals page (link,
+  copy, stats, apply form). Full auto-capture at signup is a follow-on.
+- 7daf15f: Related opportunities on the trend page. New relatedTrends query finds embedding-nearest trends
+  (pgvector, excluding the trend itself); the trend detail "Related" section now shows shared-entity
+  matches first and fills with semantically-similar trends, so even sparsely-tagged trends surface
+  relevant neighbours.
+- e813087: Report PDF export. The State-of-AI report (/report) now has a "Save as PDF" button and a
+  print-optimized stylesheet (@media print hides the app chrome, renders on white, avoids awkward page
+  breaks) plus a dateline, so teams can export a clean, dated, shareable PDF. Dependency-free
+  (browser print-to-PDF).
+- 8a17bc7: Public RSS feed. A new `/feed.xml` RSS 2.0 route serves the newest scored opportunities (title, link,
+  opportunity score, build idea, pubDate) from a new `listTrendFeed` query, with feed-reader
+  autodiscovery via `<link rel="alternate" type="application/rss+xml">` in the document head. A
+  distribution channel for readers and automation, alongside the API/MCP surfaces.
+- 4011ff2: Stripe checkout & webhook for self-serve upgrades. The `/billing` "Upgrade to Pro" button opens
+  Stripe Checkout (or applies Pro directly in test mode); a signature-verified webhook is the source
+  of truth for plan changes, mapping subscription events → plan via pure, unit-tested helpers and
+  persisting the Stripe ids. Manage/cancel via the Stripe Billing Portal. Falls back to the offline
+  Stub when STRIPE_SECRET_KEY / STRIPE_PRICE_PRO are unset.
+- 7edad2e: Team tier + seat enforcement. New TEAM plan (25 seats, 200k/day API) alongside Free/Pro; every plan
+  now has a maxSeats entitlement (Free 1, Pro 3, Team 25) enforced at inviteMember (throws
+  PlanLimitError). Stripe checkout is plan-aware (Pro/Team prices; plan carried in metadata so the
+  webhook needs no price→plan table). Pricing page shows 3 tiers; billing offers per-plan upgrades;
+  the team page shows seat usage and blocks invites when full.
+- d3eec43: API usage history sparkline on /billing. New getApiUsageHistory helper aggregates the existing
+  per-day ApiKeyUsage rows into a zero-filled 14-day series (summed across the org's keys), rendered
+  as a small SVG sparkline with the 14-day total beneath the usage meters.
+- 7d8b33c: Usage-vs-limits panel on /billing. New countWatchlists / countAlerts helpers feed a set of usage
+  meters (watchlists, alerts, seats, busiest-key API today) that show consumption against the plan's
+  entitlements, colouring amber at ≥80% and red at the limit. Unlimited entitlements show a running
+  count with no cap.
+
+### Patch Changes
+
+- 509db1d: HN "Who is hiring?" job source (10th source). Reads the latest monthly Who-is-hiring thread via the
+  official keyless HN Algolia API and keeps AI/ML job posts — hiring is a leading indicator of demand,
+  and these flow through the normal clustering to add demand/momentum to the matching trend. New
+  hnhiring connector + runHnHiringIngestion, wired into the refresh pipeline.
+- 7686759: PyPI source — a 9th connector. Reads the official, keyless PyPI newest-packages RSS feed and keeps
+  the AI-relevant packages (a brand-new AI package is a leading indicator). New pypi connector +
+  runPypiIngestion, wired into the refresh pipeline; appears in the source filter automatically.
+- Updated dependencies [eb1fc88]
+- Updated dependencies [a4f5de6]
+- Updated dependencies [97f8bf4]
+- Updated dependencies [e6dd752]
+- Updated dependencies [6a8f4d4]
+- Updated dependencies [b80c3c5]
+- Updated dependencies [9d6d986]
+- Updated dependencies [7daf15f]
+- Updated dependencies [8a17bc7]
+- Updated dependencies [4011ff2]
+- Updated dependencies [7edad2e]
+- Updated dependencies [d3eec43]
+- Updated dependencies [7d8b33c]
+  - @aioi/database@0.24.0
+  - @aioi/billing@0.4.0
+
 ## 0.21.0
 
 ### Minor Changes
