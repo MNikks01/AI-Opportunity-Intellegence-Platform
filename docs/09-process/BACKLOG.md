@@ -46,12 +46,36 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 | B-026 | TypeScript 5→6 migration (fails typecheck; ignored in dependabot until done)                             | infra | 3   | ⬜                                                                                                  |
 | B-027 | Runtime connects as a non-superuser DB role (`aioi_app`) + `APP_DATABASE_URL` so RLS enforces (ADR-0003) | infra | 3   | ✅                                                                                                  |
 
+## Growth + monetization wave (R1.5 — shipped since B-023)
+
+Delivered as small PRs to `development` and released; see
+[`../01-product/IMPLEMENTATION_STATUS.md`](../01-product/IMPLEMENTATION_STATUS.md) §4 for the full
+inventory and the [CHANGELOG](../../CHANGELOG.md) `[Unreleased]` for per-PR notes.
+
+- **Sources:** arXiv + npm (now 8 total). **Momentum** snapshots + sparklines.
+- **Golden Quadrant** + demand mining; **trend comparison**; **related opportunities** (entity +
+  embedding).
+- **Build-kit scaffold export.**
+- **Growth engine:** SEO pages/sitemap/JSON-LD, OG images, `/report`, newsletter capture + weekly send.
+- **Collaboration:** team seats/roles + RBAC + audit; per-org Slack/Discord digest config.
+- **Programmatic:** public read API v1, API keys + plan-aware metering, MCP server.
+- **Monetization (ADR-0004):** Free/Pro/Team × monthly/annual, Stripe checkout + webhook + Portal,
+  entitlement enforcement at the write paths, usage meters + 14-day history.
+
+## Next up (queued, pre-decomposition)
+
+- **Alert email delivery** — deliver `EMAIL`-channel alert notifications via Resend; needs a
+  `Notification.emailedAt` migration + a delivery job/workflow (mirrors the newsletter send).
+- **RSS/Atom feed** of new high-opportunity trends (no migration).
+- **Public `/changelog`** product surface (R3) — curated release notes.
+- Make the Fastify API checkout interval-aware (currently monthly-Pro only).
+
 ## R2/R3 epics (not yet decomposed)
 
-Competitor/Funding/Market/Research dashboards · Model/Prompt/MCP tracking · Public API keys +
-metering · Browser extension · Slack/Discord/Telegram integrations · Weekly Reports + PDF export ·
-Team workspace + seats · Referral/Affiliate · Agent Marketplace · Admin/Org governance + SSO ·
-Blog/Help/Feedback/public Roadmap/Changelog.
+Competitor/Funding/Market/Research dashboards · Model/Prompt tracking · Browser extension · Telegram
+integration · Weekly Reports + PDF export · Referral/Affiliate · Agent Marketplace · Admin/Org
+governance + **SSO** + a **Business** tier · Blog/Help/Feedback/public Roadmap · PyPI + job-posts +
+funding sources.
 
 ## Grooming rules
 
