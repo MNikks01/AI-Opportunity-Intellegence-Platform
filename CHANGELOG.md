@@ -28,6 +28,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Referral loop** (`/referrals`) — each org gets a shareable referral code; a new org can apply
+  a code and the referrer sees how many teams joined via their link. New `Organization.referralCode`
+  / `referredByCode` (+ migration) and `getOrCreateReferralCode` / `getReferralStats` /
+  `applyReferralCode` helpers, with a copy-link + apply-code page. Auto-capture at signup is a follow-on.
 
 - **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
   `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /

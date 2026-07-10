@@ -1933,3 +1933,79 @@ a.resource-link:hover {
     gap: 12px;
   }
 }
+
+/* ---- Referrals ---- */
+.referrals {
+  max-width: 640px;
+  margin: 0 auto;
+}
+.referrals-eyebrow {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+.referrals-head h1 {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  margin: 8px 0;
+}
+.referrals-head p {
+  color: var(--fg-muted);
+  line-height: 1.6;
+  margin: 0 0 20px;
+}
+.referrals-notice {
+  margin: 0 0 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-muted);
+  font-size: 0.9rem;
+}
+.referrals-notice.is-ok {
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+}
+.referrals-card-title {
+  font-size: 1rem;
+  margin: 0 0 12px;
+}
+.referrals-link {
+  display: flex;
+  gap: 8px;
+}
+.referrals-link .team-input {
+  flex: 1;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.referrals-stats {
+  display: flex;
+  gap: 28px;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+.referrals-stat-num {
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  margin-right: 8px;
+}
+.referrals-stat-label {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+}
+.referrals-apply {
+  display: flex;
+  gap: 8px;
+}
+.referrals-apply .team-input {
+  flex: 1;
+  text-transform: uppercase;
+}
+.referrals-referred {
+  color: var(--fg-muted);
+  font-size: 0.875rem;
+  margin: 16px 2px 0;
+}

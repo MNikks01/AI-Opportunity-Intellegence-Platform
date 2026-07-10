@@ -29,9 +29,15 @@ model Organization {
   notifications Notification[]
   subscription  Subscription?
   integration   OrgIntegration?
+  /// This org's own shareable referral code (generated on demand).
+  referralCode   String?       @unique
+  /// The referral code that brought this org in (set once, at referral time).
+  referredByCode String?
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   deletedAt     DateTime?
+
+  @@index([referredByCode])
 }
 
 /// Per-org outbound integrations (B-034) — where the daily digest is delivered. Org-scoped config.
