@@ -28,6 +28,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Report PDF export** — the State-of-AI report (`/report`) gains a **Save as PDF** button and a
+  print-optimized stylesheet (hides app chrome, renders on white, avoids awkward page breaks) plus a
+  dateline, so teams can export a clean, dated, shareable PDF. Dependency-free (browser print-to-PDF).
 - **HN "Who is hiring?" source** — a 10th connector reading the latest monthly Who-is-hiring
   thread via the official, keyless HN Algolia API and keeping the AI/ML job posts (hiring is a
   leading indicator of demand). Posts flow through the normal clustering, adding demand/momentum to
