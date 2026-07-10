@@ -28,6 +28,11 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Personalized weekly digest** — a per-org weekly email of movement in *that org's* watched
+  trends (opportunity + momentum arrows) and new alert matches, distinct from the generic
+  newsletter. New watchlist-digest email builder + `scripts/weekly-digest.ts` on a weekly
+  `weekly-digest.yml` workflow (gated on `RESEND_API_KEY`, dry-run supported). Composed from existing
+  helpers — no migration. Orgs with no watched trends are skipped.
 
 - **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
   `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /
