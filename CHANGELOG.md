@@ -11,6 +11,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **deps: stripe 17→22 (major)** — bumped `stripe` in `services/api` + `apps/web`. Stripe 22 pins a new
+  API version, so the one breaking change was the typed `apiVersion` literal in `apps/web/app/lib/billing.ts`
+  (`2025-02-24.acacia` → `2026-06-24.dahlia`). `services/api` passes no `apiVersion`, so it was unaffected;
+  checkout/webhook/portal APIs are unchanged. Full gate green (typecheck/build/lint + 288 tests).
 - **deps: dotenv 16→17 (major)** — bumped `dotenv` (dev; used by `packages/database/prisma.config.ts`).
   The `config()` API is unchanged; added `quiet: true` to silence dotenv 17's new promotional startup
   banner so Prisma CLI output stays clean. Verified `prisma db execute`/`generate` + full gate.
