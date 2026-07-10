@@ -53,6 +53,13 @@ export {
   looksAiRelevant,
   type PypiItem,
 } from "./connectors/pypi";
+// Selective re-export: hnhiring shares `normalize` with the other connectors.
+export {
+  HN_HIRING_SOURCE_KEY,
+  fetchHiring,
+  looksAiHiring,
+  type HnHiringComment,
+} from "./connectors/hnhiring";
 export * from "./repository";
 export * from "./repository.prisma";
 
@@ -67,6 +74,7 @@ import { fetchVideos, youtubeConfigured } from "./connectors/youtube";
 import { fetchPapers } from "./connectors/arxiv";
 import { fetchPackages } from "./connectors/npm";
 import { fetchPackages as fetchPypiPackages } from "./connectors/pypi";
+import { fetchHiring } from "./connectors/hnhiring";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -136,6 +144,22 @@ export async function runPypiIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "pypi", ...result }, "ingestion pass complete");
   await recordIngestionRun("pypi", result, startedAt);
+  return result;
+}
+
+/**
+ * Run one HN "Who is hiring?" ingestion pass (latest thread's AI/ML job posts). Keyless, always safe
+ * to schedule — hiring is a leading indicator of demand for a capability.
+ */
+export async function runHnHiringIngestion(
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
+  const { records, skipped } = await fetchHiring();
+  const inserted = await repo.upsertMany(records);
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "hnhiring", ...result }, "ingestion pass complete");
+  await recordIngestionRun("hnhiring", result, startedAt);
   return result;
 }
 

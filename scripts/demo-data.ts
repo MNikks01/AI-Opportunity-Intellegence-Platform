@@ -15,6 +15,7 @@ import {
   runArxivIngestion,
   runNpmIngestion,
   runPypiIngestion,
+  runHnHiringIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -53,6 +54,7 @@ async function main() {
   await ingest("arxiv", () => runArxivIngestion(30));
   await ingest("npm", () => runNpmIngestion(30));
   await ingest("pypi", () => runPypiIngestion());
+  await ingest("hnhiring", () => runHnHiringIngestion());
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
