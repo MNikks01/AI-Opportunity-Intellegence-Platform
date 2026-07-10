@@ -9,6 +9,7 @@ import {
   PLAN_PRICING,
   monthlyEquivalent,
   isBillingInterval,
+  planRank,
 } from "./index";
 
 describe("entitlements", () => {
@@ -21,11 +22,19 @@ describe("entitlements", () => {
     expect(entitlementsFor("PRO").apiDailyQuota).toBe(50000);
   });
 
-  it("seats scale by plan (FREE 1 → PRO 3 → TEAM 25)", () => {
+  it("seats + quota scale up the ladder (FREE → PRO → TEAM → BUSINESS)", () => {
     expect(entitlementsFor("FREE").maxSeats).toBe(1);
     expect(entitlementsFor("PRO").maxSeats).toBe(3);
     expect(entitlementsFor("TEAM").maxSeats).toBe(25);
+    expect(entitlementsFor("BUSINESS").maxSeats).toBe(100);
     expect(entitlementsFor("TEAM").apiDailyQuota).toBe(200000);
+    expect(entitlementsFor("BUSINESS").apiDailyQuota).toBe(500000);
+    // Strictly increasing rank; each paid plan a real paid plan.
+    expect(planRank("FREE")).toBeLessThan(planRank("PRO"));
+    expect(planRank("PRO")).toBeLessThan(planRank("TEAM"));
+    expect(planRank("TEAM")).toBeLessThan(planRank("BUSINESS"));
+    expect(isPaidPlan("BUSINESS")).toBe(true);
+    expect(PLAN_PRICING.BUSINESS.annual).toBe(PLAN_PRICING.BUSINESS.monthly * 10);
   });
 
   it("unknown plans fall back to FREE; TEAM is a paid plan", () => {
