@@ -45,6 +45,14 @@ export {
 export { ARXIV_SOURCE_KEY, fetchPapers, parseAtom, type ArxivEntry } from "./connectors/arxiv";
 // Selective re-export: npm shares names (normalize) with hackernews.
 export { NPM_SOURCE_KEY, DEFAULT_NPM_QUERY, fetchPackages, type NpmObject } from "./connectors/npm";
+// Selective re-export: pypi shares names (fetchPackages/normalize) with npm — alias to disambiguate.
+export {
+  PYPI_SOURCE_KEY,
+  fetchPackages as fetchPypiPackages,
+  parseRss,
+  looksAiRelevant,
+  type PypiItem,
+} from "./connectors/pypi";
 export * from "./repository";
 export * from "./repository.prisma";
 
@@ -58,6 +66,7 @@ import { fetchTopPosts, productHuntConfigured } from "./connectors/producthunt";
 import { fetchVideos, youtubeConfigured } from "./connectors/youtube";
 import { fetchPapers } from "./connectors/arxiv";
 import { fetchPackages } from "./connectors/npm";
+import { fetchPackages as fetchPypiPackages } from "./connectors/pypi";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -111,6 +120,22 @@ export async function runNpmIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "npm", ...result }, "ingestion pass complete");
   await recordIngestionRun("npm", result, startedAt);
+  return result;
+}
+
+/**
+ * Run one PyPI ingestion pass (newest AI-relevant packages from the official RSS). Keyless, always
+ * safe to schedule — a brand-new AI package on PyPI is a leading indicator.
+ */
+export async function runPypiIngestion(
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
+  const { records, skipped } = await fetchPypiPackages();
+  const inserted = await repo.upsertMany(records);
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "pypi", ...result }, "ingestion pass complete");
+  await recordIngestionRun("pypi", result, startedAt);
   return result;
 }
 

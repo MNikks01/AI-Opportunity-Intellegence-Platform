@@ -33,6 +33,10 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   newsletter. New watchlist-digest email builder + `scripts/weekly-digest.ts` on a weekly
   `weekly-digest.yml` workflow (gated on `RESEND_API_KEY`, dry-run supported). Composed from existing
   helpers — no migration. Orgs with no watched trends are skipped.
+- **PyPI source** — a 9th connector ingesting the newest AI-relevant packages from the official,
+  keyless PyPI RSS feed (a brand-new AI package is a leading indicator; PyPI has no popularity search,
+  so we filter the newest-packages feed by AI keywords). New `pypi` connector + `runPypiIngestion`,
+  wired into the refresh pipeline; appears in the source filter automatically.
 
 - **Alert email delivery** — `EMAIL`-channel alerts now actually email: a new
   `Notification.emailedAt` column (+ migration), `listPendingEmailNotifications` /
