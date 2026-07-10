@@ -137,7 +137,7 @@ Run the test suite (needs the DB up + `.env` sourced):
 
 ```bash
 set -a; source .env; set +a
-pnpm test        # 162 tests; DB-backed tests use DATABASE_URL/APP_DATABASE_URL, others run hermetically
+pnpm test        # 288 tests; DB-backed tests use DATABASE_URL/APP_DATABASE_URL, others run hermetically
 ```
 
 Full quality gate (what CI runs): `pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build`.
@@ -148,13 +148,15 @@ Full quality gate (what CI runs): `pnpm format:check && pnpm lint && pnpm typech
 
 `@aioi/scheduler` registers repeatable BullMQ jobs (needs Redis):
 
-- **ingestion** — HackerNews → `Signal`, every 30 min.
+- **ingestion** — 10 connectors → `Signal` (HN, HN "Who is hiring?", GitHub, Hugging Face, arXiv, npm,
+  PyPI always; Reddit/Product Hunt/YouTube when their key is set), every 30 min–hourly.
 - **clustering** — unclustered signals → Trends (embed + cosine), hourly.
+- **scoring** — score freshly-clustered trends (10-dim opportunity scorecard), hourly.
 - **daily briefs** — generate + email per org, 07:00 UTC.
 
 To exercise the pipeline immediately instead of waiting for cron, use the seed script (step 6), or open
-a `tsx` REPL and call the job functions (`runIngestionJob`, `runClusteringJob`, `runDailyBriefsJob`)
-exported from `@aioi/scheduler`.
+a `tsx` REPL and call the exported job functions (`runIngestionJob`, `runClusteringJob`, `runScoringJob`,
+`runDailyBriefsJob`, …) from `@aioi/scheduler`.
 
 ---
 
