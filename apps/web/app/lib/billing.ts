@@ -39,7 +39,7 @@ export function planCheckoutAvailable(plan: PaidPlan, interval: BillingInterval)
 let client: Stripe | null = null;
 export function getStripe(): Stripe {
   if (!secret) throw new Error("STRIPE_SECRET_KEY is not set");
-  if (!client) client = new Stripe(secret, { apiVersion: "2025-02-24.acacia" });
+  if (!client) client = new Stripe(secret, { apiVersion: "2026-06-24.dahlia" });
   return client;
 }
 
