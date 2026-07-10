@@ -11,6 +11,9 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **deps: dotenv 16→17 (major)** — bumped `dotenv` (dev; used by `packages/database/prisma.config.ts`).
+  The `config()` API is unchanged; added `quiet: true` to silence dotenv 17's new promotional startup
+  banner so Prisma CLI output stays clean. Verified `prisma db execute`/`generate` + full gate.
 - **deps: safe minor/patch bumps** — `msw` 2.15, `prettier` 3.9, `typescript-eslint` 8.63,
   `turbo` 2.10.4, `@types/node` 26.1.1, `@commitlint/cli` 21.2.1 (root); `fastify` 5.10
   (`services/api`); `bullmq` 5.80 (`services/scheduler`). All within-major; full gate green
