@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import { afterAll, describe, expect, it } from "vitest";
 import { prisma } from "./client";
 import { withOrgContext } from "./rls";
@@ -64,7 +65,10 @@ describe.skipIf(!enabled)("RLS tenant isolation via the runtime role (integratio
     await withOrgContext(orgA, (tx) =>
       tx.workspace.create({ data: { organizationId: orgA, name: "closed" } }),
     );
-    const fresh = new PrismaClient({ datasources: { db: { url: process.env.APP_DATABASE_URL } } });
+    // Prisma 7: a distinct connection is made via its own driver adapter, not the removed `datasources`.
+    const fresh = new PrismaClient({
+      adapter: new PrismaPg({ connectionString: process.env.APP_DATABASE_URL }),
+    });
     try {
       const rows = await fresh.workspace.findMany({ where: { name: "closed" } }); // no app.current_org
       expect(rows).toHaveLength(0);

@@ -5,14 +5,14 @@
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
-  // "native" for local dev; "rhel-openssl-3.0.x" for serverless Linux runtimes (Vercel/Lambda) so the
-  // query engine binary exists in production. Add more targets here for other deploy platforms.
-  binaryTargets   = ["native", "rhel-openssl-3.0.x"]
+  // Prisma 7 runs queries through a driver adapter (@prisma/adapter-pg, see src/client.ts), so no
+  // native query-engine binary is shipped — this removes the old rhel-openssl-3.0.x serverless footgun.
 }
 
 datasource db {
   provider   = "postgresql"
-  url        = env("DATABASE_URL")
+  // Prisma 7: connection URLs live in prisma.config.ts (CLI/migrate) and the driver adapter (runtime),
+  // not here. `extensions` stays — it's schema metadata Migrate uses to manage Postgres extensions.
   extensions = [pgvector(map: "vector"), pgcrypto]
 }
 
