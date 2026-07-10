@@ -14,6 +14,7 @@ import {
   runYouTubeIngestion,
   runArxivIngestion,
   runNpmIngestion,
+  runPypiIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -51,6 +52,7 @@ async function main() {
   await ingest("youtube", () => runYouTubeIngestion(20));
   await ingest("arxiv", () => runArxivIngestion(30));
   await ingest("npm", () => runNpmIngestion(30));
+  await ingest("pypi", () => runPypiIngestion());
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
