@@ -82,8 +82,9 @@ changelogs. Needs `contents: write` + `pull-requests: write`. See
 1. **gitleaks on push only** — fails on `pull_request` without PR-write perms.
 2. **GitHub Actions "create/approve PRs"** must be enabled at the repo level or the Release workflow
    can't open the Version Packages PR (`PUT /actions/permissions/workflow`).
-3. **Prisma binary targets** — `["native","rhel-openssl-3.0.x"]` or the client crashes on Linux
-   runtimes (Vercel/CI).
+3. **Prisma 7 uses a driver adapter** (`@prisma/adapter-pg`), so there is no query-engine binary and no
+   `binaryTargets` to get right on Linux runtimes. Connection URLs live in `prisma.config.ts` (CLI /
+   `migrate`) and the runtime adapter — `prisma db execute` reads the config, not a `--url` flag.
 4. **Restricted DB role in CI** — grant `aioi_app` login so RLS is actually tested, not bypassed.
 5. **`--frozen-lockfile` everywhere** — reproducible installs; a drifted lockfile fails CI.
 6. **Default workflow permissions stay `read`**; jobs that need write request it explicitly at the job
