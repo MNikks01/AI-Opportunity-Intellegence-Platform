@@ -70,7 +70,7 @@ const FEATURES = [
 const STEPS = [
   {
     title: "Ingest",
-    text: "Pull launches, repos, models, papers, packages, videos & discussions from eight official sources — continuously.",
+    text: "Pull launches, repos, models, papers, packages, videos & discussions from nine official sources — continuously.",
   },
   {
     title: "Cluster",
@@ -93,6 +93,7 @@ const SOURCES = [
   "Hugging Face",
   "arXiv",
   "npm",
+  "PyPI",
   "YouTube",
   "Reddit",
   "Product Hunt",
