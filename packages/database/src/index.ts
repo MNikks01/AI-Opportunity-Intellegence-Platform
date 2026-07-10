@@ -59,6 +59,13 @@ export {
   type StripeSync,
 } from "./subscription";
 export {
+  getOrCreateReferralCode,
+  getReferralStats,
+  applyReferralCode,
+  type ReferralStats,
+  type ApplyReferralResult,
+} from "./referrals";
+export {
   entitlementsFor,
   PLAN_ENTITLEMENTS,
   PLANS,
