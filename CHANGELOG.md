@@ -11,6 +11,12 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Changed
+- **deps: Clerk majors — `@clerk/nextjs` 6→7 + `@clerk/backend` 1→3** — the only breaking changes were in
+  `apps/web/app/layout.tsx`: Clerk 7 removed the `<SignedIn>`/`<SignedOut>` control components (use
+  `<Show when="signed-in">` / `<Show when="signed-out">`) and moved `afterSignOutUrl` off `<UserButton>`
+  onto `<ClerkProvider>`. `clerkMiddleware`/`auth.protect()` (proxy.ts), `auth`/`currentUser` (dev-org),
+  and `verifyToken` (`@clerk/backend`, services/api) were all source-compatible. Web compiles; full gate
+  green (typecheck/build/lint + 288 tests).
 - **deps: stripe 17→22 (major)** — bumped `stripe` in `services/api` + `apps/web`. Stripe 22 pins a new
   API version, so the one breaking change was the typed `apiVersion` literal in `apps/web/app/lib/billing.ts`
   (`2025-02-24.acacia` → `2026-06-24.dahlia`). `services/api` passes no `apiVersion`, so it was unaffected;
