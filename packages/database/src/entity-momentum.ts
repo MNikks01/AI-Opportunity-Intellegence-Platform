@@ -93,6 +93,47 @@ export async function getEntityMomentumMap(
   return out;
 }
 
+export interface EntityLookup {
+  id: string;
+  type: $Enums.EntityType;
+  name: string;
+  linkedTrendCount: number;
+  momentum: EntityMomentum | null;
+  trends: { slug: string; title: string }[];
+}
+
+/**
+ * Look up a tracked entity by exact name (case-insensitive) — for the extension content script that
+ * recognizes a GitHub repo / Hugging Face model page. Returns its momentum + top linked trends, or null.
+ */
+export async function lookupTrackedEntity(name: string): Promise<EntityLookup | null> {
+  const q = name.trim();
+  if (!q) return null;
+  const entity = await prisma.entity.findFirst({
+    where: { type: { in: TRACKED_ENTITY_TYPES }, name: { equals: q, mode: "insensitive" } },
+    select: {
+      id: true,
+      type: true,
+      name: true,
+      _count: { select: { trends: true } },
+      trends: {
+        take: 3,
+        select: { trend: { select: { slug: true, title: true } } },
+      },
+    },
+  });
+  if (!entity) return null;
+  const momentum = (await getEntityMomentumMap([entity.id])).get(entity.id) ?? null;
+  return {
+    id: entity.id,
+    type: entity.type,
+    name: entity.name,
+    linkedTrendCount: entity._count.trends,
+    momentum,
+    trends: entity.trends.map((te) => ({ slug: te.trend.slug, title: te.trend.title })),
+  };
+}
+
 export interface TrackedEntity {
   id: string;
   type: $Enums.EntityType;

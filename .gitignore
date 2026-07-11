@@ -35,3 +35,6 @@ test-results/
 
 # Local Claude state (keep committed skills/config; ignore local overrides)
 .claude/settings.local.json
+
+# Extension packaged artifact
+apps/extension/aioi-extension.zip
