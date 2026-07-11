@@ -5,17 +5,21 @@
  */
 import { prisma } from "./client";
 
-// The ingestion connector's source key. Duplicated (not imported) to keep @aioi/database from depending
-// on the ingestion-service; kept in sync with SEC_EDGAR_SOURCE_KEY.
+// Funding source keys. Duplicated (not imported) to keep @aioi/database from depending on the
+// ingestion-service; kept in sync with the connectors. `crunchbase` (LICENSED) is inert until its key
+// is set, but is treated as a funding source here so it surfaces automatically once it starts ingesting.
 export const FUNDING_SOURCE_KEY = "sec-edgar";
+export const FUNDING_SOURCE_KEYS = ["sec-edgar", "crunchbase"];
 
-const TITLE_SUFFIX = / — private funding \(Form D\)$/;
+// Strip the connector's title suffix ("— private funding (Form D)" / "— raised … (Crunchbase)") to the
+// issuer name.
+const TITLE_SUFFIX = / — .*$/;
 
 /** Count each trend's funding signals (from the `sec-edgar` source). Keyed by trendId. */
 export async function getTrendFundingHits(trendIds: string[]): Promise<Map<string, number>> {
   if (trendIds.length === 0) return new Map();
   const rows = await prisma.trendSignal.findMany({
-    where: { trendId: { in: trendIds }, signal: { source: { key: FUNDING_SOURCE_KEY } } },
+    where: { trendId: { in: trendIds }, signal: { source: { key: { in: FUNDING_SOURCE_KEYS } } } },
     select: { trendId: true },
   });
   const hits = new Map<string, number>();
@@ -34,7 +38,7 @@ export interface FundingEvent {
 /** Recent AI funding events (newest first) with the trends each maps to — powers `/funding`. */
 export async function listRecentFunding(limit = 100): Promise<FundingEvent[]> {
   const rows = await prisma.signal.findMany({
-    where: { source: { key: FUNDING_SOURCE_KEY } },
+    where: { source: { key: { in: FUNDING_SOURCE_KEYS } } },
     orderBy: [{ publishedAt: "desc" }, { fetchedAt: "desc" }],
     take: limit,
     select: {

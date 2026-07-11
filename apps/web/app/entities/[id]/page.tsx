@@ -5,10 +5,16 @@ import {
   listTrendsForEntity,
   getEntitySeo,
   getEntityMomentumMap,
+  listWatchlists,
+  listWatchedTargetIds,
 } from "@aioi/database";
 import { Badge, MomentumTag } from "@aioi/ui";
 import { TYPE_LABELS } from "../page";
 import { getSiteUrl } from "../../lib/site";
+import { getDevOrg } from "../../lib/dev-org";
+import { EntityWatchToggle } from "./EntityWatchToggle";
+
+const TRACKED = new Set(["MODEL", "MCP_SERVER", "REPO"]);
 
 export const dynamic = "force-dynamic";
 
@@ -38,12 +44,26 @@ export default async function EntityDetailPage({ params }: { params: Promise<{ i
   const trends = await listTrendsForEntity(id);
   const momentum = (await getEntityMomentumMap([id])).get(id) ?? null;
 
+  // Watch state — only offered for tracked supply-side types (B-032).
+  const trackable = TRACKED.has(entity.type);
+  let watched = false;
+  if (trackable) {
+    const { organizationId } = await getDevOrg();
+    const wlId = (await listWatchlists(organizationId))[0]?.id;
+    if (wlId) watched = (await listWatchedTargetIds(organizationId, wlId, "ENTITY")).has(id);
+  }
+
   return (
     <main>
       <a href="/entities" style={{ fontSize: "0.8125rem", color: "var(--primary)" }}>
         ← Entities
       </a>
-      <h1 style={{ fontSize: "1.75rem", margin: "8px 0 4px" }}>{entity.name}</h1>
+      <div
+        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}
+      >
+        <h1 style={{ fontSize: "1.75rem", margin: "8px 0 4px" }}>{entity.name}</h1>
+        {trackable && <EntityWatchToggle entityId={id} watched={watched} />}
+      </div>
       <p style={{ color: "var(--fg-muted)", margin: "0 0 20px", display: "flex", gap: 10 }}>
         <Badge>{TYPE_LABELS[entity.type] ?? entity.type}</Badge>
         <span>

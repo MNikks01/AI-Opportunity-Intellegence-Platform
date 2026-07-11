@@ -15,6 +15,11 @@ export async function GET() {
       "GET /api/v1/opportunities":
         "The Golden-Quadrant 'build now' list (high demand, low supply).",
       "GET /api/v1/search": "Keyword search over scored trends. Query: q, limit (≤100).",
+      "GET /api/v1/entities":
+        "Tracked supply-side entities (models/MCP/repos) with momentum. Query: sort, limit.",
+      "GET /api/v1/entities/lookup":
+        "Look up a tracked entity (model/MCP/repo) by exact name. Query: name.",
+      "GET /api/v1/funding": "Recent AI funding events (SEC EDGAR + Crunchbase). Query: limit.",
     },
     auth: "Optional. Send 'Authorization: Bearer aioi_…' to raise the per-request limit (25 → 100) and a plan-based daily quota (Free 1,000/day, Pro 50,000/day). Create keys under Team.",
     docs: `${base}`,

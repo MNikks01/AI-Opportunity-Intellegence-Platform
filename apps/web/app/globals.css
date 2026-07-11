@@ -706,6 +706,66 @@ a.watch-btn {
   text-decoration: none;
 }
 
+/* Market dashboard (ADR-0006 B-037a) */
+.market-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+}
+.market-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+  text-decoration: none;
+  color: var(--fg);
+}
+.market-stat:hover {
+  border-color: var(--primary);
+}
+.market-stat.is-build {
+  border-left-color: #26a269;
+}
+.market-stat.is-crowded {
+  border-left-color: #e5a50a;
+}
+.market-stat.is-early {
+  border-left-color: var(--primary);
+}
+.market-stat.is-hype {
+  border-left-color: var(--fg-muted);
+}
+.market-stat-n {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.market-stat-l {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+}
+.market-cols {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  gap: 24px;
+}
+.market-h2 {
+  font-size: 1.125rem;
+  margin: 0 0 2px;
+}
+.market-sub {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+  margin: 0 0 12px;
+}
+.muted-note {
+  color: var(--fg-muted);
+  font-size: 0.8125rem;
+}
+
 /* Supply-side tracking (ADR-0005) */
 .entity-toolbar {
   display: flex;

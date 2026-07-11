@@ -90,13 +90,13 @@ Decomposed from the M15 "model/prompt/MCP tracking" milestone. Design: **[ADR-00
 no new data source, no legality gate. Track the AI supply side with the same momentum rigor as trends.
 **Shipped** (PR #250).
 
-| ID    | Item                                                                                      | Epic | SP  | Status |
-| ----- | ----------------------------------------------------------------------------------------- | ---- | --- | ------ |
-| B-028 | `EntitySnapshot` model + migration + per-run snapshot job (D1/D2)                         | E2   | 5   | ✅     |
-| B-029 | `getEntityMomentumMap` + `listTrackedEntities` repositories (D1/D3)                       | E2   | 5   | ✅     |
-| B-030 | HF/GitHub → `MODEL`/`REPO`/`MCP_SERVER` entity upserts + MCP detection (D2)               | E2   | 5   | ✅     |
-| B-031 | `/entities` momentum leaderboard + entity-detail sparkline (D3)                           | UI   | 5   | ✅     |
-| B-032 | (phase 2) watch + alert on a tracked entity, via existing watchlist/alert primitives (D4) | E4   | 5   | ⬜     |
+| ID    | Item                                                                                       | Epic | SP  | Status |
+| ----- | ------------------------------------------------------------------------------------------ | ---- | --- | ------ |
+| B-028 | `EntitySnapshot` model + migration + per-run snapshot job (D1/D2)                          | E2   | 5   | ✅     |
+| B-029 | `getEntityMomentumMap` + `listTrackedEntities` repositories (D1/D3)                        | E2   | 5   | ✅     |
+| B-030 | HF/GitHub → `MODEL`/`REPO`/`MCP_SERVER` entity upserts + MCP detection (D2)                | E2   | 5   | ✅     |
+| B-031 | `/entities` momentum leaderboard + entity-detail sparkline (D3)                            | UI   | 5   | ✅     |
+| B-032 | Watch + alert on a tracked entity (ENTITY_MOMENTUM trigger + pipeline eval + watch toggle) | E4   | 5   | ✅     |
 
 ## M15-B — Funding signal (SEC EDGAR Form D)
 
@@ -105,13 +105,14 @@ Decomposed from the M15 "competitor/funding dashboards" milestone. Design: **[AD
 public-domain — as a leading **demand** signal through the existing pipeline. **US-only in v1**; global
 (paid) funding is a separate future ADR. **Shipped** (PR #252).
 
-| ID    | Item                                                                                       | Epic | SP  | Status |
-| ----- | ------------------------------------------------------------------------------------------ | ---- | --- | ------ |
-| B-033 | `sec-edgar` Form D connector (EDGAR FTS + AI-keyword filter) + MSW tests + legality header | E2   | 8   | ✅     |
-| B-034 | Register the source (`OFFICIAL`) + wire into the refresh pipeline + `/sources`             | E2   | 3   | ✅     |
-| B-035 | Funding → demand-axis contribution in clustering/quadrant (integration-tested)             | E2   | 5   | ✅     |
-| B-036 | `/funding` surface: recent AI funding events + linked trends                               | UI   | 5   | ✅     |
-| B-037 | (v2) competitor/market dashboard; (later) global/paid funding source ADR                   | E2   | 8   | ⬜     |
+| ID     | Item                                                                                                                      | Epic | SP  | Status                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------- | ---- | --- | ------------------------------------------------------------------------------------------ |
+| B-033  | `sec-edgar` Form D connector (EDGAR FTS + AI-keyword filter) + MSW tests + legality header                                | E2   | 8   | ✅                                                                                         |
+| B-034  | Register the source (`OFFICIAL`) + wire into the refresh pipeline + `/sources`                                            | E2   | 3   | ✅                                                                                         |
+| B-035  | Funding → demand-axis contribution in clustering/quadrant (integration-tested)                                            | E2   | 5   | ✅                                                                                         |
+| B-036  | `/funding` surface: recent AI funding events + linked trends                                                              | UI   | 5   | ✅                                                                                         |
+| B-037a | Competitor/market dashboard (`/market` — quadrant split + rising supply + funding)                                        | UI   | 5   | ✅                                                                                         |
+| B-037b | Global funding — **Crunchbase** connector (LICENSED, key-gated), **[ADR-0008](../adr/ADR-0008-global-funding-source.md)** | E2   | 8   | ✅ built + gated (inert until `CRUNCHBASE_API_KEY`; auto-activates on a purchased license) |
 
 ## M15-C — Browser extension (MV3 popup)
 
@@ -119,12 +120,14 @@ Decomposed from the M15 "browser extension" milestone. Design: **[ADR-0007](../a
 (Accepted). An MV3 popup over the **existing deployed public API** (CORS-open) — no bespoke backend
 beyond one search route; new `apps/extension` built with **esbuild**. Distribution (Web Store) deferred.
 
-| ID    | Item                                                                                   | Epic | SP  | Status |
-| ----- | -------------------------------------------------------------------------------------- | ---- | --- | ------ |
-| B-038 | `GET /api/v1/search?q=` route + API index entry                                        | E2   | 2   | ✅     |
-| B-039 | `apps/extension` MV3 scaffold + esbuild build, wired into Turbo                        | UI   | 5   | ✅     |
-| B-040 | Popup UI (opportunities + search) + options (base URL, optional key); pure-logic tests | UI   | 5   | ✅     |
-| B-041 | (v2) content-script page recognition; (later) Web Store / AMO submission               | UI   | 8   | ⬜     |
+| ID     | Item                                                                                                                       | Epic | SP  | Status                                                         |
+| ------ | -------------------------------------------------------------------------------------------------------------------------- | ---- | --- | -------------------------------------------------------------- |
+| B-038  | `GET /api/v1/search?q=` route + API index entry                                                                            | E2   | 2   | ✅                                                             |
+| B-039  | `apps/extension` MV3 scaffold + esbuild build, wired into Turbo                                                            | UI   | 5   | ✅                                                             |
+| B-040  | Popup UI (opportunities + search) + options (base URL, optional key); pure-logic tests                                     | UI   | 5   | ✅                                                             |
+| B-041a | Content-script page recognition (GitHub/HF) + `/api/v1/entities/lookup`                                                    | UI   | 5   | ✅                                                             |
+| B-041b | Extension packaging (`package` → zip) + store-listing/privacy docs                                                         | UI   | 2   | ✅ (submission itself blocked on a publisher account + assets) |
+| B-042  | Deeper agent integrations — 4 new MCP tools (search/lookup_entity/rising/funding) + `/api/v1/entities` + `/api/v1/funding` | E2   | 8   | ✅                                                             |
 
 ## R2/R3 epics (not yet decomposed)
 

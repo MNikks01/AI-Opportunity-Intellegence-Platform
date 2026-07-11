@@ -32,6 +32,7 @@ export {
   evaluateTrendAllOrgs,
   type TrendEvent,
 } from "./alerts";
+export { entityMomentumMatches, evaluateEntityAlertsAllOrgs } from "./entity-alerts";
 export {
   listNotifications,
   unreadNotificationCount,
@@ -125,9 +126,11 @@ export {
   recordEntitySnapshots,
   getEntityMomentumMap,
   listTrackedEntities,
+  lookupTrackedEntity,
   type EntityMomentum,
   type TrackedEntity,
   type TrackedSort,
+  type EntityLookup,
 } from "./entity-momentum";
 export {
   classifyGitHubEntity,

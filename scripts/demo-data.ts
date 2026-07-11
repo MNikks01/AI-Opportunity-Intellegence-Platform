@@ -17,6 +17,7 @@ import {
   runPypiIngestion,
   runHnHiringIngestion,
   runSecEdgarIngestion,
+  runCrunchbaseIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -34,6 +35,7 @@ import {
   recordTrendSnapshots,
   recordEntitySnapshots,
   syncSupplyEntities,
+  evaluateEntityAlertsAllOrgs,
   getOrgIntegration,
   recordFailedIngestionRun,
 } from "../packages/database/src/index";
@@ -65,6 +67,7 @@ async function main() {
   await ingest("pypi", () => runPypiIngestion());
   await ingest("hnhiring", () => runHnHiringIngestion());
   await ingest("sec-edgar", () => runSecEdgarIngestion()); // no-op unless SEC_USER_AGENT is set
+  await ingest("crunchbase", () => runCrunchbaseIngestion()); // no-op unless CRUNCHBASE_API_KEY is set
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
@@ -80,6 +83,8 @@ async function main() {
   // Record a history point so momentum/trajectory accrues run over run (demand + supply side).
   console.log("snapshots…", await recordTrendSnapshots());
   console.log("entity snapshots…", await recordEntitySnapshots());
+  // Notify orgs whose watched entities (models / MCP / repos) are accelerating.
+  console.log("entity alerts…", await evaluateEntityAlertsAllOrgs());
 
   // Generate today's brief for the demo tenant so /briefs isn't empty on the live site.
   const { organizationId } = await bootstrapUser({

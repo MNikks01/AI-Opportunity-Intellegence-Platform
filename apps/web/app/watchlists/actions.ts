@@ -40,6 +40,29 @@ export async function toggleWatchAction(formData: FormData): Promise<void> {
   revalidatePath("/trends");
 }
 
+/**
+ * One-click watch toggle for a supply-side entity (model / MCP server / repo), used on entity detail.
+ * Adds/removes the entity on the org's primary watchlist (B-032).
+ */
+export async function toggleEntityWatchAction(formData: FormData): Promise<void> {
+  const { organizationId, workspaceId } = await getDevOrg();
+  if (!workspaceId) return;
+  const entityId = String(formData.get("entityId") ?? "");
+  if (!entityId) return;
+  const watched = String(formData.get("watched") ?? "") === "true";
+  const wl = await getOrCreatePrimaryWatchlist(organizationId, workspaceId);
+  if (watched) {
+    await removeWatchlistItemByTarget(organizationId, wl.id, "ENTITY", entityId);
+  } else {
+    await addWatchlistItem(organizationId, {
+      watchlistId: wl.id,
+      targetType: "ENTITY",
+      targetId: entityId,
+    });
+  }
+  revalidatePath(`/entities/${entityId}`);
+}
+
 /** Add a trend to a watchlist from the trend page, then land the user on that watchlist. */
 export async function watchTrendAction(formData: FormData): Promise<void> {
   const { organizationId } = await getDevOrg();
@@ -111,7 +134,9 @@ export async function createAlertAction(formData: FormData): Promise<void> {
           dimension: String(formData.get("dimension") ?? ""),
           gte: Number(formData.get("gte") ?? 0),
         }
-      : { type: "NEW_TREND" as const };
+      : type === "ENTITY_MOMENTUM"
+        ? { type: "ENTITY_MOMENTUM" as const, minDelta: 1 }
+        : { type: "NEW_TREND" as const };
   const parsed = createAlertSchema.safeParse({ watchlistId, trigger });
   if (!parsed.success) return;
   try {
