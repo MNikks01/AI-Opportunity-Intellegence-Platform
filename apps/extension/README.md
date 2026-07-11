@@ -33,7 +33,13 @@ Firefox: `about:debugging` → **This Firefox** → **Load Temporary Add-on** �
 - `src/api.ts` — pure logic (URL building, response mapping); unit-tested (`src/api.test.ts`).
 - `src/popup.ts` — DOM wiring (fetch + localStorage), bundled by `build.mjs` (esbuild) → `dist/popup.js`.
 
+## Content script (B-041a)
+
+On a **GitHub repo** or **Hugging Face model** page, the content script (`src/content.ts`) looks the
+entity up via `GET /api/v1/entities/lookup?name=` and, if AIOI tracks it, injects a small badge (linked
+trends + momentum) in the corner. Pure URL→name parsing lives in `src/content-api.ts` (unit-tested); it
+uses the production API base (a per-user base for the content script is a future refinement).
+
 ## Deferred (v2)
 
-A content script that recognizes GitHub / Hugging Face pages and shows AIOI's tracking for that entity,
-plus Chrome Web Store / AMO submission — see ADR-0007 §D2/§D5.
+Chrome Web Store / AMO submission — see ADR-0007 §D5.

@@ -126,9 +126,11 @@ export {
   recordEntitySnapshots,
   getEntityMomentumMap,
   listTrackedEntities,
+  lookupTrackedEntity,
   type EntityMomentum,
   type TrackedEntity,
   type TrackedSort,
+  type EntityLookup,
 } from "./entity-momentum";
 export {
   classifyGitHubEntity,

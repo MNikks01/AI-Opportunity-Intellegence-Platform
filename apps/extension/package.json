@@ -6,9 +6,10 @@
   "description": "Browser extension (MV3): AI opportunities in your toolbar, over the public API (ADR-0007).",
   "scripts": {
     "build": "node build.mjs",
+    "package": "node build.mjs && cd dist && zip -qr ../aioi-extension.zip . && echo 'packaged → apps/extension/aioi-extension.zip'",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "eslint .",
-    "clean": "rm -rf dist .turbo"
+    "clean": "rm -rf dist .turbo aioi-extension.zip"
   },
   "devDependencies": {
     "@aioi/eslint-config": "workspace:*",

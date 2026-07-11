@@ -7,5 +7,12 @@
     "default_popup": "popup.html",
     "default_title": "AI Opportunity Intelligence"
   },
+  "content_scripts": [
+    {
+      "matches": ["https://github.com/*", "https://huggingface.co/*", "https://hf.co/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
   "icons": {}
 }

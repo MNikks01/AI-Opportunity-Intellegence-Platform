@@ -11,8 +11,11 @@ rmSync(dist, { recursive: true, force: true });
 mkdirSync(dist, { recursive: true });
 
 await build({
-  entryPoints: [join(root, "src", "popup.ts")],
-  outfile: join(dist, "popup.js"),
+  entryPoints: {
+    popup: join(root, "src", "popup.ts"),
+    content: join(root, "src", "content.ts"),
+  },
+  outdir: dist,
   bundle: true,
   minify: true,
   format: "iife",
