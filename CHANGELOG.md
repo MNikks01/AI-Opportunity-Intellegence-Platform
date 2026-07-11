@@ -88,6 +88,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   it under TS 6; `tsc` already resolves undefined identifiers). Typecheck/lint/build/tests all green.
 
 ### Fixed
+- **Public API reachable without a Clerk session** — `proxy.ts` ran `auth.protect()` on *every* route when Clerk keys are set, which also gated `/api/v1/*` and the Stripe webhook, so anonymous callers (MCP server, browser extension, `curl`) were redirected to sign-in. A `createRouteMatcher` now carves out `/api/v1(.*)` (CORS-open; optional `aioi_…` bearer auth is still enforced per-route) and `/api/stripe/webhook` (signature-verified); all other routes still require auth. Verified on a Clerk-enabled build: `/api/v1/*` → 200 JSON anonymously, app pages → 307 to sign-in.
 - **CSS syntax fix** — a merge-introduced unbalanced brace in `globals.css` (after the referrals
   block) had silently broken every rule after it (onboarding, referrals, report). Restored the
   balance; those pages now style correctly again.
