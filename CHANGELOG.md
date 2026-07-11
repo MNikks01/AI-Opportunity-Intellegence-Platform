@@ -11,6 +11,13 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Added
+- **Funding signal (M15-B / ADR-0006)** — a new **SEC EDGAR Form D** source (US private funding rounds),
+  the demand-side counterpart to M15-A. A `sec-edgar` connector (EDGAR full-text search → Form D + AI
+  phrases; Zod-validated, idempotent, 429/403 backoff; keyless — no-ops without `SEC_USER_AGENT`) feeds
+  the existing pipeline. Funding filings **lift a trend's demand axis** on the Golden Quadrant
+  (`fundingSignals` + a capped lift). New **`/funding`** surface lists recent AI funding events (issuer,
+  filing date, SEC link) with the trends they map to. **US-only in v1** (Form D is a US filing); global/
+  paid funding is a separate future ADR. `+8` tests; verified in-browser.
 - **Supply-side tracking (M15-A / ADR-0005)** — the supply mirror of trend momentum. Models, MCP
   servers, and repos become first-class **tracked objects**: a new `EntitySnapshot` history (+migration),
   `getEntityMomentumMap`/`computeMomentum` (accelerating/steady/cooling vs a ~7-day baseline, like
