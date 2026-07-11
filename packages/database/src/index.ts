@@ -92,6 +92,12 @@ export {
   type Quadrant,
 } from "./quadrant";
 export { mineDemand, getTrendDemandHits } from "./demand";
+export {
+  FUNDING_SOURCE_KEY,
+  getTrendFundingHits,
+  listRecentFunding,
+  type FundingEvent,
+} from "./funding";
 export { listTrendsForRescore, touchTrend, countScoredTrends } from "./rescore";
 export { listTrendSlugs, getTrendSeo, getTrendOg, getEntitySeo } from "./seo";
 export { subscribe, unsubscribe, listActiveSubscribers, countSubscribers } from "./newsletter";

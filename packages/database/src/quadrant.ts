@@ -1,5 +1,6 @@
 import { prisma } from "./client";
 import { getTrendDemandHits } from "./demand";
+import { getTrendFundingHits } from "./funding";
 
 export type Quadrant = "build" | "crowded" | "early" | "hype";
 
@@ -12,6 +13,8 @@ export interface QuadrantTrend {
   businessDemand: number;
   /** How many of the trend's signals expressed demand. */
   demandSignals: number;
+  /** How many of the trend's signals are funding rounds (SEC EDGAR Form D). */
+  fundingSignals: number;
   /** Supply proxy (0–100) — the competition dimension (inverted: high = saturated). */
   supply: number;
   opportunity: number | null;
@@ -23,6 +26,9 @@ export const QUADRANT_MIDPOINT = 50;
 /** Per demand-signal lift to the demand axis, capped, so articulated demand moves a trend up. */
 const DEMAND_LIFT_PER_SIGNAL = 12;
 const DEMAND_LIFT_CAP = 30;
+/** Funding is committed capital — a stronger demand signal than an ask; lifts more, own cap. */
+const FUNDING_LIFT_PER_SIGNAL = 15;
+const FUNDING_LIFT_CAP = 30;
 
 function classify(demand: number, supply: number): Quadrant {
   const highDemand = demand >= QUADRANT_MIDPOINT;
@@ -60,20 +66,25 @@ export async function listTrendsQuadrant(limit = 300): Promise<QuadrantTrend[]> 
     ORDER BY opportunity DESC NULLS LAST
     LIMIT ${limit}`;
 
-  const demandHits = await getTrendDemandHits(rows.map((r) => r.id));
+  const ids = rows.map((r) => r.id);
+  const demandHits = await getTrendDemandHits(ids);
+  const fundingHits = await getTrendFundingHits(ids);
 
   return rows.map((r) => {
     const businessDemand = Number(r.demand);
     const supply = Number(r.supply);
     const demandSignals = demandHits.get(r.id) ?? 0;
-    const lift = Math.min(DEMAND_LIFT_CAP, demandSignals * DEMAND_LIFT_PER_SIGNAL);
-    const demand = Math.min(100, businessDemand + lift);
+    const fundingSignals = fundingHits.get(r.id) ?? 0;
+    const demandLift = Math.min(DEMAND_LIFT_CAP, demandSignals * DEMAND_LIFT_PER_SIGNAL);
+    const fundingLift = Math.min(FUNDING_LIFT_CAP, fundingSignals * FUNDING_LIFT_PER_SIGNAL);
+    const demand = Math.min(100, businessDemand + demandLift + fundingLift);
     return {
       slug: r.slug,
       title: r.title,
       demand,
       businessDemand,
       demandSignals,
+      fundingSignals,
       supply,
       opportunity: r.opportunity !== null ? Number(r.opportunity) : null,
       quadrant: classify(demand, supply),
