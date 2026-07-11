@@ -34,6 +34,7 @@ import {
   recordTrendSnapshots,
   recordEntitySnapshots,
   syncSupplyEntities,
+  evaluateEntityAlertsAllOrgs,
   getOrgIntegration,
   recordFailedIngestionRun,
 } from "../packages/database/src/index";
@@ -80,6 +81,8 @@ async function main() {
   // Record a history point so momentum/trajectory accrues run over run (demand + supply side).
   console.log("snapshots…", await recordTrendSnapshots());
   console.log("entity snapshots…", await recordEntitySnapshots());
+  // Notify orgs whose watched entities (models / MCP / repos) are accelerating.
+  console.log("entity alerts…", await evaluateEntityAlertsAllOrgs());
 
   // Generate today's brief for the demo tenant so /briefs isn't empty on the live site.
   const { organizationId } = await bootstrapUser({

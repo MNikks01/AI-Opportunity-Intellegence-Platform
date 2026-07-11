@@ -13,12 +13,14 @@ import {
 import { UpgradeNotice } from "../UpgradeNotice";
 
 type AlertTrigger =
-  { type: "NEW_TREND" } | { type: "SCORE_CROSSES"; dimension: string; gte: number };
+  | { type: "NEW_TREND" }
+  | { type: "SCORE_CROSSES"; dimension: string; gte: number }
+  | { type: "ENTITY_MOMENTUM"; minDelta: number };
 
 function describeTrigger(trigger: AlertTrigger): string {
-  return trigger.type === "SCORE_CROSSES"
-    ? `${trigger.dimension} ≥ ${trigger.gte}`
-    : "any new watched trend";
+  if (trigger.type === "SCORE_CROSSES") return `${trigger.dimension} ≥ ${trigger.gte}`;
+  if (trigger.type === "ENTITY_MOMENTUM") return "a watched entity is accelerating";
+  return "any new watched trend";
 }
 
 export const dynamic = "force-dynamic";
@@ -191,6 +193,7 @@ export default async function WatchlistDetailPage({
         >
           <option value="SCORE_CROSSES">Score crosses</option>
           <option value="NEW_TREND">New trend</option>
+          <option value="ENTITY_MOMENTUM">Entity accelerating</option>
         </select>
         <select
           name="dimension"
