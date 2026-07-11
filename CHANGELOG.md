@@ -11,6 +11,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Added
+- **Deeper agent integrations (B-042)** — the MCP server gains four tools over the public API: `search_opportunities`, `lookup_entity` (is a model/MCP/repo tracked? its momentum + linked trends), `list_rising_entities`, and `list_recent_funding`. Backed by two new read routes — `GET /api/v1/entities` (tracked supply-side entities with momentum; `sort`, `limit`) and `GET /api/v1/funding` (recent funding events; `limit`) — added to the API index. All seven MCP tools unit-tested; new routes verified against live Postgres. The MCP server holds no DB credentials (HTTP-only to the hosted API).
 - **Global funding via Crunchbase (B-037b / ADR-0008)** — a LICENSED, key-gated connector for global AI funding rounds. **Inert without `CRUNCHBASE_API_KEY`** (no cost); set it (with a paid license) and global funding flows through the pipeline onto `/funding` + `/market` and the demand axis automatically. Funding queries now cover both SEC EDGAR + Crunchbase.
 - **Extension content script + lookup API (B-041a/b)** — a content script badges tracked entities on GitHub / Hugging Face pages, backed by a new `/api/v1/entities/lookup` route; plus a `package` (zip) script + store-listing/privacy docs for submission.
 - **Market dashboard (B-037a)** — a new `/market` page: the Golden-Quadrant split, fastest-rising supply (models/MCP/repos), and recent funding, composed from existing data. Demand × supply at a glance.

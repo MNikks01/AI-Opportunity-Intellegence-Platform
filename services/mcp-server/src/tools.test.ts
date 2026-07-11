@@ -10,11 +10,15 @@ const client = (fetchImpl: typeof fetch) =>
   createClient({ baseUrl: "https://api.test", fetchImpl });
 
 describe("TOOL_SPECS", () => {
-  it("declares the three tools with input schemas", () => {
+  it("declares all tools with input schemas", () => {
     expect(TOOL_SPECS.map((t) => t.name)).toEqual([
       "search_trends",
       "get_trend",
       "list_build_now_opportunities",
+      "search_opportunities",
+      "lookup_entity",
+      "list_rising_entities",
+      "list_recent_funding",
     ]);
     expect(TOOL_SPECS.every((t) => t.inputSchema.type === "object")).toBe(true);
   });
@@ -77,5 +81,94 @@ describe("runTool", () => {
     expect(out).toContain("Edge inference");
     expect(out).toContain("demand 78 · supply 30");
     expect(out).toContain("2 wanted");
+  });
+
+  it("search_opportunities queries /search and requires a query", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse({
+        data: [
+          {
+            slug: "rag",
+            title: "RAG eval",
+            url: "https://api.test/trends/rag",
+            opportunity: 70,
+            dimensions: {},
+            topIdea: null,
+          },
+        ],
+      }),
+    );
+    const out = await runTool(client(fetchImpl), "search_opportunities", { query: "rag eval" });
+    expect(out).toContain("RAG eval");
+    expect(fetchImpl.mock.calls[0]![0]).toContain("/api/v1/search?");
+    expect(fetchImpl.mock.calls[0]![0]).toContain("q=rag");
+    expect(await runTool(client(vi.fn()), "search_opportunities", {})).toContain("required");
+  });
+
+  it("lookup_entity formats tracked entities and handles 404", async () => {
+    const found = vi.fn().mockResolvedValue(
+      jsonResponse({
+        data: {
+          name: "openai/whisper",
+          type: "REPO",
+          linkedTrendCount: 3,
+          momentum: { state: "accelerating", delta: 5 },
+          trends: [{ slug: "asr", title: "Speech-to-text", url: "u" }],
+        },
+      }),
+    );
+    const out = await runTool(client(found), "lookup_entity", { name: "openai/whisper" });
+    expect(out).toContain("openai/whisper (REPO)");
+    expect(out).toContain("3 trends");
+    expect(out).toContain("Speech-to-text");
+    const nf = vi.fn().mockResolvedValue(jsonResponse({}, 404));
+    expect(await runTool(client(nf), "lookup_entity", { name: "x/y" })).toContain("not tracked");
+  });
+
+  it("list_rising_entities prefers accelerating entities", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse({
+        data: [
+          {
+            name: "a/b",
+            type: "MODEL",
+            signalWeight: 9,
+            linkedTrendCount: 2,
+            momentum: { state: "accelerating", delta: 4 },
+          },
+          {
+            name: "c/d",
+            type: "REPO",
+            signalWeight: 3,
+            linkedTrendCount: 1,
+            momentum: { state: "steady", delta: 0 },
+          },
+        ],
+      }),
+    );
+    const out = await runTool(client(fetchImpl), "list_rising_entities", {});
+    expect(out).toContain("a/b (MODEL)");
+    expect(out).toContain("accelerating (+4)");
+    expect(out).not.toContain("c/d"); // steady filtered out when some are accelerating
+  });
+
+  it("list_recent_funding formats issuer + linked trends", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(
+      jsonResponse({
+        data: [
+          {
+            issuer: "Acme AI",
+            filedAt: "2026-07-01",
+            url: "u",
+            trends: [{ slug: "infra", title: "AI infra", url: "u2" }],
+          },
+        ],
+      }),
+    );
+    const out = await runTool(client(fetchImpl), "list_recent_funding", {});
+    expect(out).toContain("Acme AI");
+    expect(out).toContain("2026-07-01");
+    expect(out).toContain("AI infra");
+    expect(fetchImpl.mock.calls[0]![0]).toContain("/api/v1/funding");
   });
 });

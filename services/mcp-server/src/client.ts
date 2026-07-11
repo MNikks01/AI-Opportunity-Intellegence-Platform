@@ -42,10 +42,37 @@ export interface Opportunity {
   demandSignals: number;
 }
 
+export interface EntityLookupResult {
+  name: string;
+  type: string;
+  linkedTrendCount: number;
+  momentum: { state: string; delta: number } | null;
+  trends: { slug: string; title: string; url: string }[];
+}
+
+export interface RisingEntity {
+  name: string;
+  type: string;
+  signalWeight: number;
+  linkedTrendCount: number;
+  momentum: { state: string; delta: number } | null;
+}
+
+export interface FundingEvent {
+  issuer: string;
+  filedAt: string | null;
+  url: string | null;
+  trends: { slug: string; title: string; url: string }[];
+}
+
 export interface AioiClient {
   searchTrends(opts: { limit?: number; source?: string; sort?: string }): Promise<TrendSummary[]>;
   getTrend(slug: string): Promise<TrendDetail | null>;
   listOpportunities(opts: { limit?: number }): Promise<Opportunity[]>;
+  searchOpportunities(opts: { q: string; limit?: number }): Promise<TrendSummary[]>;
+  lookupEntity(name: string): Promise<EntityLookupResult | null>;
+  listRisingEntities(opts: { limit?: number }): Promise<RisingEntity[]>;
+  listRecentFunding(opts: { limit?: number }): Promise<FundingEvent[]>;
 }
 
 export function createClient(
@@ -82,6 +109,23 @@ export function createClient(
     },
     async listOpportunities({ limit }) {
       return (await get<Opportunity[]>(`/api/v1/opportunities${qs({ limit })}`)).data;
+    },
+    async searchOpportunities({ q, limit }) {
+      return (await get<TrendSummary[]>(`/api/v1/search${qs({ q, limit })}`)).data;
+    },
+    async lookupEntity(name) {
+      const res = await fetchImpl(`${base}/api/v1/entities/lookup${qs({ name })}`, {
+        headers: { accept: "application/json" },
+      });
+      if (res.status === 404) return null;
+      if (!res.ok) throw new Error(`AIOI API ${res.status} for /api/v1/entities/lookup`);
+      return ((await res.json()) as { data: EntityLookupResult }).data;
+    },
+    async listRisingEntities({ limit }) {
+      return (await get<RisingEntity[]>(`/api/v1/entities${qs({ sort: "momentum", limit })}`)).data;
+    },
+    async listRecentFunding({ limit }) {
+      return (await get<FundingEvent[]>(`/api/v1/funding${qs({ limit })}`)).data;
     },
   };
 }
