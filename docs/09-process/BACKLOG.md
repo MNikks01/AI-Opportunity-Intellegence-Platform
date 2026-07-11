@@ -101,17 +101,30 @@ no new data source, no legality gate. Track the AI supply side with the same mom
 ## M15-B — Funding signal (SEC EDGAR Form D)
 
 Decomposed from the M15 "competitor/funding dashboards" milestone. Design: **[ADR-0006](../adr/ADR-0006-funding-signal.md)**
-(Proposed). Adds a **new OFFICIAL source** — SEC EDGAR Form D (US private funding rounds), free +
+(Accepted). Adds a **new OFFICIAL source** — SEC EDGAR Form D (US private funding rounds), free +
 public-domain — as a leading **demand** signal through the existing pipeline. **US-only in v1**; global
-(paid) funding is a separate future ADR.
+(paid) funding is a separate future ADR. **Shipped** (PR #252).
 
 | ID    | Item                                                                                       | Epic | SP  | Status |
 | ----- | ------------------------------------------------------------------------------------------ | ---- | --- | ------ |
-| B-033 | `sec-edgar` Form D connector (EDGAR FTS + AI-keyword filter) + MSW tests + legality header | E2   | 8   | ⬜     |
-| B-034 | Register the source (`OFFICIAL`) + wire into the refresh pipeline + `/sources`             | E2   | 3   | ⬜     |
-| B-035 | Funding → demand-axis contribution in clustering/quadrant (integration-tested)             | E2   | 5   | ⬜     |
-| B-036 | `/funding` surface: recent AI funding events + linked trends                               | UI   | 5   | ⬜     |
+| B-033 | `sec-edgar` Form D connector (EDGAR FTS + AI-keyword filter) + MSW tests + legality header | E2   | 8   | ✅     |
+| B-034 | Register the source (`OFFICIAL`) + wire into the refresh pipeline + `/sources`             | E2   | 3   | ✅     |
+| B-035 | Funding → demand-axis contribution in clustering/quadrant (integration-tested)             | E2   | 5   | ✅     |
+| B-036 | `/funding` surface: recent AI funding events + linked trends                               | UI   | 5   | ✅     |
 | B-037 | (v2) competitor/market dashboard; (later) global/paid funding source ADR                   | E2   | 8   | ⬜     |
+
+## M15-C — Browser extension (MV3 popup)
+
+Decomposed from the M15 "browser extension" milestone. Design: **[ADR-0007](../adr/ADR-0007-browser-extension.md)**
+(Accepted). An MV3 popup over the **existing deployed public API** (CORS-open) — no bespoke backend
+beyond one search route; new `apps/extension` built with **esbuild**. Distribution (Web Store) deferred.
+
+| ID    | Item                                                                                   | Epic | SP  | Status |
+| ----- | -------------------------------------------------------------------------------------- | ---- | --- | ------ |
+| B-038 | `GET /api/v1/search?q=` route + API index entry                                        | E2   | 2   | ✅     |
+| B-039 | `apps/extension` MV3 scaffold + esbuild build, wired into Turbo                        | UI   | 5   | ✅     |
+| B-040 | Popup UI (opportunities + search) + options (base URL, optional key); pure-logic tests | UI   | 5   | ✅     |
+| B-041 | (v2) content-script page recognition; (later) Web Store / AMO submission               | UI   | 8   | ⬜     |
 
 ## R2/R3 epics (not yet decomposed)
 

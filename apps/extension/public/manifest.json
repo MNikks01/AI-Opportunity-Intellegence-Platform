@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "AI Opportunity Intelligence",
+  "version": "0.1.0",
+  "description": "See what to build before it's a trend — the AI 'build now' opportunities in your toolbar.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "AI Opportunity Intelligence"
+  },
+  "icons": {}
+}

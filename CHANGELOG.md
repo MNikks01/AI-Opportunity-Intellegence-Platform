@@ -11,6 +11,13 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Added
+- **Browser extension (M15-C / ADR-0007)** — a new `apps/extension`: a **Manifest V3 popup** that puts
+  the AI "build now" opportunities in your toolbar, over the existing deployed public API. Lists
+  `/api/v1/opportunities` + a search box; results deep-link to the web app; configurable API base URL +
+  optional API key. Built with **esbuild** (new `apps/extension` workspace, wired into Turbo); no
+  permissions/keys needed (the public API is CORS-open). Adds a public **`GET /api/v1/search?q=`** route.
+  Pure logic unit-tested; verified the search route + CORS end-to-end and a valid MV3 `dist/`.
+  Content-script page recognition + Web Store submission deferred to v2.
 - **Funding signal (M15-B / ADR-0006)** — a new **SEC EDGAR Form D** source (US private funding rounds),
   the demand-side counterpart to M15-A. A `sec-edgar` connector (EDGAR full-text search → Form D + AI
   phrases; Zod-validated, idempotent, 429/403 backoff; keyless — no-ops without `SEC_USER_AGENT`) feeds
