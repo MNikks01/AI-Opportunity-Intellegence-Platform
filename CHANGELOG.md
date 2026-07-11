@@ -10,6 +10,16 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 
 ## [Unreleased]
 
+### Added
+- **Supply-side tracking (M15-A / ADR-0005)** — the supply mirror of trend momentum. Models, MCP
+  servers, and repos become first-class **tracked objects**: a new `EntitySnapshot` history (+migration),
+  `getEntityMomentumMap`/`computeMomentum` (accelerating/steady/cooling vs a ~7-day baseline, like
+  trends), `listTrackedEntities` for the leaderboard, and `syncSupplyEntities` which upserts
+  `MODEL`/`REPO`/`MCP_SERVER` entities directly from Hugging Face + GitHub signals (heuristic MCP
+  detection — no new data source). `/entities` gains a type-filterable, momentum-sortable supply-side
+  leaderboard + a momentum block on entity detail. Built on existing OFFICIAL sources; offline-testable.
+  Phase-2 watch/alert on a tracked entity (B-032) deferred.
+
 ### Changed
 - **Local dev env-link + setup-doc refresh** — added `apps/web/link-root-env.mjs` (idempotent,
   keyless-safe; wired into `dev`/`build`/`start`) so Next.js loads the monorepo-root `.env` in every
