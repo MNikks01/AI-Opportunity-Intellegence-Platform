@@ -51,6 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <a href="/trends">Trends</a>
             <a href="/quadrant">Quadrant</a>
             <a href="/entities">Entities</a>
+            <a href="/funding">Funding</a>
             <a href="/watchlists">Watchlists</a>
             <a href="/notifications">Notifications</a>
             <a href="/briefs">Briefs</a>
