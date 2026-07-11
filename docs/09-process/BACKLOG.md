@@ -83,9 +83,23 @@ inventory and the [CHANGELOG](../../CHANGELOG.md) `[Unreleased]` for per-PR note
 - **Public `/changelog`** product surface (R3) — curated release notes.
 - Make the Fastify API checkout interval-aware (currently monthly-Pro only).
 
+## M15-A — Supply-side tracking (models / MCP servers / repos)
+
+Decomposed from the M15 "model/prompt/MCP tracking" milestone. Design: **[ADR-0005](../adr/ADR-0005-supply-side-tracking.md)**
+(Proposed). Builds on the existing `Entity`/`EntityType` model and OFFICIAL sources (HF, GitHub, arXiv) —
+no new data source, no legality gate. Track the AI supply side with the same momentum rigor as trends.
+
+| ID    | Item                                                                                      | Epic | SP  | Status |
+| ----- | ----------------------------------------------------------------------------------------- | ---- | --- | ------ |
+| B-028 | `EntitySnapshot` model + migration + per-run snapshot job (D1/D2)                         | E2   | 5   | ⬜     |
+| B-029 | `getEntityMomentumMap` + `listTrackedEntities` repositories (D1/D3)                       | E2   | 5   | ⬜     |
+| B-030 | HF/GitHub → `MODEL`/`REPO`/`MCP_SERVER` entity upserts + MCP detection (D2)               | E2   | 5   | ⬜     |
+| B-031 | `/entities` momentum leaderboard + entity-detail sparkline (D3)                           | UI   | 5   | ⬜     |
+| B-032 | (phase 2) watch + alert on a tracked entity, via existing watchlist/alert primitives (D4) | E4   | 5   | ⬜     |
+
 ## R2/R3 epics (not yet decomposed)
 
-Competitor/Funding/Market/Research dashboards · Model/Prompt tracking · Browser extension · Telegram
+Competitor/Funding/Market/Research dashboards · Browser extension · Telegram
 integration · Weekly Reports + PDF export · Referral/Affiliate · Agent Marketplace · Admin/Org
 governance + **SSO** + a **Business** tier · Blog/Help/Feedback/public Roadmap · PyPI + job-posts +
 funding sources.
