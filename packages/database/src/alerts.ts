@@ -25,6 +25,8 @@ export function alertMatches(trigger: AlertTrigger, scores: Record<string, numbe
       return true;
     case "SCORE_CROSSES":
       return (scores[trigger.dimension] ?? Number.NEGATIVE_INFINITY) >= trigger.gte;
+    case "ENTITY_MOMENTUM":
+      return false; // evaluated against entity momentum, not trend scores (see entity-alerts.ts)
   }
 }
 

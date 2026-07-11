@@ -11,6 +11,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Added
+- **Watch + alert on a tracked entity (B-032)** — watch a model / MCP server / repo from its `/entities/{id}` page and get notified when it's **accelerating**. New `ENTITY_MOMENTUM` alert trigger + `evaluateEntityAlertsAllOrgs` (pipeline-wired, RLS-scoped, de-duped), reusing the existing watchlist/alert/notification primitives.
 - **Browser extension (M15-C / ADR-0007)** — a new `apps/extension`: a **Manifest V3 popup** that puts
   the AI "build now" opportunities in your toolbar, over the existing deployed public API. Lists
   `/api/v1/opportunities` + a search box; results deep-link to the web app; configurable API base URL +
@@ -91,6 +92,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Watch + alert on a tracked entity (B-032)** — watch a model / MCP server / repo from its `/entities/{id}` page and get notified when it's **accelerating**. New `ENTITY_MOMENTUM` alert trigger + `evaluateEntityAlertsAllOrgs` (pipeline-wired, RLS-scoped, de-duped), reusing the existing watchlist/alert/notification primitives.
 - **Langfuse LLM tracing (B-007)** — a provider-agnostic tracing seam in `@aioi/ai-sdk`
   (`Tracer`/`NoopTracer`/`LangfuseTracer` + `getTracer`) wraps every real model call (scoring, action
   plans, entity extraction) in a generation span with model, input, output, latency, and token usage.

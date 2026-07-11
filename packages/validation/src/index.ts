@@ -86,6 +86,11 @@ export const alertTriggerSchema = z.discriminatedUnion("type", [
     dimension: scoreDimensionSchema,
     gte: z.number().int().min(0).max(100),
   }),
+  // Fires when a watched supply-side entity (model / MCP / repo) is accelerating (M15-A B-032).
+  z.object({
+    type: z.literal("ENTITY_MOMENTUM"),
+    minDelta: z.number().int().min(1).default(1),
+  }),
 ]);
 export type AlertTrigger = z.infer<typeof alertTriggerSchema>;
 

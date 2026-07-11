@@ -32,6 +32,7 @@ export {
   evaluateTrendAllOrgs,
   type TrendEvent,
 } from "./alerts";
+export { entityMomentumMatches, evaluateEntityAlertsAllOrgs } from "./entity-alerts";
 export {
   listNotifications,
   unreadNotificationCount,
