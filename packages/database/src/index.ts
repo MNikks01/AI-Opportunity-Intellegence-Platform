@@ -124,6 +124,11 @@ export {
   type TrackedSort,
 } from "./entity-momentum";
 export {
+  classifyGitHubEntity,
+  supplyEntityFromSignal,
+  syncSupplyEntities,
+} from "./supply-entities";
+export {
   upsertEntity,
   linkTrendEntity,
   listEntities,

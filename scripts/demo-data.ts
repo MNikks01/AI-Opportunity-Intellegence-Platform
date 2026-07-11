@@ -32,6 +32,7 @@ import {
   generateDailyBrief,
   recordTrendSnapshots,
   recordEntitySnapshots,
+  syncSupplyEntities,
   getOrgIntegration,
   recordFailedIngestionRun,
 } from "../packages/database/src/index";
@@ -70,6 +71,9 @@ async function main() {
     await extractEntitiesForTrends({ limit: 200, useLlm: Boolean(process.env.AIOI_ENTITY_LLM) }),
   );
   console.log("action plans…", await generateActionPlansForTopTrends({ limit: 15 }));
+
+  // Upsert supply-side entities (models / repos / MCP servers) directly from HF+GitHub signals.
+  console.log("supply entities…", await syncSupplyEntities());
 
   // Record a history point so momentum/trajectory accrues run over run (demand + supply side).
   console.log("snapshots…", await recordTrendSnapshots());
