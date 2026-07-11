@@ -53,6 +53,14 @@ export {
   looksAiRelevant,
   type PypiItem,
 } from "./connectors/pypi";
+// Selective re-export: sec-edgar shares `normalize` with the other connectors.
+export {
+  SEC_EDGAR_SOURCE_KEY,
+  secEdgarConfigured,
+  fetchFormDFilings,
+  cleanIssuer,
+  AI_QUERIES,
+} from "./connectors/sec-edgar";
 // Selective re-export: hnhiring shares `normalize` with the other connectors.
 export {
   HN_HIRING_SOURCE_KEY,
@@ -75,6 +83,7 @@ import { fetchPapers } from "./connectors/arxiv";
 import { fetchPackages } from "./connectors/npm";
 import { fetchPackages as fetchPypiPackages } from "./connectors/pypi";
 import { fetchHiring } from "./connectors/hnhiring";
+import { fetchFormDFilings, secEdgarConfigured } from "./connectors/sec-edgar";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -144,6 +153,27 @@ export async function runPypiIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "pypi", ...result }, "ingestion pass complete");
   await recordIngestionRun("pypi", result, startedAt);
+  return result;
+}
+
+/**
+ * Run one SEC EDGAR Form D ingestion pass (recent AI-relevant US private funding rounds). Needs a
+ * contact `SEC_USER_AGENT` (SEC fair-access); no-ops without it, so CI/dev stay green with no config.
+ * Funding is a leading DEMAND signal (ADR-0006). US-only in v1.
+ */
+export async function runSecEdgarIngestion(
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  if (!secEdgarConfigured()) {
+    logger.info({ source: "sec-edgar" }, "ingestion skipped: SEC_USER_AGENT not set");
+    return { fetched: 0, inserted: 0, skipped: 0 };
+  }
+  const startedAt = new Date();
+  const { records, skipped } = await fetchFormDFilings({ userAgent: process.env.SEC_USER_AGENT });
+  const inserted = await repo.upsertMany(records);
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "sec-edgar", ...result }, "ingestion pass complete");
+  await recordIngestionRun("sec-edgar", result, startedAt);
   return result;
 }
 
