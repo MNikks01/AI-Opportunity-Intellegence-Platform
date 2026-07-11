@@ -17,6 +17,7 @@ import {
   runPypiIngestion,
   runHnHiringIngestion,
   runSecEdgarIngestion,
+  runCrunchbaseIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -66,6 +67,7 @@ async function main() {
   await ingest("pypi", () => runPypiIngestion());
   await ingest("hnhiring", () => runHnHiringIngestion());
   await ingest("sec-edgar", () => runSecEdgarIngestion()); // no-op unless SEC_USER_AGENT is set
+  await ingest("crunchbase", () => runCrunchbaseIngestion()); // no-op unless CRUNCHBASE_API_KEY is set
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));

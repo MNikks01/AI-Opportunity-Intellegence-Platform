@@ -11,6 +11,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Added
+- **Global funding via Crunchbase (B-037b / ADR-0008)** — a LICENSED, key-gated connector for global AI funding rounds. **Inert without `CRUNCHBASE_API_KEY`** (no cost); set it (with a paid license) and global funding flows through the pipeline onto `/funding` + `/market` and the demand axis automatically. Funding queries now cover both SEC EDGAR + Crunchbase.
 - **Extension content script + lookup API (B-041a/b)** — a content script badges tracked entities on GitHub / Hugging Face pages, backed by a new `/api/v1/entities/lookup` route; plus a `package` (zip) script + store-listing/privacy docs for submission.
 - **Market dashboard (B-037a)** — a new `/market` page: the Golden-Quadrant split, fastest-rising supply (models/MCP/repos), and recent funding, composed from existing data. Demand × supply at a glance.
 - **Watch + alert on a tracked entity (B-032)** — watch a model / MCP server / repo from its `/entities/{id}` page and get notified when it's **accelerating**. New `ENTITY_MOMENTUM` alert trigger + `evaluateEntityAlertsAllOrgs` (pipeline-wired, RLS-scoped, de-duped), reusing the existing watchlist/alert/notification primitives.
@@ -94,6 +95,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Global funding via Crunchbase (B-037b / ADR-0008)** — a LICENSED, key-gated connector for global AI funding rounds. **Inert without `CRUNCHBASE_API_KEY`** (no cost); set it (with a paid license) and global funding flows through the pipeline onto `/funding` + `/market` and the demand axis automatically. Funding queries now cover both SEC EDGAR + Crunchbase.
 - **Extension content script + lookup API (B-041a/b)** — a content script badges tracked entities on GitHub / Hugging Face pages, backed by a new `/api/v1/entities/lookup` route; plus a `package` (zip) script + store-listing/privacy docs for submission.
 - **Market dashboard (B-037a)** — a new `/market` page: the Golden-Quadrant split, fastest-rising supply (models/MCP/repos), and recent funding, composed from existing data. Demand × supply at a glance.
 - **Watch + alert on a tracked entity (B-032)** — watch a model / MCP server / repo from its `/entities/{id}` page and get notified when it's **accelerating**. New `ENTITY_MOMENTUM` alert trigger + `evaluateEntityAlertsAllOrgs` (pipeline-wired, RLS-scoped, de-duped), reusing the existing watchlist/alert/notification primitives.

@@ -105,14 +105,14 @@ Decomposed from the M15 "competitor/funding dashboards" milestone. Design: **[AD
 public-domain — as a leading **demand** signal through the existing pipeline. **US-only in v1**; global
 (paid) funding is a separate future ADR. **Shipped** (PR #252).
 
-| ID     | Item                                                                                       | Epic | SP  | Status                                                          |
-| ------ | ------------------------------------------------------------------------------------------ | ---- | --- | --------------------------------------------------------------- |
-| B-033  | `sec-edgar` Form D connector (EDGAR FTS + AI-keyword filter) + MSW tests + legality header | E2   | 8   | ✅                                                              |
-| B-034  | Register the source (`OFFICIAL`) + wire into the refresh pipeline + `/sources`             | E2   | 3   | ✅                                                              |
-| B-035  | Funding → demand-axis contribution in clustering/quadrant (integration-tested)             | E2   | 5   | ✅                                                              |
-| B-036  | `/funding` surface: recent AI funding events + linked trends                               | UI   | 5   | ✅                                                              |
-| B-037a | Competitor/market dashboard (`/market` — quadrant split + rising supply + funding)         | UI   | 5   | ✅                                                              |
-| B-037b | Global/paid funding source — **[ADR-0008](../adr/ADR-0008-global-funding-source.md)**      | E2   | 8   | 🚧 blocked (paid data license + credentials; business decision) |
+| ID     | Item                                                                                                                      | Epic | SP  | Status                                                                                     |
+| ------ | ------------------------------------------------------------------------------------------------------------------------- | ---- | --- | ------------------------------------------------------------------------------------------ |
+| B-033  | `sec-edgar` Form D connector (EDGAR FTS + AI-keyword filter) + MSW tests + legality header                                | E2   | 8   | ✅                                                                                         |
+| B-034  | Register the source (`OFFICIAL`) + wire into the refresh pipeline + `/sources`                                            | E2   | 3   | ✅                                                                                         |
+| B-035  | Funding → demand-axis contribution in clustering/quadrant (integration-tested)                                            | E2   | 5   | ✅                                                                                         |
+| B-036  | `/funding` surface: recent AI funding events + linked trends                                                              | UI   | 5   | ✅                                                                                         |
+| B-037a | Competitor/market dashboard (`/market` — quadrant split + rising supply + funding)                                        | UI   | 5   | ✅                                                                                         |
+| B-037b | Global funding — **Crunchbase** connector (LICENSED, key-gated), **[ADR-0008](../adr/ADR-0008-global-funding-source.md)** | E2   | 8   | ✅ built + gated (inert until `CRUNCHBASE_API_KEY`; auto-activates on a purchased license) |
 
 ## M15-C — Browser extension (MV3 popup)
 

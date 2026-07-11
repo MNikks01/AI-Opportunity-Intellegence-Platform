@@ -61,6 +61,14 @@ export {
   cleanIssuer,
   AI_QUERIES,
 } from "./connectors/sec-edgar";
+// Selective re-export: crunchbase shares `normalize` with the other connectors.
+export {
+  CRUNCHBASE_SOURCE_KEY,
+  crunchbaseConfigured,
+  fetchFundingRounds,
+  formatUsd,
+  AI_CATEGORIES,
+} from "./connectors/crunchbase";
 // Selective re-export: hnhiring shares `normalize` with the other connectors.
 export {
   HN_HIRING_SOURCE_KEY,
@@ -84,6 +92,12 @@ import { fetchPackages } from "./connectors/npm";
 import { fetchPackages as fetchPypiPackages } from "./connectors/pypi";
 import { fetchHiring } from "./connectors/hnhiring";
 import { fetchFormDFilings, secEdgarConfigured } from "./connectors/sec-edgar";
+import {
+  fetchFundingRounds,
+  crunchbaseConfigured,
+  CRUNCHBASE_SOURCE_KEY,
+} from "./connectors/crunchbase";
+import { ensureSource } from "@aioi/database";
 import { InMemorySignalRepository, type SignalRepository } from "./repository";
 import { PrismaSignalRepository } from "./repository.prisma";
 
@@ -174,6 +188,28 @@ export async function runSecEdgarIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "sec-edgar", ...result }, "ingestion pass complete");
   await recordIngestionRun("sec-edgar", result, startedAt);
+  return result;
+}
+
+/**
+ * Run one Crunchbase funding ingestion pass (recent global AI funding rounds). **LICENSED** — inert
+ * without `CRUNCHBASE_API_KEY`, so it costs nothing and CI/dev stay green until a license is provisioned;
+ * it then activates automatically (ADR-0008). Registers the source as LICENSED before ingesting.
+ */
+export async function runCrunchbaseIngestion(
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  if (!crunchbaseConfigured()) {
+    logger.info({ source: "crunchbase" }, "ingestion skipped: CRUNCHBASE_API_KEY not set");
+    return { fetched: 0, inserted: 0, skipped: 0 };
+  }
+  const startedAt = new Date();
+  if (process.env.DATABASE_URL) await ensureSource(CRUNCHBASE_SOURCE_KEY, "LICENSED");
+  const { records, skipped } = await fetchFundingRounds();
+  const inserted = await repo.upsertMany(records);
+  const result = { fetched: records.length, inserted, skipped };
+  logger.info({ source: "crunchbase", ...result }, "ingestion pass complete");
+  await recordIngestionRun("crunchbase", result, startedAt);
   return result;
 }
 
