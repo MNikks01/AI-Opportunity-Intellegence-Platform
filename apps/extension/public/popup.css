@@ -1,0 +1,131 @@
+:root {
+  --fg: #0b0c0f;
+  --muted: #5b6472;
+  --border: #e5e7eb;
+  --primary: #5b5bd6;
+  --bg: #fff;
+  --subtle: #f6f7f9;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fg: #e6e8ec;
+    --muted: #9ba3af;
+    --border: #2a2d34;
+    --primary: #8b8bf0;
+    --bg: #16181d;
+    --subtle: #1d2026;
+  }
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  width: 360px;
+  max-height: 520px;
+  margin: 0;
+  overflow-y: auto;
+  font: 14px/1.45 -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  color: var(--fg);
+  background: var(--bg);
+}
+.hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px;
+}
+.brand {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+.link {
+  background: none;
+  border: 0;
+  color: var(--primary);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+#search-form {
+  padding: 0 14px 10px;
+}
+#q,
+.fld input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--subtle);
+  color: var(--fg);
+  font-size: 13px;
+}
+.settings {
+  padding: 0 14px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fld {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.btn {
+  align-self: flex-start;
+  padding: 6px 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 12px;
+  cursor: pointer;
+}
+#results {
+  padding: 4px 8px 8px;
+}
+.muted {
+  color: var(--muted);
+  padding: 8px 6px;
+  margin: 0;
+  font-size: 13px;
+}
+.row {
+  display: block;
+  padding: 9px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--fg);
+}
+.row:hover {
+  background: var(--subtle);
+}
+.row-title {
+  font-weight: 600;
+  font-size: 13px;
+}
+.row-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.score {
+  font-weight: 700;
+  color: var(--primary);
+}
+.ft {
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--border);
+}
+.ft a {
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 12px;
+}
