@@ -108,10 +108,16 @@ export async function listActiveOrgIds(limit = 1000): Promise<string[]> {
   return orgs.map((o) => o.id);
 }
 
-export async function ensureSource(key: string): Promise<string> {
+export async function ensureSource(
+  key: string,
+  legalityTier: $Enums.LegalityTier = "OFFICIAL",
+): Promise<string> {
+  // Tier is set on create only; existing rows keep their classification (update stays empty). Callers
+  // that own a source's legality (e.g. the LICENSED Crunchbase connector) call this first, before the
+  // generic repository upsert.
   const source = await prisma.source.upsert({
     where: { key },
-    create: { key, legalityTier: "OFFICIAL", rateConfig: {} },
+    create: { key, legalityTier, rateConfig: {} },
     update: {},
   });
   return source.id;

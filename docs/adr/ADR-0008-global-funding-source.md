@@ -1,6 +1,7 @@
 # ADR-0008 — Global funding data (paid source)
 
-- **Status:** Proposed — **BLOCKED on a business decision** (not engineering)
+- **Status:** Accepted — **connector built + gated** on `CRUNCHBASE_API_KEY`; activates automatically
+  when a license is provisioned. Zero cost/calls until then. (Provider choice = Crunchbase for v1.)
 - **Date:** 2026-07-11
 - **Deciders:** Product / Founder (cost owner), Architect
 - **Context source:** M15-B v2 (B-037b), [ADR-0006](ADR-0006-funding-signal.md) D3
@@ -13,7 +14,9 @@ private rounds (and richer fields: amounts, investors, stage) requires a **comme
 The data-source rule forbids scraping, so this is not something we can build our way around — it is a
 **purchase decision** with real cost, a contract, and API credentials the operator must provide.
 
-**This ADR cannot be implemented by engineering alone. It is parked until the cost owner decides.**
+**Update (2026-07-11):** the operator chose to build the connector now (gated) rather than wait — so
+when a Crunchbase license is later purchased and `CRUNCHBASE_API_KEY` set, global funding starts flowing
+**automatically** with no further engineering. Until then the connector is inert (no calls, no cost).
 
 ## The decision to be made (by the operator)
 
@@ -24,16 +27,21 @@ The data-source rule forbids scraping, so this is not something we can build our
 | **PitchBook / Dealroom / Tracxn** | Global, deeper    | paid (enterprise)     | Richer but pricier; heavier contracts.               |
 | **A news/aggregator API**         | Global, noisier   | paid                  | Needs its own ToS review; lower data quality.        |
 
-## What engineering will do **once a source + budget are approved**
+## What was built (gated; done)
 
-The architecture is already proven by ADR-0006, so adoption is mechanical:
+The architecture was already proven by ADR-0006, so adoption was mechanical — **shipped**:
 
-1. Add a `crunchbase` (or chosen) connector under the `data-source-integration` skill — **legality
-   classification: LICENSED** (not OFFICIAL), with the API key gated so CI stays keyless.
-2. Normalize funding events to `SourceRecord` and flow them through the **existing** ingest → cluster →
-   score pipeline — the same demand-axis lift the SEC connector already feeds (no new data model).
-3. Surface global events on `/funding` + `/market` alongside the SEC ones, tagged by source.
-4. MSW-mocked connector tests (happy/429/malformed/empty/idempotent) before it ships.
+1. ✅ `crunchbase` connector (`services/ingestion-service/src/connectors/crunchbase.ts`) — **LICENSED**
+   legality header; Crunchbase Data API v4 search over recent AI-category funding rounds; Zod-validated;
+   429/5xx backoff; **inert without `CRUNCHBASE_API_KEY`**. MSW-mocked tests (happy/429/malformed/empty).
+2. ✅ Funding events normalize to `SourceRecord` and flow through the **existing** ingest → cluster →
+   score pipeline — the same demand-axis lift the SEC connector feeds (no new data model). The source
+   auto-registers as **LICENSED** on first ingest.
+3. ✅ `getTrendFundingHits` / `listRecentFunding` treat both `sec-edgar` **and** `crunchbase` as funding
+   sources, so global events appear on `/funding` + `/market` and lift the Golden-Quadrant demand axis
+   **automatically** once the key is set.
+
+**Only thing left = a purchased Crunchbase license + `CRUNCHBASE_API_KEY`.** No code changes needed then.
 
 ## Acceptance criteria (deferred until unblocked)
 
