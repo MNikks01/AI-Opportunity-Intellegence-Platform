@@ -46,6 +46,19 @@ Traces to [User Stories](../01-product/USER_STORIES.md) + [Prioritization](../01
 | B-026 | TypeScript 5→6 migration (fails typecheck; ignored in dependabot until done)                             | infra | 3   | ✅ (bumped to ^6.0.3; per-package rootDir for TS5011; no-undef off in shared eslint)                |
 | B-027 | Runtime connects as a non-superuser DB role (`aioi_app`) + `APP_DATABASE_URL` so RLS enforces (ADR-0003) | infra | 3   | ✅                                                                                                  |
 
+### Deferred next-majors (held in Dependabot by design)
+
+- **TypeScript 7 (follows B-026).** Spiked on `spike/typescript-7` (2026-07-10, TS 7.0.2, the native
+  Go-port compiler). **Our code is already TS-7-clean:** `typecheck` passed 31/31 with zero changes and
+  all 288 tests passed. **Blocked purely by tooling that doesn't support the native compiler yet:**
+  (1) `typescript-eslint` 8.63 caps its peer at `typescript <6.1.0` and its parser crashes on TS 7
+  (`TypeError: … reading 'Cjs'`), breaking `lint`; (2) **Next.js 16** doesn't recognize the TS 7 package
+  (`next build` → "required package typescript not installed"), breaking `build`. **Trigger to adopt:**
+  a `typescript-eslint` release whose peer allows `>=7` **and** Next.js announcing TS 7 support — then
+  adoption should be a near-trivial version bump. Held in `dependabot.yml` until both land.
+- **Prisma 8 (follows B-025).** Not released yet — latest is `prisma` 7.8.0 (only `7.9.0-dev`
+  pre-releases exist). Nothing to do; we're current on Prisma 7. Revisit when 8.x ships.
+
 ## Growth + monetization wave (R1.5 — shipped since B-023)
 
 Delivered as small PRs to `development` and released; see
