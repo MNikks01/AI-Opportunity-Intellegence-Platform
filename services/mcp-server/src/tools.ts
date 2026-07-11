@@ -48,6 +48,56 @@ export const TOOL_SPECS = [
       },
     },
   },
+  {
+    name: "search_opportunities",
+    description:
+      "Keyword-search scored AI opportunities/trends by a query (full-text). Use when the user names a specific area (e.g. 'RAG evaluation', 'voice agents').",
+    inputSchema: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "What to search for." },
+        limit: { type: "number", description: "Max results (1-100, default 10)." },
+      },
+      required: ["query"],
+    },
+  },
+  {
+    name: "lookup_entity",
+    description:
+      "Look up a tracked AI model, MCP server, or repo by exact name (e.g. 'openai/whisper', 'meta-llama/Llama-3') — returns its momentum and the trends that reference it. Useful when reviewing a repo/model.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "The entity name (e.g. a GitHub 'owner/repo' or HF model id).",
+        },
+      },
+      required: ["name"],
+    },
+  },
+  {
+    name: "list_rising_entities",
+    description:
+      "The fastest-accelerating supply-side entities (models / MCP servers / repos) by signal momentum — what builders are moving on right now.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: { type: "number", description: "Max entities (1-100, default 10)." },
+      },
+    },
+  },
+  {
+    name: "list_recent_funding",
+    description:
+      "Recent AI funding rounds (SEC EDGAR Form D + Crunchbase) with the trends each maps to — money moving into a space is a leading demand signal.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        limit: { type: "number", description: "Max funding events (1-100, default 10)." },
+      },
+    },
+  },
 ] as const;
 
 function numArg(v: unknown, d: number): number {
@@ -129,6 +179,43 @@ export async function runTool(
             }\n   ${o.url}`,
         )
         .join("\n\n");
+    }
+    case "search_opportunities": {
+      const q = strArg(args.query);
+      if (!q) return "Error: 'query' is required.";
+      const trends = await client.searchOpportunities({ q, limit: numArg(args.limit, 10) });
+      return trends.length ? trends.map(fmtSummary).join("\n\n") : `No matches for "${q}".`;
+    }
+    case "lookup_entity": {
+      const entName = strArg(args.name);
+      if (!entName) return "Error: 'name' is required.";
+      const e = await client.lookupEntity(entName);
+      if (!e) return `"${entName}" is not tracked by AI Opportunity Intelligence.`;
+      const mo = e.momentum && e.momentum.state !== "new" ? ` · momentum ${e.momentum.state}` : "";
+      const trends = e.trends.length ? `\nTrends: ${e.trends.map((t) => t.title).join("; ")}` : "";
+      return `${e.name} (${e.type}) — tracked · ${e.linkedTrendCount} trend${e.linkedTrendCount === 1 ? "" : "s"}${mo}${trends}`;
+    }
+    case "list_rising_entities": {
+      const ents = await client.listRisingEntities({ limit: numArg(args.limit, 10) });
+      const rising = ents.filter((e) => e.momentum && e.momentum.state === "accelerating");
+      const show = rising.length ? rising : ents;
+      if (!show.length) return "No tracked entities yet.";
+      return show
+        .map((e, i) => {
+          const d = e.momentum ? ` · ${e.momentum.state} (+${e.momentum.delta})` : "";
+          return `${i + 1}. ${e.name} (${e.type}) — ${e.signalWeight} signals · ${e.linkedTrendCount} trends${d}`;
+        })
+        .join("\n");
+    }
+    case "list_recent_funding": {
+      const events = await client.listRecentFunding({ limit: numArg(args.limit, 10) });
+      if (!events.length) return "No funding events available.";
+      return events
+        .map((f, i) => {
+          const t = f.trends.length ? ` → ${f.trends.map((x) => x.title).join("; ")}` : "";
+          return `${i + 1}. ${f.issuer}${f.filedAt ? ` (${f.filedAt})` : ""}${t}`;
+        })
+        .join("\n");
     }
     default:
       return `Unknown tool: ${name}`;

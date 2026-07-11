@@ -120,14 +120,14 @@ Decomposed from the M15 "browser extension" milestone. Design: **[ADR-0007](../a
 (Accepted). An MV3 popup over the **existing deployed public API** (CORS-open) — no bespoke backend
 beyond one search route; new `apps/extension` built with **esbuild**. Distribution (Web Store) deferred.
 
-| ID     | Item                                                                                       | Epic | SP  | Status                                                         |
-| ------ | ------------------------------------------------------------------------------------------ | ---- | --- | -------------------------------------------------------------- |
-| B-038  | `GET /api/v1/search?q=` route + API index entry                                            | E2   | 2   | ✅                                                             |
-| B-039  | `apps/extension` MV3 scaffold + esbuild build, wired into Turbo                            | UI   | 5   | ✅                                                             |
-| B-040  | Popup UI (opportunities + search) + options (base URL, optional key); pure-logic tests     | UI   | 5   | ✅                                                             |
-| B-041a | Content-script page recognition (GitHub/HF) + `/api/v1/entities/lookup`                    | UI   | 5   | ✅                                                             |
-| B-041b | Extension packaging (`package` → zip) + store-listing/privacy docs                         | UI   | 2   | ✅ (submission itself blocked on a publisher account + assets) |
-| B-042  | (later) Deeper agent integrations — extend the MCP server with entity/funding/market tools | E2   | 8   | ⬜ needs scoping                                               |
+| ID     | Item                                                                                                                       | Epic | SP  | Status                                                         |
+| ------ | -------------------------------------------------------------------------------------------------------------------------- | ---- | --- | -------------------------------------------------------------- |
+| B-038  | `GET /api/v1/search?q=` route + API index entry                                                                            | E2   | 2   | ✅                                                             |
+| B-039  | `apps/extension` MV3 scaffold + esbuild build, wired into Turbo                                                            | UI   | 5   | ✅                                                             |
+| B-040  | Popup UI (opportunities + search) + options (base URL, optional key); pure-logic tests                                     | UI   | 5   | ✅                                                             |
+| B-041a | Content-script page recognition (GitHub/HF) + `/api/v1/entities/lookup`                                                    | UI   | 5   | ✅                                                             |
+| B-041b | Extension packaging (`package` → zip) + store-listing/privacy docs                                                         | UI   | 2   | ✅ (submission itself blocked on a publisher account + assets) |
+| B-042  | Deeper agent integrations — 4 new MCP tools (search/lookup_entity/rising/funding) + `/api/v1/entities` + `/api/v1/funding` | E2   | 8   | ✅                                                             |
 
 ## R2/R3 epics (not yet decomposed)
 
