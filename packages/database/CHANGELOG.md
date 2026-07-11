@@ -1,5 +1,40 @@
 # @aioi/database
 
+## 0.25.0
+
+### Minor Changes
+
+- e07f082: Funding signal (M15-B / ADR-0006). A new **SEC EDGAR Form D** source (US private funding rounds) — the
+  demand-side counterpart to M15-A. Free, official, public-domain; classified OFFICIAL.
+
+  - **`sec-edgar` connector** (`fetchFormDFilings`): EDGAR full-text search filtered to Form D + AI phrases,
+    Zod-validated, idempotent, backoff on 429/403. Needs a contact `SEC_USER_AGENT` (SEC fair-access) —
+    no-ops without it, so CI/dev stay green with no config. MSW-style tests (happy/429/malformed/empty/
+    dedupe). Wired into the refresh pipeline; auto-registers on `/sources`.
+  - **Funding → demand axis:** funding filings lift a trend on the Golden Quadrant's demand axis (money in
+    = validated demand) via `getTrendFundingHits` + a capped per-signal lift; `QuadrantTrend.fundingSignals`
+    added. `listRecentFunding` powers the surface.
+  - **`/funding` surface:** recent AI funding events (issuer, filing date, SEC link) with the trends each
+    maps to. Honest US-only scope note.
+
+  US-only in v1 (Form D is a US filing); global/paid funding is a separate future ADR. Built on the
+  existing ingest→cluster→score pipeline; offline-testable, keyless CI.
+
+- 157b114: Supply-side tracking (M15-A / ADR-0005). The supply mirror of trend momentum: models, MCP servers, and
+  repos become first-class **tracked objects** with a time-series and momentum.
+
+  - **`EntitySnapshot`** model + migration: an append-only history point per tracked entity
+    (`linkedTrendCount`, `signalWeight`), written each pipeline run.
+  - **`getEntityMomentumMap`** / **`computeMomentum`** (pure, unit-tested) derive accelerating / steady /
+    cooling vs a ~7-day baseline, exactly like trends; **`listTrackedEntities`** powers the leaderboard.
+  - **`syncSupplyEntities`** upserts `MODEL` / `REPO` / `MCP_SERVER` entities directly from the structured
+    Hugging Face + GitHub signals we already ingest (no new source), with a heuristic MCP-server detector.
+  - **`/entities`** gains a type-filterable, momentum-sortable **supply-side leaderboard** (with the shared
+    momentum sparkline), and entity detail shows a momentum block.
+
+  Built entirely on existing OFFICIAL sources + the `Entity` model — no new data source, no legality gate,
+  offline-testable. Phase-2 watch/alert on a tracked entity (B-032) is deferred.
+
 ## 0.24.0
 
 ### Minor Changes

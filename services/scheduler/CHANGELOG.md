@@ -1,5 +1,15 @@
 # @aioi/scheduler
 
+## 0.6.20
+
+### Patch Changes
+
+- Updated dependencies [e07f082]
+- Updated dependencies [157b114]
+  - @aioi/ingestion-service@0.7.0
+  - @aioi/database@0.25.0
+  - @aioi/ai-service@0.7.7
+
 ## 0.6.19
 
 ### Patch Changes
