@@ -16,6 +16,7 @@ import {
   runNpmIngestion,
   runPypiIngestion,
   runHnHiringIngestion,
+  runSecEdgarIngestion,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
@@ -63,6 +64,7 @@ async function main() {
   await ingest("npm", () => runNpmIngestion(30));
   await ingest("pypi", () => runPypiIngestion());
   await ingest("hnhiring", () => runHnHiringIngestion());
+  await ingest("sec-edgar", () => runSecEdgarIngestion()); // no-op unless SEC_USER_AGENT is set
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
