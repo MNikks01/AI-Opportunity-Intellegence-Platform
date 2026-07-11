@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { bootstrapUser, listBriefs, prisma } from "@aioi/database";
 import { clearOutbox, outbox } from "@aioi/email";
-import { runDailyBriefsJob } from "./jobs";
+import { runDailyBriefsJob, runSnapshotJob } from "./jobs";
 
 // Integration — needs a live Postgres (+ restricted role for RLS). Exercises only the pure job
 // function (no BullMQ/Redis).
@@ -34,5 +34,17 @@ describe.skipIf(!enabled)("runDailyBriefsJob (integration)", () => {
     expect((await listBriefs(b)).length).toBeGreaterThan(0);
     // brief emails landed in the stub outbox
     expect(outbox.filter((m) => m.subject.startsWith("Your daily brief"))).toHaveLength(2);
+  });
+});
+
+describe.skipIf(!enabled)("runSnapshotJob (integration)", () => {
+  it("records trend + entity snapshots and returns their counts", async () => {
+    const res = await runSnapshotJob();
+    expect(res).toEqual({
+      trends: expect.any(Number),
+      entities: expect.any(Number),
+    });
+    expect(res.trends).toBeGreaterThanOrEqual(0);
+    expect(res.entities).toBeGreaterThanOrEqual(0);
   });
 });
