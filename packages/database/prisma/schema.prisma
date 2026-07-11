@@ -227,14 +227,30 @@ enum EntityType {
 }
 
 model Entity {
-  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   type         EntityType
   name         String
   externalRefs Json
   trends       TrendEntity[]
-  createdAt    DateTime      @default(now())
+  snapshots    EntitySnapshot[]
+  createdAt    DateTime         @default(now())
 
   @@index([type, name])
+}
+
+/// Append-only history point per tracked supply-side entity (model / MCP server / repo), written once
+/// per pipeline run — the raw material for entity momentum (the supply mirror of TrendSnapshot). Global.
+model EntitySnapshot {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  entityId         String   @db.Uuid
+  /// Number of trends linked to this entity at capture time.
+  linkedTrendCount Int
+  /// Total signal count across this entity's linked trends — the momentum metric.
+  signalWeight     Int
+  capturedAt       DateTime @default(now())
+  entity           Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
+
+  @@index([entityId, capturedAt])
 }
 
 model TrendEntity {

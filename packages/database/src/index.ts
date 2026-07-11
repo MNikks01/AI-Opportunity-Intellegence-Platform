@@ -114,6 +114,16 @@ export {
   type MomentumState,
 } from "./momentum";
 export {
+  TRACKED_ENTITY_TYPES,
+  computeMomentum,
+  recordEntitySnapshots,
+  getEntityMomentumMap,
+  listTrackedEntities,
+  type EntityMomentum,
+  type TrackedEntity,
+  type TrackedSort,
+} from "./entity-momentum";
+export {
   upsertEntity,
   linkTrendEntity,
   listEntities,

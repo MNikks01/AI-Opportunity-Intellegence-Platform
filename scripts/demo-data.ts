@@ -31,6 +31,7 @@ import {
   bootstrapUser,
   generateDailyBrief,
   recordTrendSnapshots,
+  recordEntitySnapshots,
   getOrgIntegration,
   recordFailedIngestionRun,
 } from "../packages/database/src/index";
@@ -70,8 +71,9 @@ async function main() {
   );
   console.log("action plans…", await generateActionPlansForTopTrends({ limit: 15 }));
 
-  // Record a history point so momentum/trajectory accrues run over run.
+  // Record a history point so momentum/trajectory accrues run over run (demand + supply side).
   console.log("snapshots…", await recordTrendSnapshots());
+  console.log("entity snapshots…", await recordEntitySnapshots());
 
   // Generate today's brief for the demo tenant so /briefs isn't empty on the live site.
   const { organizationId } = await bootstrapUser({
