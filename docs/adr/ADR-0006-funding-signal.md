@@ -1,8 +1,8 @@
 # ADR-0006 — Funding signal (SEC EDGAR Form D)
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-07-11
-- **Deciders:** Architect, Backend Engineer, Product (pending)
+- **Deciders:** Architect, Backend Engineer, Product
 - **Context source:** M15 "competitor/funding/market dashboards" ([MILESTONES](../09-process/MILESTONES.md)),
   the `product-strategy-usp` demand framing, the **data-source rule** ([CLAUDE.md](../../CLAUDE.md)),
   [ADR-0001](ADR-0001-core-stack.md), [ADR-0005](ADR-0005-supply-side-tracking.md)
