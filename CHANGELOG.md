@@ -11,6 +11,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 ## [Unreleased]
 
 ### Added
+- **Market dashboard (B-037a)** — a new `/market` page: the Golden-Quadrant split, fastest-rising supply (models/MCP/repos), and recent funding, composed from existing data. Demand × supply at a glance.
 - **Watch + alert on a tracked entity (B-032)** — watch a model / MCP server / repo from its `/entities/{id}` page and get notified when it's **accelerating**. New `ENTITY_MOMENTUM` alert trigger + `evaluateEntityAlertsAllOrgs` (pipeline-wired, RLS-scoped, de-duped), reusing the existing watchlist/alert/notification primitives.
 - **Browser extension (M15-C / ADR-0007)** — a new `apps/extension`: a **Manifest V3 popup** that puts
   the AI "build now" opportunities in your toolbar, over the existing deployed public API. Lists
@@ -92,6 +93,7 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
   (`Cannot find module '@aioi/database'`). Switched to a relative import, matching the service imports.
 
 ### Added
+- **Market dashboard (B-037a)** — a new `/market` page: the Golden-Quadrant split, fastest-rising supply (models/MCP/repos), and recent funding, composed from existing data. Demand × supply at a glance.
 - **Watch + alert on a tracked entity (B-032)** — watch a model / MCP server / repo from its `/entities/{id}` page and get notified when it's **accelerating**. New `ENTITY_MOMENTUM` alert trigger + `evaluateEntityAlertsAllOrgs` (pipeline-wired, RLS-scoped, de-duped), reusing the existing watchlist/alert/notification primitives.
 - **Langfuse LLM tracing (B-007)** — a provider-agnostic tracing seam in `@aioi/ai-sdk`
   (`Tracer`/`NoopTracer`/`LangfuseTracer` + `getTracer`) wraps every real model call (scoring, action
