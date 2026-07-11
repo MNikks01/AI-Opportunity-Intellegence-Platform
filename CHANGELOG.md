@@ -10,6 +10,30 @@ maintained by hand each change, and every PR updates the `[Unreleased]` section.
 
 ## [Unreleased]
 
+### Added
+- **Browser extension (M15-C / ADR-0007)** — a new `apps/extension`: a **Manifest V3 popup** that puts
+  the AI "build now" opportunities in your toolbar, over the existing deployed public API. Lists
+  `/api/v1/opportunities` + a search box; results deep-link to the web app; configurable API base URL +
+  optional API key. Built with **esbuild** (new `apps/extension` workspace, wired into Turbo); no
+  permissions/keys needed (the public API is CORS-open). Adds a public **`GET /api/v1/search?q=`** route.
+  Pure logic unit-tested; verified the search route + CORS end-to-end and a valid MV3 `dist/`.
+  Content-script page recognition + Web Store submission deferred to v2.
+- **Funding signal (M15-B / ADR-0006)** — a new **SEC EDGAR Form D** source (US private funding rounds),
+  the demand-side counterpart to M15-A. A `sec-edgar` connector (EDGAR full-text search → Form D + AI
+  phrases; Zod-validated, idempotent, 429/403 backoff; keyless — no-ops without `SEC_USER_AGENT`) feeds
+  the existing pipeline. Funding filings **lift a trend's demand axis** on the Golden Quadrant
+  (`fundingSignals` + a capped lift). New **`/funding`** surface lists recent AI funding events (issuer,
+  filing date, SEC link) with the trends they map to. **US-only in v1** (Form D is a US filing); global/
+  paid funding is a separate future ADR. `+8` tests; verified in-browser.
+- **Supply-side tracking (M15-A / ADR-0005)** — the supply mirror of trend momentum. Models, MCP
+  servers, and repos become first-class **tracked objects**: a new `EntitySnapshot` history (+migration),
+  `getEntityMomentumMap`/`computeMomentum` (accelerating/steady/cooling vs a ~7-day baseline, like
+  trends), `listTrackedEntities` for the leaderboard, and `syncSupplyEntities` which upserts
+  `MODEL`/`REPO`/`MCP_SERVER` entities directly from Hugging Face + GitHub signals (heuristic MCP
+  detection — no new data source). `/entities` gains a type-filterable, momentum-sortable supply-side
+  leaderboard + a momentum block on entity detail. Built on existing OFFICIAL sources; offline-testable.
+  Phase-2 watch/alert on a tracked entity (B-032) deferred.
+
 ### Changed
 - **Local dev env-link + setup-doc refresh** — added `apps/web/link-root-env.mjs` (idempotent,
   keyless-safe; wired into `dev`/`build`/`start`) so Next.js loads the monorepo-root `.env` in every

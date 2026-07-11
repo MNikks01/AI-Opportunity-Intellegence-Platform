@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getEntityById, listTrendsForEntity, getEntitySeo } from "@aioi/database";
-import { Badge } from "@aioi/ui";
+import {
+  getEntityById,
+  listTrendsForEntity,
+  getEntitySeo,
+  getEntityMomentumMap,
+} from "@aioi/database";
+import { Badge, MomentumTag } from "@aioi/ui";
 import { TYPE_LABELS } from "../page";
 import { getSiteUrl } from "../../lib/site";
 
@@ -31,6 +36,7 @@ export default async function EntityDetailPage({ params }: { params: Promise<{ i
   const entity = await getEntityById(id);
   if (!entity) notFound();
   const trends = await listTrendsForEntity(id);
+  const momentum = (await getEntityMomentumMap([id])).get(id) ?? null;
 
   return (
     <main>
@@ -44,6 +50,15 @@ export default async function EntityDetailPage({ params }: { params: Promise<{ i
           appears in {trends.length} {trends.length === 1 ? "trend" : "trends"}
         </span>
       </p>
+
+      {momentum && momentum.state !== "new" && (
+        <div className="aioi-card" style={{ margin: "0 0 20px", maxWidth: 360 }}>
+          <div style={{ fontSize: "0.75rem", color: "var(--fg-muted)", marginBottom: 2 }}>
+            Signal momentum
+          </div>
+          <MomentumTag momentum={momentum} />
+        </div>
+      )}
 
       {trends.length === 0 ? (
         <div className="aioi-card" style={{ color: "var(--fg-muted)" }}>

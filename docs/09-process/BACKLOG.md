@@ -83,9 +83,52 @@ inventory and the [CHANGELOG](../../CHANGELOG.md) `[Unreleased]` for per-PR note
 - **Public `/changelog`** product surface (R3) — curated release notes.
 - Make the Fastify API checkout interval-aware (currently monthly-Pro only).
 
+## M15-A — Supply-side tracking (models / MCP servers / repos)
+
+Decomposed from the M15 "model/prompt/MCP tracking" milestone. Design: **[ADR-0005](../adr/ADR-0005-supply-side-tracking.md)**
+(Accepted). Builds on the existing `Entity`/`EntityType` model and OFFICIAL sources (HF, GitHub, arXiv) —
+no new data source, no legality gate. Track the AI supply side with the same momentum rigor as trends.
+**Shipped** (PR #250).
+
+| ID    | Item                                                                                      | Epic | SP  | Status |
+| ----- | ----------------------------------------------------------------------------------------- | ---- | --- | ------ |
+| B-028 | `EntitySnapshot` model + migration + per-run snapshot job (D1/D2)                         | E2   | 5   | ✅     |
+| B-029 | `getEntityMomentumMap` + `listTrackedEntities` repositories (D1/D3)                       | E2   | 5   | ✅     |
+| B-030 | HF/GitHub → `MODEL`/`REPO`/`MCP_SERVER` entity upserts + MCP detection (D2)               | E2   | 5   | ✅     |
+| B-031 | `/entities` momentum leaderboard + entity-detail sparkline (D3)                           | UI   | 5   | ✅     |
+| B-032 | (phase 2) watch + alert on a tracked entity, via existing watchlist/alert primitives (D4) | E4   | 5   | ⬜     |
+
+## M15-B — Funding signal (SEC EDGAR Form D)
+
+Decomposed from the M15 "competitor/funding dashboards" milestone. Design: **[ADR-0006](../adr/ADR-0006-funding-signal.md)**
+(Accepted). Adds a **new OFFICIAL source** — SEC EDGAR Form D (US private funding rounds), free +
+public-domain — as a leading **demand** signal through the existing pipeline. **US-only in v1**; global
+(paid) funding is a separate future ADR. **Shipped** (PR #252).
+
+| ID    | Item                                                                                       | Epic | SP  | Status |
+| ----- | ------------------------------------------------------------------------------------------ | ---- | --- | ------ |
+| B-033 | `sec-edgar` Form D connector (EDGAR FTS + AI-keyword filter) + MSW tests + legality header | E2   | 8   | ✅     |
+| B-034 | Register the source (`OFFICIAL`) + wire into the refresh pipeline + `/sources`             | E2   | 3   | ✅     |
+| B-035 | Funding → demand-axis contribution in clustering/quadrant (integration-tested)             | E2   | 5   | ✅     |
+| B-036 | `/funding` surface: recent AI funding events + linked trends                               | UI   | 5   | ✅     |
+| B-037 | (v2) competitor/market dashboard; (later) global/paid funding source ADR                   | E2   | 8   | ⬜     |
+
+## M15-C — Browser extension (MV3 popup)
+
+Decomposed from the M15 "browser extension" milestone. Design: **[ADR-0007](../adr/ADR-0007-browser-extension.md)**
+(Accepted). An MV3 popup over the **existing deployed public API** (CORS-open) — no bespoke backend
+beyond one search route; new `apps/extension` built with **esbuild**. Distribution (Web Store) deferred.
+
+| ID    | Item                                                                                   | Epic | SP  | Status |
+| ----- | -------------------------------------------------------------------------------------- | ---- | --- | ------ |
+| B-038 | `GET /api/v1/search?q=` route + API index entry                                        | E2   | 2   | ✅     |
+| B-039 | `apps/extension` MV3 scaffold + esbuild build, wired into Turbo                        | UI   | 5   | ✅     |
+| B-040 | Popup UI (opportunities + search) + options (base URL, optional key); pure-logic tests | UI   | 5   | ✅     |
+| B-041 | (v2) content-script page recognition; (later) Web Store / AMO submission               | UI   | 8   | ⬜     |
+
 ## R2/R3 epics (not yet decomposed)
 
-Competitor/Funding/Market/Research dashboards · Model/Prompt tracking · Browser extension · Telegram
+Competitor/Funding/Market/Research dashboards · Browser extension · Telegram
 integration · Weekly Reports + PDF export · Referral/Affiliate · Agent Marketplace · Admin/Org
 governance + **SSO** + a **Business** tier · Blog/Help/Feedback/public Roadmap · PyPI + job-posts +
 funding sources.

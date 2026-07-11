@@ -92,6 +92,12 @@ export {
   type Quadrant,
 } from "./quadrant";
 export { mineDemand, getTrendDemandHits } from "./demand";
+export {
+  FUNDING_SOURCE_KEY,
+  getTrendFundingHits,
+  listRecentFunding,
+  type FundingEvent,
+} from "./funding";
 export { listTrendsForRescore, touchTrend, countScoredTrends } from "./rescore";
 export { listTrendSlugs, getTrendSeo, getTrendOg, getEntitySeo } from "./seo";
 export { subscribe, unsubscribe, listActiveSubscribers, countSubscribers } from "./newsletter";
@@ -113,6 +119,21 @@ export {
   type TrendMomentum,
   type MomentumState,
 } from "./momentum";
+export {
+  TRACKED_ENTITY_TYPES,
+  computeMomentum,
+  recordEntitySnapshots,
+  getEntityMomentumMap,
+  listTrackedEntities,
+  type EntityMomentum,
+  type TrackedEntity,
+  type TrackedSort,
+} from "./entity-momentum";
+export {
+  classifyGitHubEntity,
+  supplyEntityFromSignal,
+  syncSupplyEntities,
+} from "./supply-entities";
 export {
   upsertEntity,
   linkTrendEntity,

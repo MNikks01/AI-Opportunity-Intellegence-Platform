@@ -1,0 +1,18 @@
+{
+  "name": "@aioi/extension",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Browser extension (MV3): AI opportunities in your toolbar, over the public API (ADR-0007).",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "eslint .",
+    "clean": "rm -rf dist .turbo"
+  },
+  "devDependencies": {
+    "@aioi/eslint-config": "workspace:*",
+    "@aioi/tsconfig": "workspace:*",
+    "esbuild": "^0.24.0"
+  }
+}
