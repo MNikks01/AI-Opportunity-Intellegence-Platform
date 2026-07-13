@@ -3,7 +3,13 @@
  * the queue layer just schedules them. System fan-out over all active orgs uses `listActiveOrgIds`
  * (Organization has no RLS); each per-org call is RLS-scoped inside the repo.
  */
-import { generateDailyBrief, listActiveOrgIds, listOrgMemberEmails } from "@aioi/database";
+import {
+  generateDailyBrief,
+  listActiveOrgIds,
+  listOrgMemberEmails,
+  recordTrendSnapshots,
+  recordEntitySnapshots,
+} from "@aioi/database";
 import {
   runHackerNewsIngestion,
   runRedditIngestion,
@@ -11,6 +17,12 @@ import {
   runHuggingFaceIngestion,
   runProductHuntIngestion,
   runYouTubeIngestion,
+  runArxivIngestion,
+  runNpmIngestion,
+  runPypiIngestion,
+  runHnHiringIngestion,
+  runSecEdgarIngestion,
+  runCrunchbaseIngestion,
 } from "@aioi/ingestion-service";
 import { clusterRecentSignals, scoreClusteredTrends } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
@@ -52,6 +64,42 @@ export async function runYouTubeIngestionJob(limit = 25) {
   return result;
 }
 
+export async function runArxivIngestionJob(limit = 30) {
+  const result = await runArxivIngestion(limit);
+  logger.info(result, "scheduler: arxiv ingestion job complete");
+  return result;
+}
+
+export async function runNpmIngestionJob(limit = 30) {
+  const result = await runNpmIngestion(limit);
+  logger.info(result, "scheduler: npm ingestion job complete");
+  return result;
+}
+
+export async function runPypiIngestionJob() {
+  const result = await runPypiIngestion();
+  logger.info(result, "scheduler: pypi ingestion job complete");
+  return result;
+}
+
+export async function runHnHiringIngestionJob() {
+  const result = await runHnHiringIngestion();
+  logger.info(result, "scheduler: hnhiring ingestion job complete");
+  return result;
+}
+
+export async function runSecEdgarIngestionJob() {
+  const result = await runSecEdgarIngestion();
+  logger.info(result, "scheduler: sec-edgar ingestion job complete");
+  return result;
+}
+
+export async function runCrunchbaseIngestionJob() {
+  const result = await runCrunchbaseIngestion();
+  logger.info(result, "scheduler: crunchbase ingestion job complete");
+  return result;
+}
+
 export async function runClusteringJob() {
   const result = await clusterRecentSignals();
   logger.info(result, "scheduler: clustering job complete");
@@ -61,6 +109,19 @@ export async function runClusteringJob() {
 export async function runScoringJob() {
   const result = await scoreClusteredTrends();
   logger.info(result, "scheduler: scoring job complete");
+  return result;
+}
+
+/**
+ * Record one history point per trend + tracked entity — the raw material for momentum/trajectory.
+ * Runs at the end of each pipeline cycle (after scoring); only useful once ≥2 runs accrue, so it must
+ * run from the start for the baseline to build. No-ops cleanly on an empty database.
+ */
+export async function runSnapshotJob(): Promise<{ trends: number; entities: number }> {
+  const trends = await recordTrendSnapshots();
+  const entities = await recordEntitySnapshots();
+  const result = { trends: trends.count, entities: entities.count };
+  logger.info(result, "scheduler: snapshot job complete");
   return result;
 }
 
@@ -95,7 +156,14 @@ export const JOB = {
   huggingfaceIngestion: "ingestion:huggingface",
   productHuntIngestion: "ingestion:producthunt",
   youtubeIngestion: "ingestion:youtube",
+  arxivIngestion: "ingestion:arxiv",
+  npmIngestion: "ingestion:npm",
+  pypiIngestion: "ingestion:pypi",
+  hnHiringIngestion: "ingestion:hnhiring",
+  secEdgarIngestion: "ingestion:sec-edgar",
+  crunchbaseIngestion: "ingestion:crunchbase",
   clustering: "clustering:signals",
   scoring: "scoring:trends",
+  snapshot: "snapshot:momentum",
   dailyBriefs: "briefs:daily",
 } as const;
