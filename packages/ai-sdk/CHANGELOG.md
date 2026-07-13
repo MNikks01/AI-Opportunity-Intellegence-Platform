@@ -1,5 +1,12 @@
 # @aioi/ai-sdk
 
+## 0.7.1
+
+### Patch Changes
+
+- Updated dependencies [b6bf357]
+  - @aioi/validation@0.4.0
+
 ## 0.7.0
 
 ### Minor Changes
