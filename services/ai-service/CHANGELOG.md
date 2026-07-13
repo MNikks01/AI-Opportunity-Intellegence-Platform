@@ -1,5 +1,16 @@
 # @aioi/ai-service
 
+## 0.7.8
+
+### Patch Changes
+
+- Updated dependencies [ad749a4]
+- Updated dependencies [b6bf357]
+- Updated dependencies [62a79b6]
+  - @aioi/database@0.26.0
+  - @aioi/validation@0.4.0
+  - @aioi/ai-sdk@0.7.1
+
 ## 0.7.7
 
 ### Patch Changes

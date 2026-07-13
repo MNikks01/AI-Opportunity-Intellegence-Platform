@@ -1,5 +1,12 @@
 # @aioi/notification-service
 
+## 0.3.1
+
+### Patch Changes
+
+- Updated dependencies [b6bf357]
+  - @aioi/validation@0.4.0
+
 ## 0.3.0
 
 ### Minor Changes

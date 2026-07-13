@@ -1,5 +1,50 @@
 # @aioi/database
 
+## 0.26.0
+
+### Minor Changes
+
+- ad749a4: Global funding via Crunchbase (M15-B v2, B-037b / ADR-0008). A **LICENSED**, **key-gated** connector for
+  global AI funding rounds — the complement to the free, US-only SEC EDGAR source.
+
+  - `crunchbase` connector (Crunchbase Data API v4 search over recent AI-category rounds; Zod-validated,
+    429/5xx backoff) — **inert without `CRUNCHBASE_API_KEY`** (no calls, no cost, CI stays keyless). Set the
+    key (with a purchased license) and it activates automatically; the source auto-registers as LICENSED.
+  - Funding queries (`getTrendFundingHits`, `listRecentFunding`) now treat both `sec-edgar` **and**
+    `crunchbase` as funding sources, so global events surface on `/funding` + `/market` and lift the
+    Golden-Quadrant demand axis with no further changes. `ensureSource` gained an optional legality tier.
+  - MSW-mocked tests (happy/429/malformed/empty). Verified a crunchbase event auto-surfaces in the funding
+    data + registers LICENSED.
+
+- b6bf357: Watch + alert on a tracked entity (M15-A phase 2, B-032). You can now **watch** a supply-side entity
+  (model / MCP server / repo) from its detail page and be alerted when it's **accelerating**.
+
+  - New `ENTITY_MOMENTUM` alert trigger (`@aioi/validation`); the watchlist alert form offers "Entity
+    accelerating".
+  - `evaluateEntityAlertsAllOrgs` (run in the pipeline after entity snapshots) notifies each org whose
+    watched entities are accelerating — reusing the existing watchlist + alert + Notification primitives,
+    RLS-scoped, and **de-duped** (one unread notification per entity per alert).
+  - A watch toggle on `/entities/{id}` (tracked types only), via the existing primary-watchlist flow.
+
+  Pure `entityMomentumMatches` + a live-DB integration test (notify + de-dupe).
+
+- 62a79b6: Extension content script + packaging (M15-C v2, B-041a/B-041b). On a **GitHub repo** or **Hugging Face
+  model** page, a content script recognizes the entity and injects a badge if AIOI tracks it (linked
+  trends + momentum).
+
+  - New public **`GET /api/v1/entities/lookup?name=`** (CORS-open) backed by `lookupTrackedEntity`.
+  - `apps/extension` gains a content script (`src/content.ts`) with pure URL→name parsing
+    (`src/content-api.ts`, unit-tested) for github.com / huggingface.co; esbuild now bundles two entries.
+  - `pnpm --filter @aioi/extension package` produces a store-ready `aioi-extension.zip`; added store-listing
+    copy (`STORE.md`) + a privacy policy (`PRIVACY.md`). Web Store submission itself needs a publisher
+    account (documented, blocked on the operator).
+
+### Patch Changes
+
+- Updated dependencies [b6bf357]
+  - @aioi/validation@0.4.0
+  - @aioi/ai-sdk@0.7.1
+
 ## 0.25.0
 
 ### Minor Changes
