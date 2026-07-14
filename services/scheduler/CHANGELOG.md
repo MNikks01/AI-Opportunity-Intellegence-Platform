@@ -1,5 +1,86 @@
 # @aioi/scheduler
 
+## 0.8.0
+
+### Minor Changes
+
+- 62feae5: Three official-API connectors for signal that RSS can't cover:
+
+  - **Semantic Scholar** (`semantic-scholar`) — newest AI papers via the Academic Graph bulk search
+    (sorted by publication date); a cross-venue leading indicator complementing arXiv, with citation
+    counts. Optional `SEMANTIC_SCHOLAR_API_KEY` raises the rate limit; keyless 429s degrade to a no-op.
+    Every 6h.
+  - **Remote OK** (`remoteok`) — current remote AI job postings; hiring is a leading demand signal. Our
+    own word-boundary AI filter drops ~90% non-AI noise. Honors the feed's attribution ToS via the stored
+    job URL. Keyless (descriptive User-Agent). 2×/day.
+  - **Stack Exchange** (`stackexchange`) — newest Stack Overflow questions across AI tags; a burst on a tag
+    is a leading demand/pain signal. One request per tag, deduped. Keyless 300 req/day; `STACKEXCHANGE_KEY`
+    raises to 10k. Every 4h.
+
+  All three: Zod-validated → `SourceRecord`, backoff + jitter honoring `Retry-After`, idempotent upsert,
+  ✅ OFFICIAL classification in-header + `docs/data-sources/*.md`, MSW-style unit tests, and graceful
+  degradation (a rate-limit/quota failure records a failed run and returns zeros instead of throwing).
+  Wired into the scheduler as `ingestion:semantic-scholar` / `ingestion:remoteok` / `ingestion:stackexchange`.
+
+- 651b63a: Generic RSS/Atom feed connector (`connectors/rss.ts`) — one connector, a registry of ~20 publisher
+  feeds. A single parser handles both RSS `<item>` and Atom `<entry>`; each feed is registered as its own
+  `Source` (`rss:<id>`) for per-publisher attribution, dedupe, and `/sources` health tracking. Broad
+  publishers (TechCrunch, The Verge, AWS, …) are filtered to AI-relevant posts via word-boundary keyword
+  matching; AI-native labs (OpenAI, DeepMind, Hugging Face, Google AI) and curated newsletters (Import AI,
+  Latent Space, Simon Willison) are kept whole.
+
+  All feed URLs were verified live (HTTP 200 + XML) on 2026-07-13. Per-feed failures are isolated — a dead
+  or slow feed records a FAILED run and the batch continues. Classification is ✅ OFFICIAL (publisher-owned
+  syndication feeds, no auth, no PII); polite backoff + jitter + descriptive User-Agent. Adding a feed is a
+  one-line registry edit, no new code.
+
+  Wired into the scheduler as `ingestion:rss`, every 2 hours. New exports: `runRssIngestion` /
+  `runRssIngestionJob`, `RSS_FEEDS`, `fetchFeed`, `parseFeed`, `rssSourceKey`. Docs:
+  `docs/data-sources/rss.md`. ToS-prohibited sources (X, LinkedIn, Google Trends/Scholar) remain excluded.
+
+### Patch Changes
+
+- Updated dependencies [62feae5]
+- Updated dependencies [3e0c633]
+- Updated dependencies [651b63a]
+  - @aioi/ingestion-service@0.9.0
+  - @aioi/database@0.26.1
+  - @aioi/ai-service@0.7.9
+
+## 0.7.0
+
+### Minor Changes
+
+- 7219463: Wire the momentum baseline + the remaining leading-indicator sources into the running cron. Three gaps
+  existed between shipped code and the live pipeline: (1) `recordTrendSnapshots` / `recordEntitySnapshots`
+  were written and tested but only ever called from the demo seed — so in production the momentum,
+  trajectory, and Golden-Quadrant-over-time features never accrued a baseline; (2) six built + tested
+  connectors (arXiv, npm, PyPI, HN "Who is hiring?", SEC EDGAR, Crunchbase) were never registered as jobs,
+  so they never ran; (3) neither was actually reachable from the scheduler.
+
+  This adds:
+
+  - A `snapshot:momentum` repeatable job (hourly at :25, after scoring at :15) calling
+    `runSnapshotJob` → `recordTrendSnapshots` + `recordEntitySnapshots`. Unconditional, so the baseline
+    starts building immediately. No-ops cleanly on an empty database.
+  - Six new ingestion jobs on fair-access cadences: arXiv (every 6h), PyPI (every 3h), and npm /
+    HN-hiring / SEC EDGAR / Crunchbase (daily). The key-gated / licensed ones (SEC EDGAR, Crunchbase)
+    stay inert with no config, so CI and dev remain green until keys are provisioned.
+
+  New exported job functions on `@aioi/scheduler`: `runSnapshotJob`, `runArxivIngestionJob`,
+  `runNpmIngestionJob`, `runPypiIngestionJob`, `runHnHiringIngestionJob`, `runSecEdgarIngestionJob`,
+  `runCrunchbaseIngestionJob`.
+
+### Patch Changes
+
+- Updated dependencies [ad749a4]
+- Updated dependencies [b6bf357]
+- Updated dependencies [62a79b6]
+  - @aioi/ingestion-service@0.8.0
+  - @aioi/database@0.26.0
+  - @aioi/validation@0.4.0
+  - @aioi/ai-service@0.7.8
+
 ## 0.6.20
 
 ### Patch Changes

@@ -1,5 +1,70 @@
 # @aioi/web
 
+## 0.24.1
+
+### Patch Changes
+
+- Updated dependencies [3e0c633]
+  - @aioi/database@0.26.1
+
+## 0.24.0
+
+### Minor Changes
+
+- b6bf357: Watch + alert on a tracked entity (M15-A phase 2, B-032). You can now **watch** a supply-side entity
+  (model / MCP server / repo) from its detail page and be alerted when it's **accelerating**.
+
+  - New `ENTITY_MOMENTUM` alert trigger (`@aioi/validation`); the watchlist alert form offers "Entity
+    accelerating".
+  - `evaluateEntityAlertsAllOrgs` (run in the pipeline after entity snapshots) notifies each org whose
+    watched entities are accelerating — reusing the existing watchlist + alert + Notification primitives,
+    RLS-scoped, and **de-duped** (one unread notification per entity per alert).
+  - A watch toggle on `/entities/{id}` (tracked types only), via the existing primary-watchlist flow.
+
+  Pure `entityMomentumMatches` + a live-DB integration test (notify + de-dupe).
+
+- 62a79b6: Extension content script + packaging (M15-C v2, B-041a/B-041b). On a **GitHub repo** or **Hugging Face
+  model** page, a content script recognizes the entity and injects a badge if AIOI tracks it (linked
+  trends + momentum).
+
+  - New public **`GET /api/v1/entities/lookup?name=`** (CORS-open) backed by `lookupTrackedEntity`.
+  - `apps/extension` gains a content script (`src/content.ts`) with pure URL→name parsing
+    (`src/content-api.ts`, unit-tested) for github.com / huggingface.co; esbuild now bundles two entries.
+  - `pnpm --filter @aioi/extension package` produces a store-ready `aioi-extension.zip`; added store-listing
+    copy (`STORE.md`) + a privacy policy (`PRIVACY.md`). Web Store submission itself needs a publisher
+    account (documented, blocked on the operator).
+
+- c54139f: Market dashboard (M15-B v2, B-037a). A new `/market` page composing existing data into the AI
+  opportunity market at a glance: the **Golden-Quadrant split** (build/crowded/early/hype counts + the top
+  "build now" opportunities), **rising supply** (fastest-accelerating models/MCP/repos), and **recent
+  funding** (SEC EDGAR Form D). Read-only RSC over `listTrendsQuadrant` / `listTrackedEntities` /
+  `listRecentFunding`; added to nav + sitemap. No new backend.
+- 739603c: Deeper agent integrations (B-042). The MCP server gains four tools over the public v2 API so coding
+  agents can act on the platform's supply×demand intelligence: **`search_opportunities`** (keyword search
+  scored trends), **`lookup_entity`** (is this model/MCP/repo tracked? its momentum + linked trends —
+  useful when reviewing a repo), **`list_rising_entities`** (fastest-accelerating supply), and
+  **`list_recent_funding`** (SEC EDGAR + Crunchbase money, a leading demand signal). Backed by two new
+  read routes — **`GET /api/v1/entities`** (tracked supply-side entities with momentum; `sort`, `limit`)
+  and **`GET /api/v1/funding`** (recent funding events; `limit`) — added to the self-documenting API
+  index. All seven MCP tools are unit-tested; the new DB-backed routes reuse `listTrackedEntities` /
+  `listRecentFunding` and were verified against live Postgres. No DB credentials in the MCP server (it
+  speaks HTTP to the hosted API).
+
+### Patch Changes
+
+- 6b2732b: Fix: keep the public API reachable without a Clerk session. `proxy.ts` previously ran
+  `auth.protect()` on **every** route when Clerk keys are present, which also gated `/api/v1/*` and the
+  Stripe webhook — so anonymous callers (the MCP server, the browser extension, `curl`) were redirected
+  to sign-in. Now a `createRouteMatcher` carves out `/api/v1(.*)` (the CORS-open read API; per-route
+  `aioi_…` bearer auth is still optional) and `/api/stripe/webhook` (its own signature check); every other
+  route still requires authentication. Verified against a Clerk-enabled build: `/api/v1/*` returns 200
+  JSON anonymously (CORS `*` intact) while app pages still 307 to sign-in.
+- Updated dependencies [ad749a4]
+- Updated dependencies [b6bf357]
+- Updated dependencies [62a79b6]
+  - @aioi/database@0.26.0
+  - @aioi/validation@0.4.0
+
 ## 0.23.0
 
 ### Minor Changes
