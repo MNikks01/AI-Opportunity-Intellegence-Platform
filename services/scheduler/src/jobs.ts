@@ -24,6 +24,9 @@ import {
   runSecEdgarIngestion,
   runCrunchbaseIngestion,
   runRssIngestion,
+  runSemanticScholarIngestion,
+  runRemoteOkIngestion,
+  runStackExchangeIngestion,
 } from "@aioi/ingestion-service";
 import { clusterRecentSignals, scoreClusteredTrends } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
@@ -107,6 +110,24 @@ export async function runRssIngestionJob() {
   return result;
 }
 
+export async function runSemanticScholarIngestionJob() {
+  const result = await runSemanticScholarIngestion();
+  logger.info(result, "scheduler: semantic-scholar ingestion job complete");
+  return result;
+}
+
+export async function runRemoteOkIngestionJob() {
+  const result = await runRemoteOkIngestion();
+  logger.info(result, "scheduler: remoteok ingestion job complete");
+  return result;
+}
+
+export async function runStackExchangeIngestionJob() {
+  const result = await runStackExchangeIngestion();
+  logger.info(result, "scheduler: stackexchange ingestion job complete");
+  return result;
+}
+
 export async function runClusteringJob() {
   const result = await clusterRecentSignals();
   logger.info(result, "scheduler: clustering job complete");
@@ -170,6 +191,9 @@ export const JOB = {
   secEdgarIngestion: "ingestion:sec-edgar",
   crunchbaseIngestion: "ingestion:crunchbase",
   rssIngestion: "ingestion:rss",
+  semanticScholarIngestion: "ingestion:semantic-scholar",
+  remoteOkIngestion: "ingestion:remoteok",
+  stackExchangeIngestion: "ingestion:stackexchange",
   clustering: "clustering:signals",
   scoring: "scoring:trends",
   snapshot: "snapshot:momentum",
