@@ -88,6 +88,26 @@ export {
   type RssItem,
   type RssCategory,
 } from "./connectors/rss";
+// Selective re-export: semantic-scholar shares `normalize` with the other connectors.
+export {
+  SEMANTIC_SCHOLAR_SOURCE_KEY,
+  fetchPapers as fetchSemanticScholarPapers,
+  type S2Paper,
+} from "./connectors/semantic-scholar";
+// Selective re-export: remoteok shares `normalize` with the other connectors.
+export {
+  REMOTEOK_SOURCE_KEY,
+  fetchJobs,
+  looksAiJob,
+  type RemoteOkJob,
+} from "./connectors/remoteok";
+// Selective re-export: stackexchange shares `normalize` with the other connectors.
+export {
+  STACKEXCHANGE_SOURCE_KEY,
+  AI_TAGS,
+  fetchQuestions,
+  type StackQuestion,
+} from "./connectors/stackexchange";
 export * from "./repository";
 export * from "./repository.prisma";
 
@@ -104,6 +124,9 @@ import { fetchPackages } from "./connectors/npm";
 import { fetchPackages as fetchPypiPackages } from "./connectors/pypi";
 import { fetchHiring } from "./connectors/hnhiring";
 import { RSS_FEEDS, fetchFeed, rssSourceKey } from "./connectors/rss";
+import { fetchPapers as fetchSemanticScholarPapers } from "./connectors/semantic-scholar";
+import { fetchJobs } from "./connectors/remoteok";
+import { fetchQuestions } from "./connectors/stackexchange";
 import { fetchFormDFilings, secEdgarConfigured } from "./connectors/sec-edgar";
 import {
   fetchFundingRounds,
@@ -274,6 +297,77 @@ export async function runRssIngestion(
   const result = { fetched, inserted, skipped, feeds: ok };
   logger.info({ source: "rss", ...result }, "rss ingestion pass complete");
   return result;
+}
+
+/**
+ * Run one Semantic Scholar pass (newest AI papers). Keyless access shares a low rate pool, so a 429 is
+ * expected without SEMANTIC_SCHOLAR_API_KEY — we degrade to a no-op (record a failed run, return zeros)
+ * instead of throwing, and activate fully once a key is set. Cross-venue complement to arXiv.
+ */
+export async function runSemanticScholarIngestion(
+  limit = 100,
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
+  try {
+    const { records, skipped } = await fetchSemanticScholarPapers(limit);
+    const inserted = await repo.upsertMany(records);
+    const result = { fetched: records.length, inserted, skipped };
+    logger.info({ source: "semantic-scholar", ...result }, "ingestion pass complete");
+    await recordIngestionRun("semantic-scholar", result, startedAt);
+    return result;
+  } catch (err) {
+    logger.warn(
+      { err, source: "semantic-scholar" },
+      "semantic scholar ingestion failed (rate limit?)",
+    );
+    await recordFailedIngestionRun("semantic-scholar", err, startedAt);
+    return { fetched: 0, inserted: 0, skipped: 0 };
+  }
+}
+
+/**
+ * Run one Remote OK pass (current remote AI job postings). Hiring is a leading demand signal. Keyless;
+ * a descriptive User-Agent is required. Best-effort — a fetch failure degrades to a no-op.
+ */
+export async function runRemoteOkIngestion(
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
+  try {
+    const { records, skipped } = await fetchJobs();
+    const inserted = await repo.upsertMany(records);
+    const result = { fetched: records.length, inserted, skipped };
+    logger.info({ source: "remoteok", ...result }, "ingestion pass complete");
+    await recordIngestionRun("remoteok", result, startedAt);
+    return result;
+  } catch (err) {
+    logger.warn({ err, source: "remoteok" }, "remoteok ingestion failed");
+    await recordFailedIngestionRun("remoteok", err, startedAt);
+    return { fetched: 0, inserted: 0, skipped: 0 };
+  }
+}
+
+/**
+ * Run one Stack Exchange pass (newest questions across AI tags). A burst of questions on a tag is a
+ * leading demand/pain signal. Keyless allows 300 req/day/IP; STACKEXCHANGE_KEY raises it. Best-effort.
+ */
+export async function runStackExchangeIngestion(
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number }> {
+  const startedAt = new Date();
+  try {
+    const { records, skipped } = await fetchQuestions();
+    const inserted = await repo.upsertMany(records);
+    const result = { fetched: records.length, inserted, skipped };
+    logger.info({ source: "stackexchange", ...result }, "ingestion pass complete");
+    await recordIngestionRun("stackexchange", result, startedAt);
+    return result;
+  } catch (err) {
+    logger.warn({ err, source: "stackexchange" }, "stackexchange ingestion failed (quota?)");
+    await recordFailedIngestionRun("stackexchange", err, startedAt);
+    return { fetched: 0, inserted: 0, skipped: 0 };
+  }
 }
 
 /**
