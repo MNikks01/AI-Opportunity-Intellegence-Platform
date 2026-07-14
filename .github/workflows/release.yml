@@ -1,5 +1,12 @@
 # Release — on merge to main, open/update a "Version Packages" PR from pending changesets.
 # Packages are private, so no npm publish; this applies version bumps + per-package changelogs.
+#
+# CI on the release PR: GitHub does NOT run workflows on PRs/commits authored by the default
+# GITHUB_TOKEN (anti-recursion), so a release PR opened with it is gated as `action_required` and can't
+# satisfy branch protection. To fix this, set a `RELEASE_TOKEN` secret (a fine-grained PAT with
+# contents:write + pull-requests:write) — the release PR is then authored by that identity and CI runs
+# automatically. Falls back to GITHUB_TOKEN when the secret is absent (release PR still opens; its checks
+# just need a manual re-trigger, e.g. close/reopen the PR).
 name: Release
 
 on:
@@ -22,6 +29,7 @@ jobs:
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
+          token: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
       - uses: pnpm/action-setup@v6
         with:
           version: "9.12.0"
@@ -38,4 +46,5 @@ jobs:
           commit: "chore(release): version packages"
           title: "chore(release): version packages"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # PAT (RELEASE_TOKEN) when available so the release PR triggers CI; GITHUB_TOKEN otherwise.
+          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN || secrets.GITHUB_TOKEN }}
