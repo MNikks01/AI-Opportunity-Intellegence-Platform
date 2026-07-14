@@ -23,6 +23,7 @@ import {
   runHnHiringIngestion,
   runSecEdgarIngestion,
   runCrunchbaseIngestion,
+  runRssIngestion,
 } from "@aioi/ingestion-service";
 import { clusterRecentSignals, scoreClusteredTrends } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
@@ -100,6 +101,12 @@ export async function runCrunchbaseIngestionJob() {
   return result;
 }
 
+export async function runRssIngestionJob() {
+  const result = await runRssIngestion();
+  logger.info(result, "scheduler: rss ingestion job complete");
+  return result;
+}
+
 export async function runClusteringJob() {
   const result = await clusterRecentSignals();
   logger.info(result, "scheduler: clustering job complete");
@@ -162,6 +169,7 @@ export const JOB = {
   hnHiringIngestion: "ingestion:hnhiring",
   secEdgarIngestion: "ingestion:sec-edgar",
   crunchbaseIngestion: "ingestion:crunchbase",
+  rssIngestion: "ingestion:rss",
   clustering: "clustering:signals",
   scoring: "scoring:trends",
   snapshot: "snapshot:momentum",

@@ -22,6 +22,7 @@ import {
   runHnHiringIngestionJob,
   runSecEdgarIngestionJob,
   runCrunchbaseIngestionJob,
+  runRssIngestionJob,
 } from "./jobs";
 
 const QUEUE_NAME = "aioi-scheduler";
@@ -98,6 +99,12 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
     {},
     { repeat: { pattern: "40 6 * * *" }, jobId: JOB.crunchbaseIngestion },
   );
+  // RSS/Atom feed registry (~20 publisher feeds) every 2h at :45. Keyless; per-feed failures are isolated.
+  await queue.add(
+    JOB.rssIngestion,
+    {},
+    { repeat: { pattern: "45 */2 * * *" }, jobId: JOB.rssIngestion },
+  );
   await queue.add(JOB.clustering, {}, { repeat: { pattern: "5 * * * *" }, jobId: JOB.clustering });
   // Score freshly-clustered trends 10 min after clustering.
   await queue.add(JOB.scoring, {}, { repeat: { pattern: "15 * * * *" }, jobId: JOB.scoring });
@@ -125,6 +132,7 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
       if (job.name === JOB.hnHiringIngestion) return runHnHiringIngestionJob();
       if (job.name === JOB.secEdgarIngestion) return runSecEdgarIngestionJob();
       if (job.name === JOB.crunchbaseIngestion) return runCrunchbaseIngestionJob();
+      if (job.name === JOB.rssIngestion) return runRssIngestionJob();
       if (job.name === JOB.clustering) return runClusteringJob();
       if (job.name === JOB.scoring) return runScoringJob();
       if (job.name === JOB.snapshot) return runSnapshotJob();

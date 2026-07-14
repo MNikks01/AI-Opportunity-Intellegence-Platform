@@ -76,11 +76,23 @@ export {
   looksAiHiring,
   type HnHiringComment,
 } from "./connectors/hnhiring";
+// Selective re-export: rss shares `normalize`/`looksAiRelevant`/`decode` with other connectors.
+export {
+  RSS_SOURCE_PREFIX,
+  RSS_FEEDS,
+  rssSourceKey,
+  parseFeed,
+  fetchFeed,
+  looksAiRelevant as rssLooksAiRelevant,
+  type RssFeed,
+  type RssItem,
+  type RssCategory,
+} from "./connectors/rss";
 export * from "./repository";
 export * from "./repository.prisma";
 
 import { logger } from "@aioi/logger";
-import { recordIngestionRun } from "@aioi/database";
+import { recordIngestionRun, recordFailedIngestionRun } from "@aioi/database";
 import { fetchTopStories } from "./connectors/hackernews";
 import { fetchSubreddits, redditConfigured, subredditsFromEnv } from "./connectors/reddit";
 import { fetchRepositories } from "./connectors/github";
@@ -91,6 +103,7 @@ import { fetchPapers } from "./connectors/arxiv";
 import { fetchPackages } from "./connectors/npm";
 import { fetchPackages as fetchPypiPackages } from "./connectors/pypi";
 import { fetchHiring } from "./connectors/hnhiring";
+import { RSS_FEEDS, fetchFeed, rssSourceKey } from "./connectors/rss";
 import { fetchFormDFilings, secEdgarConfigured } from "./connectors/sec-edgar";
 import {
   fetchFundingRounds,
@@ -226,6 +239,40 @@ export async function runHnHiringIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "hnhiring", ...result }, "ingestion pass complete");
   await recordIngestionRun("hnhiring", result, startedAt);
+  return result;
+}
+
+/**
+ * Run one pass over the whole RSS/Atom feed registry (see connectors/rss.ts). Each feed is fetched,
+ * parsed, filtered, and persisted independently, and gets its own IngestionRun (`rss:<id>`) so the
+ * /sources health view shows per-publisher status. One dead/slow feed never fails the batch — its error
+ * is recorded and the loop continues. Keyless; always safe to schedule.
+ */
+export async function runRssIngestion(
+  repo: SignalRepository = createSignalRepository(),
+): Promise<{ fetched: number; inserted: number; skipped: number; feeds: number }> {
+  let fetched = 0;
+  let inserted = 0;
+  let skipped = 0;
+  let ok = 0;
+  for (const feed of RSS_FEEDS) {
+    const startedAt = new Date();
+    try {
+      const { records, skipped: sk } = await fetchFeed(feed);
+      const ins = await repo.upsertMany(records);
+      const perFeed = { fetched: records.length + sk, inserted: ins, skipped: sk };
+      fetched += perFeed.fetched;
+      inserted += ins;
+      skipped += sk;
+      ok += 1;
+      await recordIngestionRun(rssSourceKey(feed.id), perFeed, startedAt);
+    } catch (err) {
+      logger.warn({ err, feed: feed.id }, "rss feed ingestion failed");
+      await recordFailedIngestionRun(rssSourceKey(feed.id), err, startedAt);
+    }
+  }
+  const result = { fetched, inserted, skipped, feeds: ok };
+  logger.info({ source: "rss", ...result }, "rss ingestion pass complete");
   return result;
 }
 
