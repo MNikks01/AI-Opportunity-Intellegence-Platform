@@ -1,5 +1,12 @@
 # @aioi/web
 
+## 0.24.1
+
+### Patch Changes
+
+- Updated dependencies [3e0c633]
+  - @aioi/database@0.26.1
+
 ## 0.24.0
 
 ### Minor Changes
