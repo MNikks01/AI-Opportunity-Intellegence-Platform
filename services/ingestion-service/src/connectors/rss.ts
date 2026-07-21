@@ -242,6 +242,49 @@ export const RSS_FEEDS: RssFeed[] = [
     aiFilter: true,
     defaultCategoryKey: "developer-tools",
   },
+  // Regional AI/tech news (English-language, verified live 2026-07-21) — coverage beyond the US-centric
+  // feeds above, so the News map/filters populate for China, India, Europe (incl. Germany), and Japan.
+  // Filtered to AI-relevant items; region tags the source so non-US activity surfaces.
+  {
+    id: "pandaily",
+    name: "Pandaily",
+    category: "news",
+    url: "https://pandaily.com/feed/",
+    aiFilter: true,
+    region: "CHINA",
+  },
+  {
+    id: "inc42",
+    name: "Inc42",
+    category: "vc",
+    url: "https://inc42.com/feed/",
+    aiFilter: true,
+    region: "INDIA",
+  },
+  {
+    id: "thenextweb",
+    name: "The Next Web",
+    category: "news",
+    url: "https://thenextweb.com/feed",
+    aiFilter: true,
+    region: "EUROPE",
+  },
+  {
+    id: "sifted",
+    name: "Sifted",
+    category: "vc",
+    url: "https://sifted.eu/feed",
+    aiFilter: true,
+    region: "EUROPE",
+  },
+  {
+    id: "the-bridge-jp",
+    name: "The Bridge (Japan)",
+    category: "vc",
+    url: "https://thebridge.jp/en/feed",
+    aiFilter: true,
+    region: "JAPAN",
+  },
 ];
 
 const USER_AGENT = "AIOIBot/1.0 (+https://ai-opportunity-intelligence.example; ingestion)";
