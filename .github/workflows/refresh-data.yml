@@ -38,6 +38,9 @@ jobs:
           # Optional source keys — set as repo secrets to widen ingestion beyond the 3 keyless sources.
           GITHUB_TOKEN: ${{ secrets.INGEST_GITHUB_TOKEN }}
           HUGGINGFACE_TOKEN: ${{ secrets.HUGGINGFACE_TOKEN }}
+          # SEC EDGAR (funding feed) activates only when this is set — SEC's fair-access policy requires a
+          # descriptive User-Agent, e.g. "AI Opportunity Intelligence contact@yourdomain.com".
+          SEC_USER_AGENT: ${{ secrets.SEC_USER_AGENT }}
           YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
           REDDIT_CLIENT_ID: ${{ secrets.REDDIT_CLIENT_ID }}
           REDDIT_CLIENT_SECRET: ${{ secrets.REDDIT_CLIENT_SECRET }}
