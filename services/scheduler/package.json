@@ -21,7 +21,7 @@
     "@aioi/logger": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",
-    "bullmq": "^5.80.2",
+    "bullmq": "^5.80.8",
     "ioredis": "^5.4.1"
   },
   "devDependencies": {
