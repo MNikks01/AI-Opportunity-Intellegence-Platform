@@ -4,7 +4,7 @@ import { prisma } from "./client";
 import { ensureSource } from "./repositories";
 import { seedCategories } from "./taxonomy";
 import { upsertSignalAnalysis, type SignalAnalysisInput } from "./signal-analysis";
-import { getNewsItem, listNews } from "./signal-search";
+import { getNewsItem, listNews, newsRegionStats } from "./signal-search";
 import { listModelCards } from "./model-cards";
 
 const hasDb = Boolean(process.env.DATABASE_URL);
@@ -62,6 +62,15 @@ describe.skipIf(!hasDb)("news API reads (integration)", () => {
 
   it("getNewsItem returns null for an unknown id", async () => {
     expect(await getNewsItem(randomUUID())).toBeNull();
+  });
+
+  it("newsRegionStats aggregates count + avg opportunity by region", async () => {
+    const stats = await newsRegionStats();
+    const us = stats.find((s) => s.region === "US");
+    expect(us).toBeDefined(); // this test's two US signals (opp 90 + 10)
+    expect(us!.count).toBeGreaterThanOrEqual(2);
+    expect(us!.avgOpportunity).toBeGreaterThanOrEqual(1);
+    expect(us!.avgOpportunity).toBeLessThanOrEqual(100);
   });
 
   it("listModelCards lists tracked MODEL entities with their card detail", async () => {

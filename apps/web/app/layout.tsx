@@ -48,10 +48,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <span className="app-brand">◧ AI Opportunity Intelligence</span>
           <nav className="app-nav" aria-label="Primary">
             <a href="/start">Get started</a>
+            <a href="/feed">News</a>
             <a href="/trends">Trends</a>
             <a href="/quadrant">Quadrant</a>
             <a href="/market">Market</a>
             <a href="/entities">Entities</a>
+            <a href="/models">Models</a>
+            <a href="/map">Map</a>
             <a href="/funding">Funding</a>
             <a href="/watchlists">Watchlists</a>
             <a href="/notifications">Notifications</a>

@@ -110,12 +110,14 @@ export {
   searchNews,
   listNews,
   getNewsItem,
+  newsRegionStats,
   reembedSignals,
   rrf,
   type SignalSearchFilters,
   type SignalHit,
   type NewsSort,
   type NewsDetail,
+  type RegionStat,
 } from "./signal-search";
 export { listModelCards, type ModelCardView, type ModelCardFilters } from "./model-cards";
 export {

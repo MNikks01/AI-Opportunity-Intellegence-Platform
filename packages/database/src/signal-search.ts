@@ -175,6 +175,30 @@ export async function searchNews(nl: string, opts: { limit?: number } = {}): Pro
   );
 }
 
+export interface RegionStat {
+  region: string;
+  count: number;
+  avgOpportunity: number;
+}
+
+/** Analyzed-signal volume + average opportunity per region — the data behind the country/region map. */
+export async function newsRegionStats(sinceDays?: number): Promise<RegionStat[]> {
+  const where =
+    sinceDays !== undefined
+      ? Prisma.sql`WHERE COALESCE(s."publishedAt", s."fetchedAt") >= NOW() - make_interval(days => ${sinceDays}::int)`
+      : Prisma.empty;
+  const rows = await prisma.$queryRaw<
+    Array<{ region: string; count: number; avg: number }>
+  >(Prisma.sql`
+    SELECT a."region" AS region, COUNT(*)::int AS count, ROUND(AVG(a."opportunityScore"))::int AS avg
+    FROM "SignalAnalysis" a
+    JOIN "Signal" s ON s.id = a."signalId"
+    ${where}
+    GROUP BY a."region"
+    ORDER BY count DESC`);
+  return rows.map((r) => ({ region: r.region, count: r.count, avgOpportunity: r.avg }));
+}
+
 export type NewsSort = "recent" | "opportunity" | "impact" | "trending";
 
 /** ORDER BY fragment for a feed sort. `trending` has no column yet → ranked by opportunity. */
