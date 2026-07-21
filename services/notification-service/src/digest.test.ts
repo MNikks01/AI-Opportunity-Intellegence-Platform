@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   formatSlackDigest,
   formatDiscordDigest,
+  formatTelegramDigest,
   deliverDigest,
   type DigestContent,
 } from "./digest";
@@ -33,6 +34,14 @@ describe("digest formatting", () => {
     expect(String(p.content)).toContain("💡 A spend dashboard");
     expect(String(p.content).length).toBeLessThanOrEqual(2000);
   });
+
+  it("builds a Telegram HTML message with anchor links, escaped + capped", () => {
+    const t = formatTelegramDigest(content, "https://x.dev/");
+    expect(t).toContain("<b>🔭 AI Opportunity Digest</b>");
+    expect(t).toContain('<a href="https://x.dev/trends/llm-cost">LLM cost trackers</a>');
+    expect(t).toContain("opportunity <b>82</b>");
+    expect(t.length).toBeLessThanOrEqual(4000);
+  });
 });
 
 describe("deliverDigest", () => {
@@ -47,6 +56,21 @@ describe("deliverDigest", () => {
     expect(out).toEqual({ slack: true, discord: true });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(fetchImpl.mock.calls[0]![0]).toContain("hooks.slack.com");
+  });
+
+  it("delivers to Telegram via the Bot API when a token + chat id are set", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({ ok: true, status: 200 } as Response);
+    const out = await deliverDigest({
+      content,
+      telegramBotToken: "123:ABC",
+      telegramChatId: "-100987",
+      fetchImpl,
+    });
+    expect(out).toEqual({ telegram: true });
+    expect(fetchImpl.mock.calls[0]![0]).toContain("api.telegram.org/bot123:ABC/sendMessage");
+    const body = JSON.parse((fetchImpl.mock.calls[0]![1] as RequestInit).body as string);
+    expect(body.chat_id).toBe("-100987");
+    expect(body.parse_mode).toBe("HTML");
   });
 
   it("reports a failed channel without throwing", async () => {

@@ -257,6 +257,9 @@ importers:
       '@aioi/billing':
         specifier: workspace:*
         version: link:../billing
+      '@aioi/intel-core':
+        specifier: workspace:*
+        version: link:../intel-core
       '@aioi/logger':
         specifier: workspace:*
         version: link:../logger
@@ -313,6 +316,15 @@ importers:
       typescript:
         specifier: ^6.0.3
         version: 6.0.3
+
+  packages/intel-core:
+    devDependencies:
+      '@aioi/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@aioi/tsconfig':
+        specifier: workspace:*
+        version: link:../tsconfig
 
   packages/logger:
     dependencies:
@@ -386,6 +398,9 @@ importers:
       '@aioi/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@aioi/intel-core':
+        specifier: workspace:*
+        version: link:../../packages/intel-core
       '@aioi/logger':
         specifier: workspace:*
         version: link:../../packages/logger
@@ -469,6 +484,9 @@ importers:
       '@aioi/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@aioi/intel-core':
+        specifier: workspace:*
+        version: link:../../packages/intel-core
       '@aioi/logger':
         specifier: workspace:*
         version: link:../../packages/logger

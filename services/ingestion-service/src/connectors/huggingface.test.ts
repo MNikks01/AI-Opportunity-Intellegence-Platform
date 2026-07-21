@@ -1,5 +1,12 @@
 import { describe, expect, it, vi } from "vitest";
-import { DEFAULT_HF_SORT, fetchModels, normalize, type HfModel } from "./huggingface";
+import {
+  DEFAULT_HF_SORT,
+  fetchModels,
+  fetchModelDetail,
+  normalize,
+  parseModelCard,
+  type HfModel,
+} from "./huggingface";
 
 const model: HfModel = {
   id: "acme/tiny-llm",
@@ -76,5 +83,57 @@ describe("fetchModels", () => {
     const { records } = await fetchModels(5, { fetchImpl, sleep, env: {} as NodeJS.ProcessEnv });
     expect(fetchImpl).toHaveBeenCalledTimes(2);
     expect(records).toHaveLength(1);
+  });
+});
+
+describe("parseModelCard (M9)", () => {
+  it("derives license, params, and runtime availability from HF detail", () => {
+    const card = parseModelCard({
+      id: "acme/tiny-llm",
+      library_name: "transformers",
+      tags: ["gguf", "mlx", "text-generation"],
+      cardData: { license: "apache-2.0" },
+      safetensors: { total: 7_000_000_000 },
+      siblings: [{ rfilename: "model.safetensors" }, { rfilename: "model.Q4_K_M.gguf" }],
+    });
+    expect(card.license).toBe("apache-2.0");
+    expect(card.paramsB).toBe(7);
+    expect(card.ggufAvailable).toBe(true);
+    expect(card.mlxAvailable).toBe(true);
+    expect(card.transformers).toBe(true);
+    expect(card.vllmSupported).toBe(false);
+    expect(card.weightsUrl).toBe("https://huggingface.co/acme/tiny-llm");
+  });
+
+  it("falls back to a license: tag and handles missing params/files", () => {
+    const card = parseModelCard({ id: "x/y", tags: ["license:mit"] });
+    expect(card.license).toBe("mit");
+    expect(card.paramsB).toBeNull();
+    expect(card.ggufAvailable).toBe(false);
+  });
+});
+
+describe("fetchModelDetail (M9)", () => {
+  it("returns a parsed card on 200", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValue(jsonResponse({ id: "acme/tiny-llm", tags: ["gguf"], cardData: {} }));
+    const card = await fetchModelDetail("acme/tiny-llm", {
+      fetchImpl,
+      sleep: () => Promise.resolve(),
+      env: {} as NodeJS.ProcessEnv,
+    });
+    expect(card?.ggufAvailable).toBe(true);
+    expect(fetchImpl.mock.calls[0]![0]).toContain("/api/models/acme/tiny-llm");
+  });
+
+  it("returns null when the model isn't on HF (404)", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue(jsonResponse({}, { ok: false, status: 404 }));
+    const card = await fetchModelDetail("not/real", {
+      fetchImpl,
+      sleep: () => Promise.resolve(),
+      env: {} as NodeJS.ProcessEnv,
+    });
+    expect(card).toBeNull();
   });
 });

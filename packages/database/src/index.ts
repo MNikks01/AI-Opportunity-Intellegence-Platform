@@ -87,6 +87,57 @@ export {
 export { exportOrgData, deleteOrg } from "./gdpr";
 export { getSourceStats, type SourceStat } from "./source-stats";
 export {
+  CATEGORY_REGISTRY,
+  seedCategories,
+  listCategories,
+  getCategoryByKey,
+  type CategoryDef,
+  type CategoryRecord,
+} from "./taxonomy";
+export {
+  listSignalsForAnalysis,
+  findAnalysisByContentHash,
+  upsertSignalAnalysis,
+  countAnalyzedSignals,
+  type SignalForAnalysis,
+  type CachedAnalysis,
+  type SignalAnalysisInput,
+} from "./signal-analysis";
+export {
+  searchSignalsHybrid,
+  searchSignalsTextIds,
+  searchSignalsSemanticIds,
+  searchNews,
+  listNews,
+  getNewsItem,
+  newsRegionStats,
+  reembedSignals,
+  rrf,
+  type SignalSearchFilters,
+  type SignalHit,
+  type NewsSort,
+  type NewsDetail,
+  type RegionStat,
+} from "./signal-search";
+export {
+  listModelCards,
+  listModelsForEnrichment,
+  upsertModelCard,
+  type ModelCardView,
+  type ModelCardFilters,
+  type ModelToEnrich,
+  type ModelCardInput,
+} from "./model-cards";
+export {
+  newsTopicTargets,
+  regionTopic,
+  categoryTopic,
+  modelTopic,
+  evaluateSignalForOrg,
+  evaluateSignalAllOrgs,
+  type NewsSignalMatch,
+} from "./news-alerts";
+export {
   listTrendsQuadrant,
   QUADRANT_MIDPOINT,
   type QuadrantTrend,

@@ -16,6 +16,7 @@
  */
 import { z } from "zod";
 import type { SourceRecord } from "@aioi/shared";
+import type { Region } from "@aioi/intel-core";
 
 export const RSS_SOURCE_PREFIX = "rss";
 /** Stable per-feed source key, e.g. `rss:openai`. */
@@ -30,21 +31,32 @@ export interface RssFeed {
   url: string;
   /** General publishers: keep only AI-relevant items. AI-native / already-AI-scoped feeds: keep all. */
   aiFilter: boolean;
+  /**
+   * Source-level tags (M3). `region`: the company/lab's home region for company-blog feeds where the
+   * story region is meaningful; left undefined for global publishers (news/newsletters/VC) so the
+   * per-article classifier decides. `defaultCategoryKey`: a low-confidence fallback for strongly
+   * single-topic feeds (e.g. Hugging Face → open-source); undefined for broad feeds.
+   */
+  region?: Region;
+  defaultCategoryKey?: string;
 }
 
 /**
- * The feed registry. Every URL was verified live (HTTP 200 + XML) on 2026-07-13. Add feeds here — no
- * new code is needed. `aiFilter: true` restricts a broad publisher to AI-relevant posts; AI-native
- * feeds keep everything.
+ * The feed registry. Original feeds verified live 2026-07-13; the big-tech AI blogs (NVIDIA, Microsoft
+ * Research, Meta Engineering) added + verified live 2026-07-21 (M3). Add feeds here — no new code is
+ * needed. `aiFilter: true` restricts a broad publisher to AI-relevant posts; AI-native feeds keep
+ * everything. `region` / `defaultCategoryKey` tag the resulting Source (see the RssFeed doc).
  */
 export const RSS_FEEDS: RssFeed[] = [
-  // Research labs & AI-native companies (unfiltered)
+  // Research labs & AI-native companies (unfiltered). Region = the lab's home region.
   {
     id: "openai",
     name: "OpenAI",
     category: "research",
     url: "https://openai.com/news/rss.xml",
     aiFilter: false,
+    region: "US",
+    defaultCategoryKey: "ai-models",
   },
   {
     id: "deepmind",
@@ -52,6 +64,8 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "research",
     url: "https://deepmind.google/blog/rss.xml",
     aiFilter: false,
+    region: "EUROPE",
+    defaultCategoryKey: "ai-models",
   },
   {
     id: "huggingface",
@@ -59,6 +73,8 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "research",
     url: "https://huggingface.co/blog/feed.xml",
     aiFilter: false,
+    region: "US",
+    defaultCategoryKey: "open-source",
   },
   {
     id: "google-ai",
@@ -66,8 +82,38 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "research",
     url: "https://blog.google/technology/ai/rss/",
     aiFilter: false,
+    region: "US",
+    defaultCategoryKey: "big-tech",
   },
-  // AI newsletters & builder blogs (curated, unfiltered)
+  // Big-tech AI / research blogs (verified live 2026-07-21). Broad publishers → aiFilter.
+  {
+    id: "nvidia",
+    name: "NVIDIA Blog",
+    category: "infra",
+    url: "https://blogs.nvidia.com/feed/",
+    aiFilter: true,
+    region: "US",
+    defaultCategoryKey: "hardware",
+  },
+  {
+    id: "microsoft-research",
+    name: "Microsoft Research",
+    category: "research",
+    url: "https://www.microsoft.com/en-us/research/feed/",
+    aiFilter: true,
+    region: "US",
+    defaultCategoryKey: "research-papers",
+  },
+  {
+    id: "meta-engineering",
+    name: "Meta Engineering",
+    category: "dev",
+    url: "https://engineering.fb.com/feed/",
+    aiFilter: true,
+    region: "US",
+    defaultCategoryKey: "big-tech",
+  },
+  // AI newsletters & builder blogs (curated, unfiltered). Global coverage → no region.
   {
     id: "import-ai",
     name: "Import AI",
@@ -103,6 +149,7 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "dev",
     url: "https://dev.to/feed/tag/ai",
     aiFilter: false,
+    defaultCategoryKey: "developer-tools",
   },
   // Startup / VC (unfiltered — startup signal is on-thesis)
   {
@@ -111,8 +158,10 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "vc",
     url: "https://www.ycombinator.com/blog/rss.xml",
     aiFilter: false,
+    region: "US",
+    defaultCategoryKey: "startups",
   },
-  // General tech news (filtered to AI-relevant)
+  // General tech news (filtered to AI-relevant). Global coverage → no region.
   {
     id: "techcrunch",
     name: "TechCrunch",
@@ -154,6 +203,7 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "vc",
     url: "https://news.crunchbase.com/feed/",
     aiFilter: true,
+    defaultCategoryKey: "investments",
   },
   // Cloud & infra (filtered)
   {
@@ -162,6 +212,8 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "infra",
     url: "https://blog.cloudflare.com/rss/",
     aiFilter: true,
+    region: "US",
+    defaultCategoryKey: "cloud",
   },
   {
     id: "aws",
@@ -169,6 +221,8 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "cloud",
     url: "https://aws.amazon.com/blogs/aws/feed/",
     aiFilter: true,
+    region: "US",
+    defaultCategoryKey: "cloud",
   },
   {
     id: "google-cloud",
@@ -176,6 +230,8 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "cloud",
     url: "https://cloudblog.withgoogle.com/rss/",
     aiFilter: true,
+    region: "US",
+    defaultCategoryKey: "cloud",
   },
   // Developer community (filtered)
   {
@@ -184,6 +240,7 @@ export const RSS_FEEDS: RssFeed[] = [
     category: "dev",
     url: "https://stackoverflow.blog/feed/",
     aiFilter: true,
+    defaultCategoryKey: "developer-tools",
   },
 ];
 
@@ -355,6 +412,8 @@ export function normalize(feed: RssFeed, item: RssItem): SourceRecord | null {
     publishedAt: it.published,
     text,
     raw: { ...it, feed: feed.id, publisher: feed.name, category: feed.category },
+    region: feed.region,
+    defaultCategoryKey: feed.defaultCategoryKey,
   };
 }
 

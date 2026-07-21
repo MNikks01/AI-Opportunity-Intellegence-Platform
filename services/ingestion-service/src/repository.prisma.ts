@@ -23,7 +23,12 @@ export class PrismaSignalRepository implements SignalRepository {
 
     let inserted = 0;
     for (const [sourceKey, recs] of bySource) {
-      const sourceId = await ensureSource(sourceKey);
+      // Source-level tags are identical across a source's records; take them from the first (M3).
+      const first = recs[0]!;
+      const sourceId = await ensureSource(sourceKey, "OFFICIAL", {
+        region: first.region,
+        defaultCategoryKey: first.defaultCategoryKey,
+      });
       const res = await prisma.signal.createMany({
         data: recs.map((r) => ({
           sourceId,

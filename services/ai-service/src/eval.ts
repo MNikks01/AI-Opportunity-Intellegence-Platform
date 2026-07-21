@@ -6,7 +6,13 @@
  */
 import { StubProvider, type LLMProvider } from "@aioi/ai-sdk";
 import { SCORE_DIMENSIONS, type TrendLike } from "@aioi/shared";
-import { scoreSchema, actionPlanContentSchema } from "@aioi/validation";
+import {
+  scoreSchema,
+  actionPlanContentSchema,
+  signalAnalysisContentSchema,
+  OPPORTUNITY_AXES,
+} from "@aioi/validation";
+import { classifyByRules, CATEGORY_KEYS, CATEGORY_REGISTRY } from "@aioi/intel-core";
 import { scoreTrend } from "./scoring";
 import { generateActionPlan } from "./action-plan";
 
@@ -81,6 +87,51 @@ export async function runEvalHarness(
   );
   results.push(check("actionplan:nonempty-saas", planA.content.saasIdeas.length > 0));
   results.push(check("actionplan:deterministic", JSON.stringify(planA) === JSON.stringify(planB)));
+
+  // ── Per-article analysis invariants (M4) ──
+  const validKeys = CATEGORY_REGISTRY.map((c) => c.key);
+  const analyzeReq = {
+    title: "DeepSeek releases an open-source reasoning model",
+    body: "DeepSeek published weights and benchmarks for a new open-source LLM aimed at developers.",
+    sourceKey: "rss:deepmind",
+    regionHint: "CHINA",
+    categoryHints: ["ai-models"],
+    validCategoryKeys: validKeys,
+  };
+  const analysisA = await provider.analyzeSignal(analyzeReq);
+  const analysisB = await provider.analyzeSignal(analyzeReq);
+  results.push(
+    check("analysis:schema-valid", signalAnalysisContentSchema.safeParse(analysisA).success),
+  );
+  results.push(
+    check("analysis:deterministic", JSON.stringify(analysisA) === JSON.stringify(analysisB)),
+  );
+  results.push(
+    check(
+      "analysis:nine-axes-in-range",
+      OPPORTUNITY_AXES.every((axis) => {
+        const s = analysisA.opportunities[axis].score;
+        return Number.isInteger(s) && s >= 1 && s <= 100;
+      }),
+    ),
+  );
+  results.push(
+    check(
+      "analysis:categories-valid",
+      analysisA.categories.length > 0 &&
+        analysisA.categories.every((c) => CATEGORY_KEYS.has(c.key)),
+    ),
+  );
+  results.push(check("analysis:tldr-within-50-words", analysisA.tldr.split(/\s+/).length <= 50));
+  results.push(check("analysis:actions-nonempty", analysisA.actionItems.length > 0));
+
+  // The rules gate (guardrail 1) must let AI through and reject off-topic text.
+  results.push(
+    check("gate:accepts-ai", classifyByRules(analyzeReq.title, analyzeReq.body).relevant),
+  );
+  results.push(
+    check("gate:rejects-offtopic", !classifyByRules("Local bakery wins sourdough award").relevant),
+  );
 
   return { results, passed: results.every((r) => r.passed) };
 }
