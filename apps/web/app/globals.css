@@ -2385,3 +2385,252 @@ a.resource-link:hover {
   padding: 1px 5px;
   border-radius: 5px;
 }
+
+/* ── AI & Tech News (M7) ─────────────────────────────────────────────────── */
+.news-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+}
+.news-filters input,
+.news-filters select {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 0.875rem;
+}
+.news-search {
+  flex: 1 1 220px;
+  min-width: 160px;
+}
+.news-filter-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--primary);
+  border-radius: var(--radius-md);
+  background: var(--primary);
+  color: var(--primary-fg);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.news-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+.news-card {
+  display: block;
+  height: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-subtle);
+  color: var(--fg);
+  text-decoration: none;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+.news-card:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+}
+.news-card-head,
+.news-card-foot,
+.news-detail-head,
+.news-detail-scores,
+.news-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.news-card-head,
+.news-detail-head {
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+}
+.news-title {
+  font-size: 1rem;
+  line-height: 1.35;
+  margin: 8px 0 6px;
+}
+.news-tldr {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+  margin: 0 0 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.news-card-foot {
+  margin-top: auto;
+}
+.news-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--bg-muted);
+  color: var(--fg-muted);
+  font-size: 0.6875rem;
+  text-decoration: none;
+}
+.news-score {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #fff;
+}
+.news-score-high {
+  background: var(--success);
+}
+.news-score-mid {
+  background: var(--warning);
+}
+.news-score-low {
+  background: var(--fg-muted);
+}
+/* Detail */
+.news-detail {
+  max-width: 760px;
+}
+.news-back {
+  display: inline-block;
+  margin: 0 0 12px;
+  color: var(--primary);
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+.news-detail-tldr {
+  font-size: 1.0625rem;
+  line-height: 1.5;
+  margin: 12px 0 20px;
+}
+.news-section {
+  margin: 0 0 20px;
+}
+.news-section h2 {
+  font-size: 1rem;
+  margin: 0 0 6px;
+}
+.news-section p {
+  margin: 0;
+  line-height: 1.55;
+}
+.news-axes {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+.news-axis {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+}
+.news-axis-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 600;
+  font-size: 0.875rem;
+  margin-bottom: 4px;
+}
+.news-axis-why {
+  font-size: 0.75rem;
+  color: var(--fg-muted);
+  line-height: 1.4;
+}
+.news-actions {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.6;
+}
+.news-meta-line {
+  font-size: 0.8125rem;
+  color: var(--fg-muted);
+  margin: 8px 0 0;
+}
+/* ── Region heatmap (M7) ─────────────────────────────────────────────────── */
+.heatmap-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.heatmap-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  color: var(--fg);
+}
+.heatmap-cell:hover {
+  border-color: var(--primary);
+}
+.heat-0 {
+  background: var(--bg-subtle);
+}
+.heat-1 {
+  background: color-mix(in srgb, var(--primary) 12%, var(--bg-subtle));
+}
+.heat-2 {
+  background: color-mix(in srgb, var(--primary) 28%, var(--bg-subtle));
+}
+.heat-3 {
+  background: color-mix(in srgb, var(--primary) 48%, var(--bg-subtle));
+}
+.heat-4 {
+  background: color-mix(in srgb, var(--primary) 72%, var(--bg-subtle));
+  color: var(--primary-fg);
+}
+.heatmap-flag {
+  font-size: 1.25rem;
+}
+.heatmap-region {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.heatmap-count {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+.heatmap-avg {
+  font-size: 0.6875rem;
+  opacity: 0.8;
+}
+/* ── Models table (M7) ───────────────────────────────────────────────────── */
+.models-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+}
+.models-table th,
+.models-table td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.models-table th {
+  color: var(--fg-muted);
+  font-weight: 600;
+}
