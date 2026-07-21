@@ -95,6 +95,15 @@ export {
   type CategoryRecord,
 } from "./taxonomy";
 export {
+  listSignalsForAnalysis,
+  findAnalysisByContentHash,
+  upsertSignalAnalysis,
+  countAnalyzedSignals,
+  type SignalForAnalysis,
+  type CachedAnalysis,
+  type SignalAnalysisInput,
+} from "./signal-analysis";
+export {
   listTrendsQuadrant,
   QUADRANT_MIDPOINT,
   type QuadrantTrend,
