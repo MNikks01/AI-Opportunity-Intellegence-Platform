@@ -125,6 +125,10 @@ model Source {
   tosUrl       String?
   rateConfig   Json
   enabled      Boolean        @default(true)
+  /// AI/tech vertical (M1): default region for signals from this source; null = worldwide/unknown.
+  region             Region?
+  /// AI/tech vertical (M1): fallback Category.key applied when the classifier is low-confidence.
+  defaultCategoryKey String?
   runs         IngestionRun[]
   signals      Signal[]
   createdAt    DateTime       @default(now())
@@ -161,6 +165,8 @@ model Signal {
   fetchedAt   DateTime      @default(now())
   source      Source        @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   trends      TrendSignal[]
+  analysis    SignalAnalysis?
+  categories  SignalCategory[]
 
   @@unique([sourceId, externalId])
   @@index([publishedAt])
@@ -233,6 +239,7 @@ model Entity {
   externalRefs Json
   trends       TrendEntity[]
   snapshots    EntitySnapshot[]
+  modelCard    ModelCard?
   createdAt    DateTime         @default(now())
 
   @@index([type, name])
@@ -307,6 +314,102 @@ model ActionPlan {
   content       Json // saasIdeas, apps, extensions, apis, content, keywords, domains, names, gtm, pricing, techStack, mvp, prd, architecture, ui, dbSchema, marketing, launch
   createdAt     DateTime @default(now())
   trend         Trend    @relation(fields: [trendId], references: [id], onDelete: Cascade)
+}
+
+// ───────────────── AI & Tech Intelligence vertical (M1, global) ─────────────────
+// Taxonomy + per-article enrichment for the AI/tech news vertical. See
+// docs/02-architecture/AI_TECH_INTELLIGENCE_MODULE.md and ADR-0009. All tables here are global
+// intelligence data (no RLS), consistent with Source/Signal/Trend/Entity.
+
+/// Coarse geography for filtering (country/region/worldwide). `country` granularity, when needed, is a
+/// free-text field on SignalAnalysis; this enum is the primary filter axis.
+enum Region {
+  US
+  CHINA
+  INDIA
+  EUROPE
+  JAPAN
+  SOUTH_KOREA
+  SINGAPORE
+  CANADA
+  AUSTRALIA
+  OTHER
+}
+
+/// Content taxonomy (AI Models, Coding AI, Video AI, …). Seeded from the canonical registry; supports a
+/// single level of nesting via `parentId`.
+model Category {
+  id        String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  key       String           @unique
+  name      String
+  parentId  String?          @db.Uuid
+  parent    Category?        @relation("CategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children  Category[]       @relation("CategoryTree")
+  signals   SignalCategory[]
+  createdAt DateTime         @default(now())
+
+  @@index([parentId])
+}
+
+/// Many-to-many Signal↔Category with the classifier's confidence, so low-confidence tags can be filtered
+/// or re-reviewed.
+model SignalCategory {
+  signalId   String   @db.Uuid
+  categoryId String   @db.Uuid
+  confidence Float
+  signal     Signal   @relation(fields: [signalId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([signalId, categoryId])
+  @@index([categoryId])
+}
+
+/// 1:1 enrichment of a Signal — the per-article AI analysis (ADR-0009 decision 1). Kept separate from the
+/// immutable raw Signal so re-analysis is a clean rewrite. `payload` carries the brief's 9 opportunity
+/// axes (incl. Career/Learning/Automation/Startup/Freelancing) as narrative + sub-score objects. Written
+/// by services/ai-service in M4; this migration only defines the table.
+model SignalAnalysis {
+  signalId         String   @id @db.Uuid
+  region           Region
+  /// BCP-47-ish language code of the source article (e.g. "en", "zh").
+  language         String
+  /// ≤50-word summary.
+  tldr             String
+  /// executiveSummary, whyItMatters, and per-axis { score, why } for business/developer/startup/
+  /// investment/career/learning/content/automation/freelancing, plus skillsToLearn, companiesAffected,
+  /// techMentioned, difficulty, industry, estMarketImpact, actionItems, confidence, trendingScore.
+  payload          Json
+  impactScore      Int      @db.SmallInt
+  opportunityScore Int      @db.SmallInt
+  credibilityScore Int      @db.SmallInt
+  /// Cache key: identical content + prompt version ⇒ skip re-analysis (cost guardrail, ADR-0009).
+  contentHash      String
+  promptVersion    String
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  signal           Signal   @relation(fields: [signalId], references: [id], onDelete: Cascade)
+
+  @@index([region, impactScore])
+  @@index([opportunityScore])
+  @@index([contentHash])
+}
+
+/// Supply-side detail for an Entity of type MODEL (open-source model tracking). Populated from Hugging
+/// Face + registries in M9; this migration only defines the table.
+model ModelCard {
+  entityId      String   @id @db.Uuid
+  license       String?
+  paramsB       Float?
+  /// Benchmark scores keyed by suite, e.g. { "mmlu": 0.82, "swe-bench": 0.41 }.
+  benchmarks    Json?
+  ggufAvailable Boolean  @default(false)
+  ollamaTag     String?
+  mlxAvailable  Boolean  @default(false)
+  vllmSupported Boolean  @default(false)
+  transformers  Boolean  @default(false)
+  weightsUrl    String?
+  updatedAt     DateTime @updatedAt
+  entity        Entity   @relation(fields: [entityId], references: [id], onDelete: Cascade)
 }
 
 // ───────────────────────── Tenant surfaces ─────────────────────────
