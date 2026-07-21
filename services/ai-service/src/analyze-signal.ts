@@ -20,6 +20,7 @@ import {
   listSignalsForAnalysis,
   findAnalysisByContentHash,
   upsertSignalAnalysis,
+  evaluateSignalAllOrgs,
   type SignalForAnalysis,
   type SignalAnalysisInput,
 } from "@aioi/database";
@@ -175,8 +176,16 @@ export async function analyzeSignals(
         validCategoryKeys: VALID_CATEGORY_KEYS,
       });
       result.llmCalls += 1;
-      await upsertSignalAnalysis(buildAnalysisInput(signal, content, gate, body));
+      const input = buildAnalysisInput(signal, content, gate, body);
+      await upsertSignalAnalysis(input);
       result.analyzed += 1;
+      // Best-effort news-alert fan-out (M8): notify orgs subscribed to this region/category.
+      await evaluateSignalAllOrgs({
+        signalId: signal.id,
+        title: signal.title,
+        region: input.region,
+        categoryKeys: content.categories.map((c) => c.key),
+      }).catch((err) => logger.warn({ err, signalId: signal.id }, "news-alert fan-out failed"));
     } catch (err) {
       logger.warn({ err, signalId: signal.id }, "signal analysis failed (skipped)");
     }

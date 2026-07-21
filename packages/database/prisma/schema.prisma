@@ -45,6 +45,9 @@ model OrgIntegration {
   organizationId    String       @id @db.Uuid
   slackWebhookUrl   String?
   discordWebhookUrl String?
+  /// Telegram delivery (M8): a bot token + chat id the digest/alerts are sent to.
+  telegramBotToken  String?
+  telegramChatId    String?
   digestEnabled     Boolean      @default(true)
   updatedAt         DateTime     @updatedAt
   organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
@@ -449,6 +452,7 @@ enum AlertChannel {
   SLACK
   DISCORD
   TELEGRAM
+  PUSH
 }
 
 enum AlertCadence {

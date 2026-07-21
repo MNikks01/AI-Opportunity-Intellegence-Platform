@@ -121,6 +121,15 @@ export {
 } from "./signal-search";
 export { listModelCards, type ModelCardView, type ModelCardFilters } from "./model-cards";
 export {
+  newsTopicTargets,
+  regionTopic,
+  categoryTopic,
+  modelTopic,
+  evaluateSignalForOrg,
+  evaluateSignalAllOrgs,
+  type NewsSignalMatch,
+} from "./news-alerts";
+export {
   listTrendsQuadrant,
   QUADRANT_MIDPOINT,
   type QuadrantTrend,

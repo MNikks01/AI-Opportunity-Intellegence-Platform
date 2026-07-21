@@ -351,7 +351,7 @@ Each module is independently shippable, with tests + docs + (where AI) a green e
 | **M5** ✅ | Search + NL query        | hybrid rank + NL→filter                                                                | eval: parse accuracy, faithfulness |
 | **M6** ✅ | API + filters            | `/api/v1/news`, `/models`, `/search`, `/categories`                                    | contract tests, RBAC, rate-limit   |
 | **M7** ✅ | Dashboard                | feed, article, map, model tracker                                                      | a11y + RTL + Playwright            |
-| **M8**    | Alerts                   | Telegram + Push channels; region/category/model targets                                | integration tests                  |
+| **M8** ✅ | Alerts                   | Telegram + Push channels; region/category/model targets                                | integration tests                  |
 | **M9**    | Model tracker enrichment | GGUF/Ollama/vLLM/benchmarks from HF + registries                                       | connector tests                    |
 
 Cross-cutting each module: Conventional Commit, changeset, CHANGELOG, ADR if a decision arises,
