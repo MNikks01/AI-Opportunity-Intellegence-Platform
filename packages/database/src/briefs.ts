@@ -64,6 +64,9 @@ async function topOpportunityTrends(limit: number): Promise<BriefTrend[]> {
 
 export async function generateDailyBrief(orgId: string, userId?: string) {
   const topTrends = await topOpportunityTrends(5);
+  // Idempotent per UTC day: the daily cron AND the "Generate today's brief" button both refresh the
+  // single brief for today rather than stacking duplicates (the row is org-scoped by RLS in the tx).
+  const startOfDay = new Date(`${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`);
   return withOrgContext(orgId, async (tx) => {
     const watchlistCount = await tx.watchlist.count();
     const unreadAlerts = await tx.notification.count({ where: { readAt: null } });
@@ -76,14 +79,21 @@ export async function generateDailyBrief(orgId: string, userId?: string) {
       watchlistCount,
       unreadAlerts,
     };
+    const data = {
+      content: content as unknown as Prisma.InputJsonValue,
+      deliveredAt: new Date(), // in-app delivery is immediate; email delivery is a follow-up
+    };
+
+    const existing = await tx.brief.findFirst({
+      where: { kind: "DAILY", createdAt: { gte: startOfDay } },
+      orderBy: { createdAt: "desc" },
+      select: { id: true },
+    });
+    if (existing) {
+      return tx.brief.update({ where: { id: existing.id }, data });
+    }
     return tx.brief.create({
-      data: {
-        organizationId: orgId,
-        userId: userId ?? null,
-        kind: "DAILY",
-        content: content as unknown as Prisma.InputJsonValue,
-        deliveredAt: new Date(), // in-app delivery is immediate; email delivery is a follow-up
-      },
+      data: { organizationId: orgId, userId: userId ?? null, kind: "DAILY", ...data },
     });
   });
 }
