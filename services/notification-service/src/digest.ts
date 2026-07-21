@@ -68,6 +68,44 @@ export function formatDiscordDigest(content: DigestContent, siteUrl = ""): Recor
   return { content: lines.join("\n").slice(0, 1990) };
 }
 
+/**
+ * Telegram message text for the digest (HTML parse mode). Telegram caps messages at 4096 chars; we stay
+ * well under. Links use `<a href>` since Telegram HTML supports anchors.
+ */
+export function formatTelegramDigest(content: DigestContent, siteUrl = ""): string {
+  const base = trimTrail(siteUrl);
+  const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  const lines = [`<b>🔭 AI Opportunity Digest</b>`, esc(content.headline), ""];
+  for (const t of content.topTrends) {
+    const title = base ? `<a href="${base}/trends/${t.slug}">${esc(t.title)}</a>` : esc(t.title);
+    lines.push(`${title} · opportunity <b>${t.opportunity}</b>`);
+    if (t.topIdea) lines.push(`💡 ${esc(t.topIdea)}`);
+    lines.push("");
+  }
+  lines.push(`<i>${content.watchlistCount} watchlists · ${content.unreadAlerts} unread alerts</i>`);
+  return lines.join("\n").slice(0, 4000);
+}
+
+/** POST a Telegram Bot API sendMessage. Best-effort; returns ok + status. */
+export async function postTelegram(
+  botToken: string,
+  chatId: string,
+  text: string,
+  fetchImpl: typeof fetch = fetch,
+): Promise<{ ok: boolean; status: number }> {
+  const res = await fetchImpl(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML",
+      disable_web_page_preview: true,
+    }),
+  });
+  return { ok: res.ok, status: res.status };
+}
+
 export async function postWebhook(
   url: string,
   payload: Record<string, unknown>,
@@ -85,6 +123,8 @@ export interface DeliverDigestOptions {
   content: DigestContent;
   slackWebhookUrl?: string;
   discordWebhookUrl?: string;
+  telegramBotToken?: string;
+  telegramChatId?: string;
   siteUrl?: string;
   fetchImpl?: typeof fetch;
 }
@@ -92,8 +132,8 @@ export interface DeliverDigestOptions {
 /** Deliver the digest to whichever channels are configured. Each is best-effort. */
 export async function deliverDigest(
   opts: DeliverDigestOptions,
-): Promise<{ slack?: boolean; discord?: boolean }> {
-  const out: { slack?: boolean; discord?: boolean } = {};
+): Promise<{ slack?: boolean; discord?: boolean; telegram?: boolean }> {
+  const out: { slack?: boolean; discord?: boolean; telegram?: boolean } = {};
   if (opts.slackWebhookUrl) {
     try {
       const r = await postWebhook(
@@ -116,6 +156,19 @@ export async function deliverDigest(
       out.discord = r.ok;
     } catch {
       out.discord = false;
+    }
+  }
+  if (opts.telegramBotToken && opts.telegramChatId) {
+    try {
+      const r = await postTelegram(
+        opts.telegramBotToken,
+        opts.telegramChatId,
+        formatTelegramDigest(opts.content, opts.siteUrl),
+        opts.fetchImpl,
+      );
+      out.telegram = r.ok;
+    } catch {
+      out.telegram = false;
     }
   }
   return out;

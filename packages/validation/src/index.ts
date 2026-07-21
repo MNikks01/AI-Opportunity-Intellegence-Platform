@@ -94,7 +94,14 @@ export const alertTriggerSchema = z.discriminatedUnion("type", [
 ]);
 export type AlertTrigger = z.infer<typeof alertTriggerSchema>;
 
-export const alertChannelSchema = z.enum(["IN_APP", "EMAIL", "SLACK", "DISCORD", "TELEGRAM"]);
+export const alertChannelSchema = z.enum([
+  "IN_APP",
+  "EMAIL",
+  "SLACK",
+  "DISCORD",
+  "TELEGRAM",
+  "PUSH",
+]);
 export const alertCadenceSchema = z.enum(["INSTANT", "DAILY_DIGEST"]);
 
 export const createAlertSchema = z.object({
