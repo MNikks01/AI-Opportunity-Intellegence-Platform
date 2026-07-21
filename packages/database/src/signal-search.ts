@@ -175,6 +175,93 @@ export async function searchNews(nl: string, opts: { limit?: number } = {}): Pro
   );
 }
 
+export type NewsSort = "recent" | "opportunity" | "impact" | "trending";
+
+/** ORDER BY fragment for a feed sort. `trending` has no column yet → ranked by opportunity. */
+function sortClause(sort: NewsSort): Prisma.Sql {
+  switch (sort) {
+    case "opportunity":
+    case "trending":
+      return Prisma.sql`a."opportunityScore" DESC, COALESCE(s."publishedAt", s."fetchedAt") DESC`;
+    case "impact":
+      return Prisma.sql`a."impactScore" DESC, COALESCE(s."publishedAt", s."fetchedAt") DESC`;
+    case "recent":
+    default:
+      return Prisma.sql`COALESCE(s."publishedAt", s."fetchedAt") DESC`;
+  }
+}
+
+/**
+ * The news feed: analyzed signals matching the filters, ordered by `sort`. Only signals with an analysis
+ * appear (they have the TLDR + scores the feed shows). No search query — for that use searchSignalsHybrid.
+ */
+export async function listNews(
+  f: SignalSearchFilters = {},
+  sort: NewsSort = "recent",
+  limit = 25,
+): Promise<SignalHit[]> {
+  const conds = filterConds(f);
+  const where = conds.length ? Prisma.sql`WHERE ${Prisma.join(conds, " AND ")}` : Prisma.empty;
+  const rows = await prisma.$queryRaw<Array<{ id: string }>>(Prisma.sql`
+    SELECT s.id FROM "Signal" s
+    JOIN "SignalAnalysis" a ON a."signalId" = s.id
+    ${where}
+    ORDER BY ${sortClause(sort)}
+    LIMIT ${limit}`);
+  return hydrate(rows.map((r) => r.id));
+}
+
+export interface NewsDetail extends SignalHit {
+  language: string | null;
+  credibilityScore: number | null;
+  publishedAtIso: string | null;
+  /** The full analysis payload (9 opportunity axes, action items, etc.), or null if not analyzed. */
+  analysis: unknown;
+}
+
+/** One news item with its full analysis payload, or null if the signal doesn't exist. */
+export async function getNewsItem(id: string): Promise<NewsDetail | null> {
+  const r = await prisma.signal.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      title: true,
+      url: true,
+      publishedAt: true,
+      source: { select: { key: true } },
+      analysis: {
+        select: {
+          region: true,
+          language: true,
+          tldr: true,
+          payload: true,
+          impactScore: true,
+          opportunityScore: true,
+          credibilityScore: true,
+        },
+      },
+      categories: { select: { category: { select: { key: true } } } },
+    },
+  });
+  if (!r) return null;
+  return {
+    id: r.id,
+    title: r.title,
+    url: r.url,
+    publishedAt: r.publishedAt,
+    publishedAtIso: r.publishedAt?.toISOString() ?? null,
+    sourceKey: r.source.key,
+    region: r.analysis?.region ?? null,
+    language: r.analysis?.language ?? null,
+    tldr: r.analysis?.tldr ?? null,
+    opportunityScore: r.analysis?.opportunityScore ?? null,
+    impactScore: r.analysis?.impactScore ?? null,
+    credibilityScore: r.analysis?.credibilityScore ?? null,
+    categories: r.categories.map((c) => c.category.key),
+    analysis: r.analysis?.payload ?? null,
+  };
+}
+
 /**
  * Backfill Signal embeddings with the configured embedder (only rows missing one). Embeds title + the
  * analysis TLDR when present, so an analyzed signal is searchable by its richer meaning. Returns counts.

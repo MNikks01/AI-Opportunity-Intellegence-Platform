@@ -108,11 +108,16 @@ export {
   searchSignalsTextIds,
   searchSignalsSemanticIds,
   searchNews,
+  listNews,
+  getNewsItem,
   reembedSignals,
   rrf,
   type SignalSearchFilters,
   type SignalHit,
+  type NewsSort,
+  type NewsDetail,
 } from "./signal-search";
+export { listModelCards, type ModelCardView, type ModelCardFilters } from "./model-cards";
 export {
   listTrendsQuadrant,
   QUADRANT_MIDPOINT,
