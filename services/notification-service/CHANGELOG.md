@@ -1,5 +1,32 @@
 # @aioi/notification-service
 
+## 0.4.0
+
+### Minor Changes
+
+- 46cad64: AI & Tech Intelligence vertical — M8 (news alerts). Adds a `PUSH` alert channel, Telegram delivery, and
+  region/category/model news subscriptions:
+
+  - migration: `PUSH` on `AlertChannel`; `telegramBotToken`/`telegramChatId` on `OrgIntegration`; and the
+    `app_orgs_watching_topic` SECURITY DEFINER function (cross-tenant topic discovery, mirroring
+    `app_orgs_watching_trend`).
+  - notification-service: `formatTelegramDigest` + `postTelegram` (Bot API `sendMessage`, HTML), wired into
+    `deliverDigest` alongside Slack/Discord.
+  - database: TOPIC-subscription matcher — a signal's region/category/model map to topic ids
+    (`region:US`, `category:ai-models`, `model:llama`) via `newsTopicTargets`; `evaluateSignalAllOrgs`
+    fans out cross-tenant and `evaluateSignalForOrg` writes a deduped in-app Notification per org.
+  - ai-service: the analysis pass fires the news-alert fan-out (best-effort) after persisting an analysis.
+    Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+### Patch Changes
+
+- Updated dependencies [a318f3e]
+- Updated dependencies [09d03cb]
+- Updated dependencies [538c880]
+- Updated dependencies [46cad64]
+  - @aioi/shared@0.3.0
+  - @aioi/validation@0.5.0
+
 ## 0.3.1
 
 ### Patch Changes

@@ -1,5 +1,30 @@
 # @aioi/ai-sdk
 
+## 0.8.0
+
+### Minor Changes
+
+- 09d03cb: AI & Tech Intelligence vertical — M4 (per-article analysis). Adds the full per-article analysis pipeline
+  (ADR-0009): `LLMProvider.analyzeSignal` (Stub + LiteLLM) producing a schema-validated payload — TLDR,
+  executive summary, the nine opportunity axes (business/career/learning/content/investment/automation/
+  startup/developer/freelancing, each a 1–100 score + grounded "why"), difficulty, companies, tech, skills,
+  region, categories, and action items (`signalAnalysisContentSchema`). The `analyzeSignals` driver runs
+  the three cost guardrails in order — rules relevance gate (no spend on off-topic), content-hash cache
+  (identical/reposted articles reuse an existing analysis), and a per-run model-call budget cap — then
+  persists `SignalAnalysis` + `SignalCategory` (`upsertSignalAnalysis`, `findAnalysisByContentHash`,
+  `listSignalsForAnalysis`). The prompt is versioned (`signal-analysis-v1`) and gated by the extended
+  llm-eval-harness (schema-validity, determinism, axis ranges, valid categories, gate behavior). Design:
+  AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+### Patch Changes
+
+- Updated dependencies [a318f3e]
+- Updated dependencies [09d03cb]
+- Updated dependencies [538c880]
+- Updated dependencies [46cad64]
+  - @aioi/shared@0.3.0
+  - @aioi/validation@0.5.0
+
 ## 0.7.1
 
 ### Patch Changes
