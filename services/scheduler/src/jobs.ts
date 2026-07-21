@@ -27,8 +27,9 @@ import {
   runSemanticScholarIngestion,
   runRemoteOkIngestion,
   runStackExchangeIngestion,
+  enrichModelCards,
 } from "@aioi/ingestion-service";
-import { clusterRecentSignals, scoreClusteredTrends } from "@aioi/ai-service";
+import { clusterRecentSignals, scoreClusteredTrends, analyzeSignals } from "@aioi/ai-service";
 import { getEmailProvider, renderBriefEmail, type BriefLike } from "@aioi/email";
 import { logger } from "@aioi/logger";
 
@@ -141,6 +142,25 @@ export async function runScoringJob() {
 }
 
 /**
+ * Per-article analysis (M4/M10): analyze the backlog of un-analyzed signals into SignalAnalysis. This is
+ * what fills the AI/tech News feed, region map, and category filters. Cost-capped via `budget` (ADR-0009);
+ * the rules relevance gate + content-hash cache keep spend down. Best-effort — failures per signal are
+ * logged, not fatal.
+ */
+export async function runAnalyzeSignalsJob() {
+  const result = await analyzeSignals({ limit: 100, budget: 40 });
+  logger.info(result, "scheduler: analyze-signals job complete");
+  return result;
+}
+
+/** Model-card enrichment (M9/M10): populate ModelCard detail from Hugging Face for tracked models. */
+export async function runModelCardEnrichmentJob() {
+  const result = await enrichModelCards(50);
+  logger.info(result, "scheduler: model-card enrichment job complete");
+  return result;
+}
+
+/**
  * Record one history point per trend + tracked entity — the raw material for momentum/trajectory.
  * Runs at the end of each pipeline cycle (after scoring); only useful once ≥2 runs accrue, so it must
  * run from the start for the baseline to build. No-ops cleanly on an empty database.
@@ -196,6 +216,8 @@ export const JOB = {
   stackExchangeIngestion: "ingestion:stackexchange",
   clustering: "clustering:signals",
   scoring: "scoring:trends",
+  analyzeSignals: "analyze:signals",
+  modelCardEnrichment: "enrichment:model-cards",
   snapshot: "snapshot:momentum",
   dailyBriefs: "briefs:daily",
 } as const;

@@ -8,6 +8,8 @@ import {
   JOB,
   runClusteringJob,
   runScoringJob,
+  runAnalyzeSignalsJob,
+  runModelCardEnrichmentJob,
   runSnapshotJob,
   runDailyBriefsJob,
   runIngestionJob,
@@ -128,6 +130,19 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
   await queue.add(JOB.clustering, {}, { repeat: { pattern: "5 * * * *" }, jobId: JOB.clustering });
   // Score freshly-clustered trends 10 min after clustering.
   await queue.add(JOB.scoring, {}, { repeat: { pattern: "15 * * * *" }, jobId: JOB.scoring });
+  // Per-article analysis (M4/M10) hourly at :20 — fills the AI/tech News feed, map, and category
+  // filters. Cost-capped in the job (ADR-0009); only runs on the un-analyzed backlog.
+  await queue.add(
+    JOB.analyzeSignals,
+    {},
+    { repeat: { pattern: "20 * * * *" }, jobId: JOB.analyzeSignals },
+  );
+  // Model-card enrichment (M9/M10) every 6h at :30 — HF license/params/runtime detail for the tracker.
+  await queue.add(
+    JOB.modelCardEnrichment,
+    {},
+    { repeat: { pattern: "30 */6 * * *" }, jobId: JOB.modelCardEnrichment },
+  );
   // Record momentum snapshots at the end of each cycle, after scoring (:25). This is what makes the
   // momentum/trajectory features accrue a baseline — it must run from the start, so it is unconditional.
   await queue.add(JOB.snapshot, {}, { repeat: { pattern: "25 * * * *" }, jobId: JOB.snapshot });
@@ -158,6 +173,8 @@ export async function startScheduler(): Promise<{ queue: Queue; worker: Worker }
       if (job.name === JOB.remoteOkIngestion) return runRemoteOkIngestionJob();
       if (job.name === JOB.clustering) return runClusteringJob();
       if (job.name === JOB.scoring) return runScoringJob();
+      if (job.name === JOB.analyzeSignals) return runAnalyzeSignalsJob();
+      if (job.name === JOB.modelCardEnrichment) return runModelCardEnrichmentJob();
       if (job.name === JOB.snapshot) return runSnapshotJob();
       if (job.name === JOB.dailyBriefs) return runDailyBriefsJob();
       logger.warn({ name: job.name }, "scheduler: unknown job");

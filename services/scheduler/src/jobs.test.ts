@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { bootstrapUser, listBriefs, prisma } from "@aioi/database";
 import { clearOutbox, outbox } from "@aioi/email";
-import { runDailyBriefsJob, runSnapshotJob } from "./jobs";
+import { runAnalyzeSignalsJob, runDailyBriefsJob, runSnapshotJob } from "./jobs";
 
 // Integration — needs a live Postgres (+ restricted role for RLS). Exercises only the pure job
 // function (no BullMQ/Redis).
@@ -46,5 +46,22 @@ describe.skipIf(!enabled)("runSnapshotJob (integration)", () => {
     });
     expect(res.trends).toBeGreaterThanOrEqual(0);
     expect(res.entities).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe.skipIf(!enabled)("runAnalyzeSignalsJob (integration)", () => {
+  it("runs the per-article analysis pass and returns per-outcome counts", async () => {
+    const res = await runAnalyzeSignalsJob();
+    // Shape check — drives SignalAnalysis population for the News feed/map (M10).
+    expect(res).toEqual({
+      seen: expect.any(Number),
+      analyzed: expect.any(Number),
+      cacheHits: expect.any(Number),
+      skipped: expect.any(Number),
+      deferred: expect.any(Number),
+      llmCalls: expect.any(Number),
+    });
+    // Cost cap honored: never more model calls than the job's budget (40).
+    expect(res.llmCalls).toBeLessThanOrEqual(40);
   });
 });
