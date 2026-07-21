@@ -1,5 +1,23 @@
 # @aioi/api
 
+## 0.9.4
+
+### Patch Changes
+
+- Updated dependencies [8640a94]
+- Updated dependencies [5bce17e]
+- Updated dependencies [a318f3e]
+- Updated dependencies [09d03cb]
+- Updated dependencies [246143f]
+- Updated dependencies [538c880]
+- Updated dependencies [195a5c5]
+- Updated dependencies [46cad64]
+- Updated dependencies [9f0b508]
+  - @aioi/database@0.27.0
+  - @aioi/shared@0.3.0
+  - @aioi/ai-service@0.8.0
+  - @aioi/validation@0.5.0
+
 ## 0.9.3
 
 ### Patch Changes

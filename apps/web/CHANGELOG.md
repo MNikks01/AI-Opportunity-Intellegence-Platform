@@ -1,5 +1,41 @@
 # @aioi/web
 
+## 0.25.0
+
+### Minor Changes
+
+- 538c880: AI & Tech Intelligence vertical — M6 (public API + filters). New `/api/v1` read endpoints on the existing
+  envelope/auth/rate-limit stack: `GET /news` (feed with `q` hybrid search, region/category/minOpportunity/
+  sinceDays filters, sort, limit), `GET /news/{id}` (full analysis payload), `GET /categories` (taxonomy),
+  and `GET /models` (open-source model tracker). Backed by `listNews` / `getNewsItem` / `listModelCards`
+  in @aioi/database, and one shared `newsFilterSchema` (@aioi/validation) that validates the REST query
+  params (coerced) and is reusable by tRPC + the web filter form. Design: AI_TECH_INTELLIGENCE_MODULE.md;
+  ADR-0009.
+- 195a5c5: AI & Tech Intelligence vertical — M7 (dashboard). New pages in apps/web (RSC, force-dynamic, reusing the
+  design tokens): `/feed` — the AI/tech news feed with region/category/sort filters + hybrid search (native
+  GET form, no client JS); `/feed/[id]` — article detail rendering the full analysis (TLDR, executive
+  summary, why-it-matters, all nine opportunity axes with color-coded scores, action items, skills,
+  companies, tech); `/map` — a region heatmap (analyzed-signal volume + avg opportunity, cells linking into
+  the filtered feed); `/models` — the open-source model tracker table (license/params/GGUF/Ollama/vLLM/MLX).
+  Adds `newsRegionStats` to @aioi/database and News/Models/Map to the primary nav. Verified live end-to-end
+  against seeded data. Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+### Patch Changes
+
+- Updated dependencies [8640a94]
+- Updated dependencies [5bce17e]
+- Updated dependencies [a318f3e]
+- Updated dependencies [09d03cb]
+- Updated dependencies [246143f]
+- Updated dependencies [538c880]
+- Updated dependencies [195a5c5]
+- Updated dependencies [46cad64]
+- Updated dependencies [9f0b508]
+  - @aioi/database@0.27.0
+  - @aioi/shared@0.3.0
+  - @aioi/validation@0.5.0
+  - @aioi/ui@0.4.2
+
 ## 0.24.1
 
 ### Patch Changes

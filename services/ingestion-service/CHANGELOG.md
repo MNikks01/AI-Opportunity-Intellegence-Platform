@@ -1,5 +1,43 @@
 # @aioi/ingestion-service
 
+## 0.10.0
+
+### Minor Changes
+
+- a318f3e: AI & Tech Intelligence vertical — M3 (AI feed expansion + source tagging). Adds three big-tech AI feeds
+  to the RSS registry — NVIDIA Blog, Microsoft Research, Meta Engineering (all verified live 2026-07-21,
+  filtered to AI-relevant) — and tags every feed with an optional `region` and `defaultCategoryKey`
+  (company/lab feeds get their home region + a fallback category; global publishers stay untagged so the
+  per-article classifier decides). `SourceRecord` carries these source-level tags, `ensureSource(key, tier,
+tags)` persists them to the `Source` row (set on create, synced on re-run, never cleared by an untagged
+  call), and the RSS connector propagates them via `normalize`. Tests: registry-tag validity, tag
+  propagation, and DB persistence. Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+- 9f0b508: AI & Tech Intelligence vertical — M9 (model-card enrichment), the final module. Populates `ModelCard` for
+  tracked MODEL entities from the Hugging Face Hub API: `fetchModelDetail` + pure `parseModelCard` derive
+  license, parameter count, and GGUF/MLX/vLLM/transformers availability from a model's HF detail (tags,
+  safetensors, siblings, cardData). The `enrichModelCards` driver walks MODEL entities (the entity name is
+  the HF repo id), fetches each, and upserts via `upsertModelCard` (idempotent) — models not on HF (e.g.
+  GPT-5) return null and are skipped, best-effort per model. Adds `listModelsForEnrichment` / `upsertModelCard`
+  to @aioi/database. Verified against the live HF API. Completes the vertical (M1–M9). Design:
+  AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+### Patch Changes
+
+- Updated dependencies [8640a94]
+- Updated dependencies [5bce17e]
+- Updated dependencies [a318f3e]
+- Updated dependencies [09d03cb]
+- Updated dependencies [246143f]
+- Updated dependencies [538c880]
+- Updated dependencies [195a5c5]
+- Updated dependencies [46cad64]
+- Updated dependencies [9f0b508]
+  - @aioi/database@0.27.0
+  - @aioi/intel-core@0.2.0
+  - @aioi/shared@0.3.0
+  - @aioi/ai-sdk@0.8.0
+  - @aioi/validation@0.5.0
+
 ## 0.9.0
 
 ### Minor Changes

@@ -1,5 +1,101 @@
 # @aioi/database
 
+## 0.27.0
+
+### Minor Changes
+
+- 8640a94: AI & Tech Intelligence vertical — M1 (taxonomy + schema). Additive, lock-safe migration adding the
+  `Region` enum, `Category` + `SignalCategory` (content taxonomy with classifier confidence),
+  `SignalAnalysis` (1:1 per-article enrichment payload for the per-article analysis chosen in ADR-0009),
+  and `ModelCard` (open-source model tracking detail on Entity type=MODEL); plus nullable `region` /
+  `defaultCategoryKey` on `Source`. Ships the canonical `CATEGORY_REGISTRY` (18 categories) with an
+  idempotent `seedCategories()` and `listCategories()` / `getCategoryByKey()` read helpers. Design:
+  docs/02-architecture/AI_TECH_INTELLIGENCE_MODULE.md; decisions: ADR-0009.
+- a318f3e: AI & Tech Intelligence vertical — M3 (AI feed expansion + source tagging). Adds three big-tech AI feeds
+  to the RSS registry — NVIDIA Blog, Microsoft Research, Meta Engineering (all verified live 2026-07-21,
+  filtered to AI-relevant) — and tags every feed with an optional `region` and `defaultCategoryKey`
+  (company/lab feeds get their home region + a fallback category; global publishers stay untagged so the
+  per-article classifier decides). `SourceRecord` carries these source-level tags, `ensureSource(key, tier,
+tags)` persists them to the `Source` row (set on create, synced on re-run, never cleared by an untagged
+  call), and the RSS connector propagates them via `normalize`. Tests: registry-tag validity, tag
+  propagation, and DB persistence. Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+- 09d03cb: AI & Tech Intelligence vertical — M4 (per-article analysis). Adds the full per-article analysis pipeline
+  (ADR-0009): `LLMProvider.analyzeSignal` (Stub + LiteLLM) producing a schema-validated payload — TLDR,
+  executive summary, the nine opportunity axes (business/career/learning/content/investment/automation/
+  startup/developer/freelancing, each a 1–100 score + grounded "why"), difficulty, companies, tech, skills,
+  region, categories, and action items (`signalAnalysisContentSchema`). The `analyzeSignals` driver runs
+  the three cost guardrails in order — rules relevance gate (no spend on off-topic), content-hash cache
+  (identical/reposted articles reuse an existing analysis), and a per-run model-call budget cap — then
+  persists `SignalAnalysis` + `SignalCategory` (`upsertSignalAnalysis`, `findAnalysisByContentHash`,
+  `listSignalsForAnalysis`). The prompt is versioned (`signal-analysis-v1`) and gated by the extended
+  llm-eval-harness (schema-validity, determinism, axis ranges, valid categories, gate behavior). Design:
+  AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+- 246143f: AI & Tech Intelligence vertical — M5 (news search). Hybrid search over Signals: a raw-SQL migration adds
+  a pgvector `embedding` (HNSW) + a STORED FTS `searchVector` (GIN) to Signal (mirroring the Trend search
+  columns). `searchSignalsHybrid` fuses lexical (FTS `ts_rank`) and semantic (pgvector cosine) results via
+  reciprocal-rank fusion, honoring shared taxonomy filters (region / category / min-opportunity / recency).
+  `searchNews` runs the pure `parseNlQuery` (intel-core, no LLM) to turn phrases like "What happened in
+  China today?" or "AI funding over $50M in Europe" into filters + semantic text — only one cheap embed
+  call per search. `reembedSignals` backfills Signal embeddings (title + analysis TLDR) for rows missing
+  one. Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+- 538c880: AI & Tech Intelligence vertical — M6 (public API + filters). New `/api/v1` read endpoints on the existing
+  envelope/auth/rate-limit stack: `GET /news` (feed with `q` hybrid search, region/category/minOpportunity/
+  sinceDays filters, sort, limit), `GET /news/{id}` (full analysis payload), `GET /categories` (taxonomy),
+  and `GET /models` (open-source model tracker). Backed by `listNews` / `getNewsItem` / `listModelCards`
+  in @aioi/database, and one shared `newsFilterSchema` (@aioi/validation) that validates the REST query
+  params (coerced) and is reusable by tRPC + the web filter form. Design: AI_TECH_INTELLIGENCE_MODULE.md;
+  ADR-0009.
+- 195a5c5: AI & Tech Intelligence vertical — M7 (dashboard). New pages in apps/web (RSC, force-dynamic, reusing the
+  design tokens): `/feed` — the AI/tech news feed with region/category/sort filters + hybrid search (native
+  GET form, no client JS); `/feed/[id]` — article detail rendering the full analysis (TLDR, executive
+  summary, why-it-matters, all nine opportunity axes with color-coded scores, action items, skills,
+  companies, tech); `/map` — a region heatmap (analyzed-signal volume + avg opportunity, cells linking into
+  the filtered feed); `/models` — the open-source model tracker table (license/params/GGUF/Ollama/vLLM/MLX).
+  Adds `newsRegionStats` to @aioi/database and News/Models/Map to the primary nav. Verified live end-to-end
+  against seeded data. Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+- 46cad64: AI & Tech Intelligence vertical — M8 (news alerts). Adds a `PUSH` alert channel, Telegram delivery, and
+  region/category/model news subscriptions:
+
+  - migration: `PUSH` on `AlertChannel`; `telegramBotToken`/`telegramChatId` on `OrgIntegration`; and the
+    `app_orgs_watching_topic` SECURITY DEFINER function (cross-tenant topic discovery, mirroring
+    `app_orgs_watching_trend`).
+  - notification-service: `formatTelegramDigest` + `postTelegram` (Bot API `sendMessage`, HTML), wired into
+    `deliverDigest` alongside Slack/Discord.
+  - database: TOPIC-subscription matcher — a signal's region/category/model map to topic ids
+    (`region:US`, `category:ai-models`, `model:llama`) via `newsTopicTargets`; `evaluateSignalAllOrgs`
+    fans out cross-tenant and `evaluateSignalForOrg` writes a deduped in-app Notification per org.
+  - ai-service: the analysis pass fires the news-alert fan-out (best-effort) after persisting an analysis.
+    Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+- 9f0b508: AI & Tech Intelligence vertical — M9 (model-card enrichment), the final module. Populates `ModelCard` for
+  tracked MODEL entities from the Hugging Face Hub API: `fetchModelDetail` + pure `parseModelCard` derive
+  license, parameter count, and GGUF/MLX/vLLM/transformers availability from a model's HF detail (tags,
+  safetensors, siblings, cardData). The `enrichModelCards` driver walks MODEL entities (the entity name is
+  the HF repo id), fetches each, and upserts via `upsertModelCard` (idempotent) — models not on HF (e.g.
+  GPT-5) return null and are skipped, best-effort per model. Adds `listModelsForEnrichment` / `upsertModelCard`
+  to @aioi/database. Verified against the live HF API. Completes the vertical (M1–M9). Design:
+  AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+### Patch Changes
+
+- 5bce17e: AI & Tech Intelligence vertical — M2 (`packages/intel-core`). New pure, no-network/no-DB package holding
+  the vertical's core logic: normalization (`cleanText`, `canonicalUrl`, `contentHash`, `detectLanguage`),
+  dedupe (`shingles`/`jaccard`/`isNearDuplicate` lexical + `cosineSimilarity` for M4 embeddings), the
+  rules-based relevance gate (`classifyByRules` — the cheap tier-1 filter before any LLM spend, with
+  category + region hinting), and the canonical taxonomy (`CATEGORY_REGISTRY`, `REGIONS`, `isCategoryKey`),
+  now the single source of truth. `@aioi/database` re-exports the registry from `@aioi/intel-core` instead
+  of defining it locally (no behavior change). 30 unit tests. Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+- Updated dependencies [5bce17e]
+- Updated dependencies [a318f3e]
+- Updated dependencies [09d03cb]
+- Updated dependencies [246143f]
+- Updated dependencies [538c880]
+- Updated dependencies [46cad64]
+  - @aioi/intel-core@0.2.0
+  - @aioi/shared@0.3.0
+  - @aioi/ai-sdk@0.8.0
+  - @aioi/validation@0.5.0
+
 ## 0.26.1
 
 ### Patch Changes

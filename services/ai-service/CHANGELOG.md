@@ -1,5 +1,52 @@
 # @aioi/ai-service
 
+## 0.8.0
+
+### Minor Changes
+
+- 09d03cb: AI & Tech Intelligence vertical — M4 (per-article analysis). Adds the full per-article analysis pipeline
+  (ADR-0009): `LLMProvider.analyzeSignal` (Stub + LiteLLM) producing a schema-validated payload — TLDR,
+  executive summary, the nine opportunity axes (business/career/learning/content/investment/automation/
+  startup/developer/freelancing, each a 1–100 score + grounded "why"), difficulty, companies, tech, skills,
+  region, categories, and action items (`signalAnalysisContentSchema`). The `analyzeSignals` driver runs
+  the three cost guardrails in order — rules relevance gate (no spend on off-topic), content-hash cache
+  (identical/reposted articles reuse an existing analysis), and a per-run model-call budget cap — then
+  persists `SignalAnalysis` + `SignalCategory` (`upsertSignalAnalysis`, `findAnalysisByContentHash`,
+  `listSignalsForAnalysis`). The prompt is versioned (`signal-analysis-v1`) and gated by the extended
+  llm-eval-harness (schema-validity, determinism, axis ranges, valid categories, gate behavior). Design:
+  AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+### Patch Changes
+
+- 46cad64: AI & Tech Intelligence vertical — M8 (news alerts). Adds a `PUSH` alert channel, Telegram delivery, and
+  region/category/model news subscriptions:
+
+  - migration: `PUSH` on `AlertChannel`; `telegramBotToken`/`telegramChatId` on `OrgIntegration`; and the
+    `app_orgs_watching_topic` SECURITY DEFINER function (cross-tenant topic discovery, mirroring
+    `app_orgs_watching_trend`).
+  - notification-service: `formatTelegramDigest` + `postTelegram` (Bot API `sendMessage`, HTML), wired into
+    `deliverDigest` alongside Slack/Discord.
+  - database: TOPIC-subscription matcher — a signal's region/category/model map to topic ids
+    (`region:US`, `category:ai-models`, `model:llama`) via `newsTopicTargets`; `evaluateSignalAllOrgs`
+    fans out cross-tenant and `evaluateSignalForOrg` writes a deduped in-app Notification per org.
+  - ai-service: the analysis pass fires the news-alert fan-out (best-effort) after persisting an analysis.
+    Design: AI_TECH_INTELLIGENCE_MODULE.md; ADR-0009.
+
+- Updated dependencies [8640a94]
+- Updated dependencies [5bce17e]
+- Updated dependencies [a318f3e]
+- Updated dependencies [09d03cb]
+- Updated dependencies [246143f]
+- Updated dependencies [538c880]
+- Updated dependencies [195a5c5]
+- Updated dependencies [46cad64]
+- Updated dependencies [9f0b508]
+  - @aioi/database@0.27.0
+  - @aioi/intel-core@0.2.0
+  - @aioi/shared@0.3.0
+  - @aioi/ai-sdk@0.8.0
+  - @aioi/validation@0.5.0
+
 ## 0.7.9
 
 ### Patch Changes
