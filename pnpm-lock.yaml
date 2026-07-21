@@ -481,6 +481,9 @@ importers:
       '@aioi/database':
         specifier: workspace:*
         version: link:../../packages/database
+      '@aioi/intel-core':
+        specifier: workspace:*
+        version: link:../../packages/intel-core
       '@aioi/logger':
         specifier: workspace:*
         version: link:../../packages/logger

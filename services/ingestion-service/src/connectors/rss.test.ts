@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { CATEGORY_KEYS, REGIONS } from "@aioi/intel-core";
 import {
   parseFeed,
   normalize,
@@ -74,6 +75,22 @@ describe("rss connector", () => {
     for (const f of RSS_FEEDS) expect(f.url).toMatch(/^https:\/\//);
   });
 
+  it("every feed's region and defaultCategoryKey are valid (or undefined)", () => {
+    const regions = new Set<string>(REGIONS);
+    for (const f of RSS_FEEDS) {
+      if (f.region !== undefined) expect(regions.has(f.region)).toBe(true);
+      if (f.defaultCategoryKey !== undefined)
+        expect(CATEGORY_KEYS.has(f.defaultCategoryKey)).toBe(true);
+    }
+  });
+
+  it("includes the M3 big-tech AI feeds", () => {
+    const ids = new Set(RSS_FEEDS.map((f) => f.id));
+    expect(ids.has("nvidia")).toBe(true);
+    expect(ids.has("microsoft-research")).toBe(true);
+    expect(ids.has("meta-engineering")).toBe(true);
+  });
+
   it("looksAiRelevant uses word boundaries (no false positives on 'email'/'maintain')", () => {
     expect(looksAiRelevant("A new LLM agent toolkit")).toBe(true);
     expect(looksAiRelevant("Thoughts on AI safety")).toBe(true);
@@ -116,6 +133,25 @@ describe("rss connector", () => {
     expect(rec.source).toBe("rss:example-news");
     expect(rec.externalId).toBe("https://example.com/openai-agents");
     expect(normalize(filteredFeed, offTopic!)).toBeNull(); // filtered out
+  });
+
+  it("normalize propagates the feed's source-level tags onto the record", () => {
+    const taggedFeed: RssFeed = {
+      ...openFeed,
+      region: "US",
+      defaultCategoryKey: "open-source",
+    };
+    const [item] = parseFeed(ATOM_SAMPLE);
+    const rec = normalize(taggedFeed, item!)!;
+    expect(rec.region).toBe("US");
+    expect(rec.defaultCategoryKey).toBe("open-source");
+  });
+
+  it("leaves tags undefined for an untagged feed", () => {
+    const [item] = parseFeed(ATOM_SAMPLE);
+    const rec = normalize(openFeed, item!)!;
+    expect(rec.region).toBeUndefined();
+    expect(rec.defaultCategoryKey).toBeUndefined();
   });
 
   it("unfiltered feeds keep every valid item regardless of AI relevance", () => {

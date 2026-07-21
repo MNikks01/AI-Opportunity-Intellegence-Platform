@@ -18,6 +18,7 @@
   "dependencies": {
     "@aioi/ai-sdk": "workspace:*",
     "@aioi/database": "workspace:*",
+    "@aioi/intel-core": "workspace:*",
     "@aioi/logger": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",

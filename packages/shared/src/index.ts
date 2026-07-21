@@ -59,6 +59,13 @@ export interface SourceRecord {
   text: string;
   /** Original payload (validated upstream). */
   raw: unknown;
+  /**
+   * Optional source-level tags (AI/tech vertical, M3). Same for every record from a given source; the
+   * persistence layer applies them to the `Source` row. `region` is a `Region` enum value (string here to
+   * keep @aioi/shared dependency-free); `defaultCategoryKey` is a `Category.key`.
+   */
+  region?: string;
+  defaultCategoryKey?: string;
 }
 
 export type TrendStatus = "EARLY" | "ACTIVE" | "FADING" | "ARCHIVED";
