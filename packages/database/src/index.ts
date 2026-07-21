@@ -104,6 +104,16 @@ export {
   type SignalAnalysisInput,
 } from "./signal-analysis";
 export {
+  searchSignalsHybrid,
+  searchSignalsTextIds,
+  searchSignalsSemanticIds,
+  searchNews,
+  reembedSignals,
+  rrf,
+  type SignalSearchFilters,
+  type SignalHit,
+} from "./signal-search";
+export {
   listTrendsQuadrant,
   QUADRANT_MIDPOINT,
   type QuadrantTrend,
