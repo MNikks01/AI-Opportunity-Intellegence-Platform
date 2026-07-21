@@ -8,9 +8,12 @@ import {
   rawModelScoreSchema,
   actionPlanContentSchema,
   extractedEntitiesSchema,
+  signalAnalysisContentSchema,
+  OPPORTUNITY_AXES,
   type RawModelScore,
   type ActionPlanContent,
   type ExtractedEntity,
+  type SignalAnalysisContent,
 } from "@aioi/validation";
 import type { ScoreDimension } from "@aioi/shared";
 import { type Tracer, NoopTracer, getTracer, usageFrom } from "./tracing";
@@ -34,12 +37,28 @@ export interface ActionPlanRequest {
   evidenceIds: string[];
 }
 
+export interface AnalyzeSignalRequest {
+  title: string;
+  /** Cleaned article text (title + summary/body) the analysis must be grounded in. */
+  body: string;
+  sourceKey: string;
+  url?: string;
+  /** Region hint from the rules gate (may be refined by the model). */
+  regionHint?: string;
+  /** Candidate category keys from the rules gate. */
+  categoryHints?: string[];
+  /** The full set of allowed category keys — the model must pick only from these. */
+  validCategoryKeys: string[];
+}
+
 export interface LLMProvider {
   readonly name: string;
   scoreDimension(req: ScoreRequest): Promise<RawModelScore>;
   generateActionPlan(req: ActionPlanRequest): Promise<ActionPlanContent>;
   /** Open-ended entity discovery from text (companies/models/tools/people). Stub returns none. */
   extractEntities(text: string): Promise<ExtractedEntity[]>;
+  /** Full per-article analysis (AI/tech vertical, M4) — TLDR, 9 opportunity axes, action items. */
+  analyzeSignal(req: AnalyzeSignalRequest): Promise<SignalAnalysisContent>;
 }
 
 /** FNV-1a — small, deterministic, dependency-free hash for the stub. */
@@ -105,6 +124,43 @@ export class StubProvider implements LLMProvider {
   // Offline: entity discovery is left to the deterministic dictionary in @aioi/ai-service.
   extractEntities(_text: string): Promise<ExtractedEntity[]> {
     return Promise.resolve([]);
+  }
+
+  analyzeSignal(req: AnalyzeSignalRequest): Promise<SignalAnalysisContent> {
+    const seed = hash(`${req.title}::${req.body}`);
+    // 1..100 from a per-axis seed so axes differ but stay deterministic.
+    const scoreFor = (salt: string) => (hash(`${salt}:${seed}`) % 100) + 1;
+    const opportunities = Object.fromEntries(
+      OPPORTUNITY_AXES.map((axis) => [
+        axis,
+        { score: scoreFor(axis), why: `Deterministic stub estimate for the ${axis} opportunity.` },
+      ]),
+    ) as SignalAnalysisContent["opportunities"];
+
+    const region = (req.regionHint ?? "OTHER") as SignalAnalysisContent["region"];
+    const catKey = req.categoryHints?.[0] ?? req.validCategoryKeys[0] ?? "ai-models";
+    const difficulties = ["BEGINNER", "INTERMEDIATE", "ADVANCED"] as const;
+
+    const content: SignalAnalysisContent = {
+      tldr: `Stub TLDR for "${req.title}".`.slice(0, 400),
+      executiveSummary: `Deterministic stub summary of "${req.title}" from ${req.sourceKey}.`,
+      whyItMatters: "Stub rationale — offline provider, no real model call.",
+      region,
+      categories: [{ key: catKey, confidence: Number((0.5 + (seed % 40) / 100).toFixed(2)) }],
+      companiesAffected: [],
+      techMentioned: [],
+      skillsToLearn: [],
+      difficulty: difficulties[seed % 3]!,
+      industry: "Artificial Intelligence",
+      estMarketImpact: "Unknown (stub).",
+      actionItems: [`Review "${req.title}" and assess relevance.`],
+      opportunities,
+      impactScore: scoreFor("impact"),
+      opportunityScore: scoreFor("opportunity"),
+      confidence: Number((0.45 + (seed % 40) / 100).toFixed(2)),
+      trendingScore: scoreFor("trending"),
+    };
+    return Promise.resolve(signalAnalysisContentSchema.parse(content));
   }
 }
 
@@ -256,6 +312,65 @@ export class LiteLLMProvider implements LLMProvider {
       const entities = extractedEntitiesSchema.parse(JSON.parse(content)).entities;
       gen.end({ output: { count: entities.length }, usage: usageFrom(data) });
       return entities;
+    } catch (e) {
+      gen.end({ error: e instanceof Error ? e.message : String(e) });
+      throw e;
+    }
+  }
+
+  async analyzeSignal(req: AnalyzeSignalRequest): Promise<SignalAnalysisContent> {
+    const axes = OPPORTUNITY_AXES.join(", ");
+    const system =
+      "You are an AI/tech opportunity analyst. Analyze ONE news article and return STRICT JSON only. " +
+      "Ground every claim in the provided text; do not invent facts. Score each of the nine opportunity " +
+      `axes (${axes}) 1-100 with a concrete one-sentence 'why'. ` +
+      "Pick 'region' from the allowed enum and 'categories' ONLY from the provided category keys " +
+      "(1-6, each with a 0-1 confidence). 'tldr' <= 50 words. 'difficulty' is BEGINNER|INTERMEDIATE|ADVANCED. " +
+      "impactScore/opportunityScore/trendingScore are 1-100; confidence is 0-1. Shape: " +
+      '{"tldr":string,"executiveSummary":string,"whyItMatters":string,"region":string,' +
+      '"categories":[{"key":string,"confidence":number}],"companiesAffected":string[],' +
+      '"techMentioned":string[],"skillsToLearn":string[],"difficulty":string,"industry":string,' +
+      '"estMarketImpact":string,"actionItems":string[],"opportunities":{axis:{"score":int,"why":string}},' +
+      '"impactScore":int,"opportunityScore":int,"confidence":number,"trendingScore":int}.';
+    const user =
+      `Source: ${req.sourceKey}\n${req.url ? `URL: ${req.url}\n` : ""}` +
+      `Allowed regions: US, CHINA, INDIA, EUROPE, JAPAN, SOUTH_KOREA, SINGAPORE, CANADA, AUSTRALIA, OTHER\n` +
+      `Allowed category keys: ${req.validCategoryKeys.join(", ")}\n` +
+      `${req.regionHint ? `Region hint: ${req.regionHint}\n` : ""}` +
+      `${req.categoryHints?.length ? `Category hints: ${req.categoryHints.join(", ")}\n` : ""}` +
+      `\nTitle: ${req.title}\n\nArticle:\n${req.body.slice(0, 6000)}`;
+
+    const gen = this.tracer.generation({
+      name: "analyze-signal",
+      model: this.model,
+      input: { source: req.sourceKey, title: req.title },
+    });
+    try {
+      const res = await this.fetchImpl(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: this.headers(),
+        body: JSON.stringify({
+          model: this.model,
+          temperature: 0.2,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: system },
+            { role: "user", content: user },
+          ],
+        }),
+      });
+      if (!res.ok) throw new Error(`LiteLLM error ${res.status}`);
+      const data = (await res.json()) as {
+        choices?: { message?: { content?: string } }[];
+        usage?: Record<string, number>;
+      };
+      const content = data.choices?.[0]?.message?.content ?? "";
+      const parsed = signalAnalysisContentSchema.parse(JSON.parse(content));
+      gen.end({
+        output: { region: parsed.region, opp: parsed.opportunityScore },
+        usage: usageFrom(data),
+      });
+      return parsed;
     } catch (e) {
       gen.end({ error: e instanceof Error ? e.message : String(e) });
       throw e;

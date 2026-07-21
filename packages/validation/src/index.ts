@@ -140,4 +140,83 @@ export const extractedEntitiesSchema = z.object({
 });
 export type ExtractedEntity = z.infer<typeof extractedEntitySchema>;
 
+// ── Per-article analysis (AI/tech vertical, M4) ─────────────────────────────
+/** Region enum values — kept in sync with the `Region` Prisma enum and @aioi/intel-core REGIONS. */
+export const REGION_VALUES = [
+  "US",
+  "CHINA",
+  "INDIA",
+  "EUROPE",
+  "JAPAN",
+  "SOUTH_KOREA",
+  "SINGAPORE",
+  "CANADA",
+  "AUSTRALIA",
+  "OTHER",
+] as const;
+export const regionSchema = z.enum(REGION_VALUES);
+export type RegionValue = (typeof REGION_VALUES)[number];
+
+export const difficultySchema = z.enum(["BEGINNER", "INTERMEDIATE", "ADVANCED"]);
+
+/** One opportunity axis: a 1–100 score with a grounded "why". The brief's 9 axes each use this shape. */
+export const opportunityAxisSchema = z.object({
+  score: z.number().int().min(1).max(100),
+  why: z.string().min(1),
+});
+
+/** A category assignment with the model's confidence (validated against known keys in the service). */
+export const analysisCategorySchema = z.object({
+  key: z.string().min(1),
+  confidence: z.number().min(0).max(1),
+});
+
+/**
+ * The per-article analysis the model returns (ADR-0009). Canonical numeric scores stay the 10-dimension
+ * trend `Score` rows; the 9 opportunity axes here live in the SignalAnalysis payload as narrative +
+ * sub-score. `tldr` is capped (~50 words) at the character level.
+ */
+export const signalAnalysisContentSchema = z.object({
+  tldr: z.string().min(1).max(400),
+  executiveSummary: z.string().min(1),
+  whyItMatters: z.string().min(1),
+  region: regionSchema,
+  categories: z.array(analysisCategorySchema).min(1).max(6),
+  companiesAffected: z.array(z.string().min(1)).max(20),
+  techMentioned: z.array(z.string().min(1)).max(20),
+  skillsToLearn: z.array(z.string().min(1)).max(12),
+  difficulty: difficultySchema,
+  industry: z.string().min(1),
+  estMarketImpact: z.string().min(1),
+  actionItems: z.array(z.string().min(1)).min(1).max(10),
+  opportunities: z.object({
+    business: opportunityAxisSchema,
+    career: opportunityAxisSchema,
+    learning: opportunityAxisSchema,
+    content: opportunityAxisSchema,
+    investment: opportunityAxisSchema,
+    automation: opportunityAxisSchema,
+    startup: opportunityAxisSchema,
+    developer: opportunityAxisSchema,
+    freelancing: opportunityAxisSchema,
+  }),
+  impactScore: z.number().int().min(1).max(100),
+  opportunityScore: z.number().int().min(1).max(100),
+  confidence: z.number().min(0).max(1),
+  trendingScore: z.number().int().min(1).max(100),
+});
+export type SignalAnalysisContent = z.infer<typeof signalAnalysisContentSchema>;
+/** The nine opportunity-axis keys, in canonical order. */
+export const OPPORTUNITY_AXES = [
+  "business",
+  "career",
+  "learning",
+  "content",
+  "investment",
+  "automation",
+  "startup",
+  "developer",
+  "freelancing",
+] as const;
+
 export { z };

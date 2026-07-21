@@ -347,7 +347,7 @@ Each module is independently shippable, with tests + docs + (where AI) a green e
 | **M1** ✅ | Taxonomy + schema        | `Category`, `Region`, `SignalCategory`, `SignalAnalysis`, `ModelCard` migration + seed | migration lock-safe; DB tests      |
 | **M2** ✅ | `packages/intel-core`    | normalize, dedupe, taxonomy, relevance gate                                            | unit tests, no network             |
 | **M3** ✅ | AI feed expansion        | +AI/tech RSS + region/category on `Source`                                             | connector tests (MSW)              |
-| **M4**    | Per-article analysis     | `analyze-signal` tier-1/tier-2, cost guardrails                                        | **llm-eval-harness golden set**    |
+| **M4** ✅ | Per-article analysis     | `analyze-signal` tier-1/tier-2, cost guardrails                                        | **llm-eval-harness golden set**    |
 | **M5**    | Search + NL query        | hybrid rank + NL→filter                                                                | eval: parse accuracy, faithfulness |
 | **M6**    | API + filters            | `/api/v1/news`, `/models`, `/search`, `/categories`                                    | contract tests, RBAC, rate-limit   |
 | **M7**    | Dashboard                | feed, article, map, model tracker                                                      | a11y + RTL + Playwright            |
