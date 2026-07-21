@@ -87,6 +87,14 @@ export {
 export { exportOrgData, deleteOrg } from "./gdpr";
 export { getSourceStats, type SourceStat } from "./source-stats";
 export {
+  CATEGORY_REGISTRY,
+  seedCategories,
+  listCategories,
+  getCategoryByKey,
+  type CategoryDef,
+  type CategoryRecord,
+} from "./taxonomy";
+export {
   listTrendsQuadrant,
   QUADRANT_MIDPOINT,
   type QuadrantTrend,
