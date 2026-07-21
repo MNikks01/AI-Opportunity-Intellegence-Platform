@@ -219,4 +219,20 @@ export const OPPORTUNITY_AXES = [
   "freelancing",
 ] as const;
 
+/**
+ * Shared news-feed filter (M6) — one schema for the REST query params, the tRPC input, and the web
+ * filter form. Coerces string query params; every field optional so a bare `/api/v1/news` works.
+ */
+export const newsSortSchema = z.enum(["recent", "opportunity", "impact", "trending"]);
+export const newsFilterSchema = z.object({
+  q: z.string().trim().min(1).max(200).optional(),
+  region: regionSchema.optional(),
+  category: z.string().trim().min(1).max(60).optional(),
+  minOpportunity: z.coerce.number().int().min(1).max(100).optional(),
+  sinceDays: z.coerce.number().int().min(1).max(3650).optional(),
+  sort: newsSortSchema.default("recent"),
+  limit: z.coerce.number().int().min(1).max(100).default(25),
+});
+export type NewsFilter = z.infer<typeof newsFilterSchema>;
+
 export { z };
