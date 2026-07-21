@@ -1,45 +1,14 @@
 /**
- * AI & Tech Intelligence taxonomy (M1). The canonical Category registry + an idempotent seed and read
- * helpers. Category is a global (non-tenant) table, so this is public reference data.
- *
- * The registry lives here for M1 so the module is self-contained; M2 (`packages/intel-core`) re-exports
- * it as the single source of truth for the relevance/classification layer. See
- * docs/02-architecture/AI_TECH_INTELLIGENCE_MODULE.md and ADR-0009.
+ * AI & Tech Intelligence taxonomy persistence (M1 + M2). The canonical Category registry is owned by
+ * `@aioi/intel-core` (the pure, no-DB single source of truth); this module seeds it into the global
+ * Category table and provides read helpers. Category is a global (non-tenant) table, so this is public
+ * reference data. See docs/02-architecture/AI_TECH_INTELLIGENCE_MODULE.md and ADR-0009.
  */
+import { CATEGORY_REGISTRY, type CategoryDef } from "@aioi/intel-core";
 import { prisma } from "./client";
 
-export interface CategoryDef {
-  key: string;
-  name: string;
-  /** Parent category key, for the single level of nesting the schema allows. */
-  parentKey?: string;
-}
-
-/**
- * The canonical AI/tech category set (from the module brief). Flat for M1; `parentKey` is supported so
- * sub-categories can be added later without a migration. Keys are stable slugs — never renamed (they are
- * referenced by `Source.defaultCategoryKey`, API filters, and saved searches).
- */
-export const CATEGORY_REGISTRY: readonly CategoryDef[] = [
-  { key: "ai-models", name: "AI Models" },
-  { key: "coding-ai", name: "Coding AI" },
-  { key: "research-ai", name: "Research AI" },
-  { key: "presentation-ai", name: "Presentation AI" },
-  { key: "video-ai", name: "Video AI" },
-  { key: "image-ai", name: "Image AI" },
-  { key: "voice-ai", name: "Voice AI" },
-  { key: "ai-agents", name: "AI Agents" },
-  { key: "robotics", name: "Robotics" },
-  { key: "startups", name: "Startups" },
-  { key: "big-tech", name: "Big Tech" },
-  { key: "government", name: "Government" },
-  { key: "investments", name: "Investments" },
-  { key: "open-source", name: "Open Source" },
-  { key: "research-papers", name: "Research Papers" },
-  { key: "developer-tools", name: "Developer Tools" },
-  { key: "cloud", name: "Cloud" },
-  { key: "hardware", name: "Hardware" },
-] as const;
+// Re-exported so existing consumers of `@aioi/database` keep working after the SoT moved to intel-core.
+export { CATEGORY_REGISTRY, type CategoryDef };
 
 export interface CategoryRecord {
   id: string;

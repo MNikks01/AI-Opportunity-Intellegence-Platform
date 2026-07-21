@@ -21,6 +21,7 @@
     "@aioi/ai-sdk": "workspace:*",
     "@aioi/auth": "workspace:*",
     "@aioi/billing": "workspace:*",
+    "@aioi/intel-core": "workspace:*",
     "@aioi/logger": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",
