@@ -16,3 +16,5 @@ export { cleanText, canonicalUrl, contentHash, detectLanguage } from "./normaliz
 export { shingles, jaccard, isNearDuplicate, cosineSimilarity } from "./dedupe";
 
 export { classifyByRules, type RelevanceResult, type CategoryHit } from "./relevance";
+
+export { parseNlQuery, type ParsedQuery } from "./query";
