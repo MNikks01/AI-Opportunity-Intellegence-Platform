@@ -71,6 +71,16 @@ describe.skipIf(!enabled)("daily brief (integration)", () => {
     expect(top).toHaveProperty("topIdea");
   });
 
+  it("is idempotent per day — regenerating refreshes today's brief, not a duplicate", async () => {
+    const before = await listBriefs(orgA);
+    const first = await generateDailyBrief(orgA);
+    const after = await listBriefs(orgA);
+    // No new row: today's brief already exists (from the first test), so it was updated in place.
+    expect(after.length).toBe(before.length);
+    const second = await generateDailyBrief(orgA);
+    expect(second.id).toBe(first.id); // same row refreshed
+  });
+
   it("lists briefs and tracks opens (idempotent)", async () => {
     const list = await listBriefs(orgA);
     expect(list.length).toBeGreaterThan(0);
