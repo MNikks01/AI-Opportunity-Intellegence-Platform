@@ -108,17 +108,37 @@ export async function listActiveOrgIds(limit = 1000): Promise<string[]> {
   return orgs.map((o) => o.id);
 }
 
+export interface SourceTags {
+  /** `Region` enum value; validated by the Prisma enum at write time. */
+  region?: string;
+  /** `Category.key`; a low-confidence fallback used when the classifier is unsure. */
+  defaultCategoryKey?: string;
+}
+
 export async function ensureSource(
   key: string,
   legalityTier: $Enums.LegalityTier = "OFFICIAL",
+  tags: SourceTags = {},
 ): Promise<string> {
-  // Tier is set on create only; existing rows keep their classification (update stays empty). Callers
-  // that own a source's legality (e.g. the LICENSED Crunchbase connector) call this first, before the
-  // generic repository upsert.
+  // Tier is set on create only; existing rows keep their classification. Callers that own a source's
+  // legality (e.g. the LICENSED Crunchbase connector) call this first, before the generic repository
+  // upsert. Region/defaultCategoryKey (M3) are synced on every call when provided, so re-running an
+  // ingestion pass keeps a source's tags current without a migration.
+  const region = tags.region as $Enums.Region | undefined;
+  const update: Prisma.SourceUpdateInput = {};
+  if (region !== undefined) update.region = region;
+  if (tags.defaultCategoryKey !== undefined) update.defaultCategoryKey = tags.defaultCategoryKey;
+
   const source = await prisma.source.upsert({
     where: { key },
-    create: { key, legalityTier, rateConfig: {} },
-    update: {},
+    create: {
+      key,
+      legalityTier,
+      rateConfig: {},
+      region,
+      defaultCategoryKey: tags.defaultCategoryKey,
+    },
+    update,
   });
   return source.id;
 }
