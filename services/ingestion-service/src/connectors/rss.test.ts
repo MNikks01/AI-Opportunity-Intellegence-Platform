@@ -91,6 +91,13 @@ describe("rss connector", () => {
     expect(ids.has("meta-engineering")).toBe(true);
   });
 
+  it("covers non-US regions (China, India, Europe, Japan) so the map isn't US-only", () => {
+    const regions = new Set(RSS_FEEDS.map((f) => f.region).filter(Boolean));
+    for (const r of ["CHINA", "INDIA", "EUROPE", "JAPAN"] as const) {
+      expect(regions.has(r)).toBe(true);
+    }
+  });
+
   it("looksAiRelevant uses word boundaries (no false positives on 'email'/'maintain')", () => {
     expect(looksAiRelevant("A new LLM agent toolkit")).toBe(true);
     expect(looksAiRelevant("Thoughts on AI safety")).toBe(true);
