@@ -18,12 +18,17 @@ import {
   runHnHiringIngestion,
   runSecEdgarIngestion,
   runCrunchbaseIngestion,
+  runRssIngestion,
+  runSemanticScholarIngestion,
+  runStackExchangeIngestion,
+  enrichModelCards,
 } from "../services/ingestion-service/src/index";
 import {
   clusterRecentSignals,
   scoreClusteredTrends,
   generateActionPlansForTopTrends,
   extractEntitiesForTrends,
+  analyzeSignals,
 } from "../services/ai-service/src/index";
 import { deliverDigest, type DigestContent } from "../services/notification-service/src/index";
 // Relative import (not the "@aioi/database" package name): this script lives at the repo root, which
@@ -68,9 +73,18 @@ async function main() {
   await ingest("hnhiring", () => runHnHiringIngestion());
   await ingest("sec-edgar", () => runSecEdgarIngestion()); // no-op unless SEC_USER_AGENT is set
   await ingest("crunchbase", () => runCrunchbaseIngestion()); // no-op unless CRUNCHBASE_API_KEY is set
+  await ingest("rss", () => runRssIngestion()); // AI/tech news feeds (OpenAI, DeepMind, TechCrunch…)
+  await ingest("semantic-scholar", () => runSemanticScholarIngestion());
+  await ingest("stackexchange", () => runStackExchangeIngestion());
 
   console.log("clustering…", await clusterRecentSignals());
   console.log("scoring…", await scoreClusteredTrends({ limit: 50 }));
+
+  // Per-article analysis (M4) — this is what fills the AI/tech News feed, region map, and category
+  // filters (SignalAnalysis rows). Cost-capped; the relevance gate + content-hash cache limit spend.
+  console.log("analyzing signals…", await analyzeSignals({ limit: 200, budget: 60 }));
+  // Model-card enrichment (M9) — license/params/runtime detail for the model tracker, from Hugging Face.
+  console.log("model cards…", await enrichModelCards(50));
   console.log(
     "entities…",
     await extractEntitiesForTrends({ limit: 200, useLlm: Boolean(process.env.AIOI_ENTITY_LLM) }),
