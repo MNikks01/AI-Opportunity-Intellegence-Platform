@@ -13,7 +13,7 @@ module.exports = {
       // packages/apps/services scopes + cross-cutting
       ["web", "admin", "marketing", "docs", "api", "ai-service", "ingestion", "scheduler",
        "notification", "ui", "ai-sdk", "database", "auth", "shared", "validation", "logger",
-       "analytics", "config", "cache", "billing", "email", "infra", "ci", "deps", "release"],
+       "analytics", "config", "cache", "billing", "email", "intel-core", "infra", "ci", "deps", "release"],
     ],
   },
 };
