@@ -5,7 +5,7 @@ import { ensureSource } from "./repositories";
 import { seedCategories } from "./taxonomy";
 import { upsertSignalAnalysis, type SignalAnalysisInput } from "./signal-analysis";
 import { getNewsItem, listNews, newsRegionStats } from "./signal-search";
-import { listModelCards } from "./model-cards";
+import { listModelCards, listModelsForEnrichment, upsertModelCard } from "./model-cards";
 
 const hasDb = Boolean(process.env.DATABASE_URL);
 const sourceKey = `rss:newsapi-${randomUUID().slice(0, 8)}`;
@@ -87,5 +87,24 @@ describe.skipIf(!hasDb)("news API reads (integration)", () => {
     expect(mine!.license).toBe("apache-2.0");
     expect(mine!.ggufAvailable).toBe(true);
     expect(mine!.paramsB).toBe(7);
+  });
+
+  it("upsertModelCard enriches (idempotently) a model listed for enrichment", async () => {
+    const entity = await prisma.entity.create({
+      data: { type: "MODEL", name: `${modelName}-enrich`, externalRefs: {} },
+    });
+
+    const toEnrich = await listModelsForEnrichment(500);
+    expect(toEnrich.some((m) => m.entityId === entity.id)).toBe(true);
+
+    await upsertModelCard(entity.id, { license: "mit", paramsB: 8, vllmSupported: true });
+    await upsertModelCard(entity.id, { license: "mit", paramsB: 8, vllmSupported: true }); // idempotent
+
+    const card = await prisma.modelCard.findUnique({ where: { entityId: entity.id } });
+    expect(card?.license).toBe("mit");
+    expect(card?.vllmSupported).toBe(true);
+    expect(card?.paramsB).toBe(8);
+
+    await prisma.entity.delete({ where: { id: entity.id } }).catch(() => {}); // cascades card
   });
 });

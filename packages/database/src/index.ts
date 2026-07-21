@@ -119,7 +119,15 @@ export {
   type NewsDetail,
   type RegionStat,
 } from "./signal-search";
-export { listModelCards, type ModelCardView, type ModelCardFilters } from "./model-cards";
+export {
+  listModelCards,
+  listModelsForEnrichment,
+  upsertModelCard,
+  type ModelCardView,
+  type ModelCardFilters,
+  type ModelToEnrich,
+  type ModelCardInput,
+} from "./model-cards";
 export {
   newsTopicTargets,
   regionTopic,

@@ -112,7 +112,13 @@ export * from "./repository";
 export * from "./repository.prisma";
 
 import { logger } from "@aioi/logger";
-import { recordIngestionRun, recordFailedIngestionRun } from "@aioi/database";
+import {
+  recordIngestionRun,
+  recordFailedIngestionRun,
+  listModelsForEnrichment,
+  upsertModelCard,
+} from "@aioi/database";
+import { fetchModelDetail } from "./connectors/huggingface";
 import { fetchTopStories } from "./connectors/hackernews";
 import { fetchSubreddits, redditConfigured, subredditsFromEnv } from "./connectors/reddit";
 import { fetchRepositories } from "./connectors/github";
@@ -422,6 +428,36 @@ export async function runHuggingFaceIngestion(
   const result = { fetched: records.length, inserted, skipped };
   logger.info({ source: "huggingface", ...result }, "ingestion pass complete");
   await recordIngestionRun("huggingface", result, startedAt);
+  return result;
+}
+
+/**
+ * Enrich tracked MODEL entities with their Hugging Face card detail (M9): license, params, and
+ * GGUF/Ollama/vLLM/MLX availability. The entity name is the HF repo id; models not on HF (e.g. GPT-5)
+ * simply return null and are skipped. Idempotent — safe to schedule; best-effort per model.
+ */
+export async function enrichModelCards(
+  limit = 50,
+): Promise<{ seen: number; enriched: number; skipped: number }> {
+  const models = await listModelsForEnrichment(limit);
+  let enriched = 0;
+  let skipped = 0;
+  for (const m of models) {
+    try {
+      const card = await fetchModelDetail(m.name);
+      if (!card) {
+        skipped += 1;
+        continue;
+      }
+      await upsertModelCard(m.entityId, card);
+      enriched += 1;
+    } catch (err) {
+      logger.warn({ err, model: m.name }, "model-card enrichment failed (skipped)");
+      skipped += 1;
+    }
+  }
+  const result = { seen: models.length, enriched, skipped };
+  logger.info({ source: "model-cards", ...result }, "model-card enrichment complete");
   return result;
 }
 

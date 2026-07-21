@@ -97,6 +97,75 @@ export interface IngestResult {
   skipped: number;
 }
 
+// ── Model-card enrichment (M9) ───────────────────────────────────────────────
+const MODEL_DETAIL_URL = "https://huggingface.co/api/models";
+
+/** The HF model-detail fields we read (all optional; the endpoint returns much more). */
+const modelDetailSchema = z.object({
+  id: z.string().optional(),
+  library_name: z.string().optional(),
+  tags: z.array(z.string()).optional(),
+  cardData: z.object({ license: z.string().optional() }).partial().passthrough().optional(),
+  safetensors: z.object({ total: z.number().optional() }).partial().passthrough().optional(),
+  siblings: z.array(z.object({ rfilename: z.string().optional() }).passthrough()).optional(),
+});
+export type HfModelDetail = z.infer<typeof modelDetailSchema>;
+
+export interface ModelCardFields {
+  license: string | null;
+  paramsB: number | null;
+  ggufAvailable: boolean;
+  mlxAvailable: boolean;
+  vllmSupported: boolean;
+  transformers: boolean;
+  weightsUrl: string | null;
+  benchmarks: Record<string, number> | null;
+}
+
+/** Derive ModelCard fields from an HF model-detail payload. Pure. */
+export function parseModelCard(detail: HfModelDetail): ModelCardFields {
+  const tags = (detail.tags ?? []).map((t) => t.toLowerCase());
+  const has = (t: string) => tags.includes(t);
+  const licenseTag = tags.find((t) => t.startsWith("license:"))?.slice("license:".length);
+  const siblings = detail.siblings ?? [];
+  const gguf = has("gguf") || siblings.some((s) => s.rfilename?.toLowerCase().endsWith(".gguf"));
+  const total = detail.safetensors?.total;
+  const paramsB = typeof total === "number" && total > 0 ? Number((total / 1e9).toFixed(1)) : null;
+
+  return {
+    license: detail.cardData?.license ?? licenseTag ?? null,
+    paramsB,
+    ggufAvailable: gguf,
+    mlxAvailable: has("mlx") || detail.library_name === "mlx",
+    vllmSupported: has("vllm"),
+    transformers: detail.library_name === "transformers" || has("transformers"),
+    weightsUrl: detail.id ? `https://huggingface.co/${detail.id}` : null,
+    benchmarks: null, // HF detail carries no standardized benchmark set; populated elsewhere if ever.
+  };
+}
+
+/**
+ * Fetch + parse one model's card detail by HF repo id (e.g. "meta-llama/Llama-3-8B"). Returns null if
+ * the model isn't on HF (404) or the response is unusable — enrichment is best-effort per model.
+ */
+export async function fetchModelDetail(
+  id: string,
+  deps: FetchDeps = {},
+): Promise<ModelCardFields | null> {
+  const r = resolve(deps);
+  const url = `${MODEL_DETAIL_URL}/${id.split("/").map(encodeURIComponent).join("/")}`;
+  let res: Response;
+  try {
+    res = await request(url, r);
+  } catch {
+    return null;
+  }
+  if (!res.ok) return null;
+  const parsed = modelDetailSchema.safeParse(await res.json().catch(() => null));
+  if (!parsed.success) return null;
+  return parseModelCard({ ...parsed.data, id: parsed.data.id ?? id });
+}
+
 /** Fetch the top models (by HF_SORT, desc) as normalized SourceRecords. */
 export async function fetchModels(
   limit = 30,
