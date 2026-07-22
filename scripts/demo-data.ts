@@ -44,6 +44,8 @@ import {
   getOrgIntegration,
   recordFailedIngestionRun,
   retagAnalysisRegionsToSource,
+  seedCategories,
+  backfillSignalCategoriesFromPayload,
 } from "../packages/database/src/index";
 
 /**
@@ -61,6 +63,10 @@ async function ingest(name: string, fn: () => Promise<unknown>): Promise<void> {
 }
 
 async function main() {
+  // Seed the AI/tech category taxonomy (idempotent) so per-article analysis can resolve category tags
+  // and the /categories API + feed filters work. Must run before analysis.
+  console.log("seeding categories…", await seedCategories());
+
   console.log("ingesting (all configured sources)…");
   await ingest("hackernews", () => runHackerNewsIngestion(40));
   await ingest("github", () => runGitHubIngestion(20));
@@ -87,6 +93,8 @@ async function main() {
   // Realign historical analyses to their source's region tag (cheap, no LLM) so regional feeds
   // (Japan/Korea/etc.) land in the right bucket on the map even if analyzed before the retag rule.
   console.log("retagging regions…", await retagAnalysisRegionsToSource());
+  // Link categories for analyses done before the taxonomy was seeded (from their stored payload).
+  console.log("backfilling categories…", await backfillSignalCategoriesFromPayload());
   // Model-card enrichment (M9) — license/params/runtime detail for the model tracker, from Hugging Face.
   console.log("model cards…", await enrichModelCards(50));
   console.log(

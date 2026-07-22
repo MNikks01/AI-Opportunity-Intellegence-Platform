@@ -100,6 +100,7 @@ export {
   upsertSignalAnalysis,
   countAnalyzedSignals,
   retagAnalysisRegionsToSource,
+  backfillSignalCategoriesFromPayload,
   type SignalForAnalysis,
   type CachedAnalysis,
   type SignalAnalysisInput,
