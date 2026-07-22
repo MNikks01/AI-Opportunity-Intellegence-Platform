@@ -96,4 +96,9 @@ jobs:
         uses: gitleaks/gitleaks-action@v3
         env:
           GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "false"
+          # gitleaks-action is free for individual accounts, but it verifies the account type via a
+          # GitHub API call — unauthenticated that call is rate-limited (60/hr), and on failure the
+          # action falls back to demanding a paid GITLEAKS_LICENSE. Passing the default token
+          # authenticates the lookup (5000/hr) so the free individual-account path is used reliably.
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 # NOTE: an llm-eval-harness smoke gate (B-009) will be added as a job here once wired.
