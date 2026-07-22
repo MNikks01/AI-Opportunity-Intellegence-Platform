@@ -285,6 +285,32 @@ export const RSS_FEEDS: RssFeed[] = [
     aiFilter: true,
     region: "JAPAN",
   },
+  // Korea + Singapore (English, verified live through the connector 2026-07-22). Broad publishers →
+  // aiFilter keeps only AI-relevant items.
+  {
+    id: "koreatimes",
+    name: "The Korea Times",
+    category: "news",
+    url: "https://www.koreatimes.co.kr/www/rss/rss.xml",
+    aiFilter: true,
+    region: "SOUTH_KOREA",
+  },
+  {
+    id: "businesskorea",
+    name: "BusinessKorea",
+    category: "news",
+    url: "https://www.businesskorea.co.kr/rss/allArticle.xml",
+    aiFilter: true,
+    region: "SOUTH_KOREA",
+  },
+  {
+    id: "vulcanpost",
+    name: "Vulcan Post",
+    category: "news",
+    url: "https://vulcanpost.com/feed/",
+    aiFilter: true,
+    region: "SINGAPORE",
+  },
 ];
 
 const USER_AGENT = "AIOIBot/1.0 (+https://ai-opportunity-intelligence.example; ingestion)";
