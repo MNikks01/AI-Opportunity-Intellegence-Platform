@@ -175,3 +175,36 @@ export async function retagAnalysisRegionsToSource(): Promise<number> {
     JOIN "Source" s ON s.id = sig."sourceId"
     WHERE a."signalId" = sig.id AND s.region IS NOT NULL AND a.region <> s.region`;
 }
+
+/**
+ * Backfill `SignalCategory` links from each analysis's stored payload for signals that have none. Fixes
+ * historical rows analyzed while the Category table was unseeded (their category keys couldn't resolve to
+ * ids at write time). Idempotent — once linked, a row is excluded next run. Returns links created.
+ */
+export async function backfillSignalCategoriesFromPayload(limit = 5000): Promise<number> {
+  const rows = await prisma.signalAnalysis.findMany({
+    where: { signal: { categories: { none: {} } } },
+    select: { signalId: true, payload: true },
+    take: limit,
+  });
+  const cats = await prisma.category.findMany({ select: { id: true, key: true } });
+  const idByKey = new Map(cats.map((c) => [c.key, c.id]));
+
+  let linked = 0;
+  for (const r of rows) {
+    const payloadCats =
+      (r.payload as { categories?: { key: string; confidence: number }[] } | null)?.categories ??
+      [];
+    const data = payloadCats
+      .filter((c) => idByKey.has(c.key))
+      .map((c) => ({
+        signalId: r.signalId,
+        categoryId: idByKey.get(c.key)!,
+        confidence: c.confidence,
+      }));
+    if (data.length === 0) continue;
+    const res = await prisma.signalCategory.createMany({ data, skipDuplicates: true });
+    linked += res.count;
+  }
+  return linked;
+}

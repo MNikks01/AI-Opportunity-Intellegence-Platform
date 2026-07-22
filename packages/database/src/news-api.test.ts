@@ -6,7 +6,10 @@ import { seedCategories } from "./taxonomy";
 import { upsertSignalAnalysis, type SignalAnalysisInput } from "./signal-analysis";
 import { getNewsItem, listNews, newsRegionStats } from "./signal-search";
 import { listModelCards, listModelsForEnrichment, upsertModelCard } from "./model-cards";
-import { retagAnalysisRegionsToSource } from "./signal-analysis";
+import {
+  retagAnalysisRegionsToSource,
+  backfillSignalCategoriesFromPayload,
+} from "./signal-analysis";
 
 const hasDb = Boolean(process.env.DATABASE_URL);
 const sourceKey = `rss:newsapi-${randomUUID().slice(0, 8)}`;
@@ -88,6 +91,28 @@ describe.skipIf(!hasDb)("news API reads (integration)", () => {
     expect(mine!.license).toBe("apache-2.0");
     expect(mine!.ggufAvailable).toBe(true);
     expect(mine!.paramsB).toBe(7);
+  });
+
+  it("backfillSignalCategoriesFromPayload links categories from the stored payload", async () => {
+    await seedCategories();
+    const sid = await ensureSource(`rss:cat-${randomUUID().slice(0, 8)}`, "OFFICIAL");
+    const signal = await prisma.signal.create({
+      data: { sourceId: sid, externalId: "c1", title: "cat story", raw: {} },
+    });
+    // Analysis persisted with an EMPTY categories list (as if the Category table was unseeded), but the
+    // payload records the model's category — the backfill links it.
+    await upsertSignalAnalysis({
+      ...analysis(signal.id, 50),
+      payload: { categories: [{ key: "ai-models", confidence: 0.9 }] },
+      categories: [],
+    });
+    expect((await getNewsItem(signal.id))!.categories).toHaveLength(0);
+
+    const linked = await backfillSignalCategoriesFromPayload();
+    expect(linked).toBeGreaterThanOrEqual(1);
+    expect((await getNewsItem(signal.id))!.categories).toContain("ai-models");
+
+    await prisma.source.deleteMany({ where: { id: sid } }).catch(() => {});
   });
 
   it("retagAnalysisRegionsToSource realigns analyses to a region-tagged source", async () => {
