@@ -63,6 +63,32 @@ describe("buildAnalysisInput", () => {
     expect(input.promptVersion).toBe(ANALYSIS_PROMPT_VERSION);
     expect(input.contentHash).toHaveLength(64);
   });
+
+  it("uses the source region tag as authoritative, overriding the model", async () => {
+    const signal: SignalForAnalysis = {
+      id: randomUUID(),
+      title: "Startup raises funding, partners with OpenAI",
+      url: null,
+      raw: {},
+      sourceKey: "rss:the-bridge-jp",
+      legalityTier: "OFFICIAL",
+      defaultCategoryKey: null,
+      sourceRegion: "JAPAN", // region-tagged feed
+    };
+    const body = signalBody(signal);
+    // Model confidently says US (it name-drops OpenAI) — the JAPAN source tag must still win.
+    const content = {
+      ...(await new StubProvider().analyzeSignal({
+        title: signal.title!,
+        body,
+        sourceKey: signal.sourceKey,
+        validCategoryKeys: ["ai-models"],
+      })),
+      region: "US" as const,
+    };
+    const gate = classifyByRules(signal.title!, body);
+    expect(buildAnalysisInput(signal, content, gate, body).region).toBe("JAPAN");
+  });
 });
 
 // ── Full pipeline (integration) ──

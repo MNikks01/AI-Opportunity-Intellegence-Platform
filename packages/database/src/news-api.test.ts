@@ -6,6 +6,7 @@ import { seedCategories } from "./taxonomy";
 import { upsertSignalAnalysis, type SignalAnalysisInput } from "./signal-analysis";
 import { getNewsItem, listNews, newsRegionStats } from "./signal-search";
 import { listModelCards, listModelsForEnrichment, upsertModelCard } from "./model-cards";
+import { retagAnalysisRegionsToSource } from "./signal-analysis";
 
 const hasDb = Boolean(process.env.DATABASE_URL);
 const sourceKey = `rss:newsapi-${randomUUID().slice(0, 8)}`;
@@ -87,6 +88,23 @@ describe.skipIf(!hasDb)("news API reads (integration)", () => {
     expect(mine!.license).toBe("apache-2.0");
     expect(mine!.ggufAvailable).toBe(true);
     expect(mine!.paramsB).toBe(7);
+  });
+
+  it("retagAnalysisRegionsToSource realigns analyses to a region-tagged source", async () => {
+    const jpKey = `rss:jp-${randomUUID().slice(0, 8)}`;
+    const sid = await ensureSource(jpKey, "OFFICIAL", { region: "JAPAN" });
+    const signal = await prisma.signal.create({
+      data: { sourceId: sid, externalId: "jp1", title: "jp story", raw: {} },
+    });
+    // Analyzed as US (the model name-dropped a US company) — the JAPAN source tag should win after retag.
+    await upsertSignalAnalysis({ ...analysis(signal.id, 50), region: "US" });
+    expect((await getNewsItem(signal.id))!.region).toBe("US");
+
+    const updated = await retagAnalysisRegionsToSource();
+    expect(updated).toBeGreaterThanOrEqual(1);
+    expect((await getNewsItem(signal.id))!.region).toBe("JAPAN");
+
+    await prisma.source.deleteMany({ where: { key: jpKey } }).catch(() => {}); // cascades
   });
 
   it("upsertModelCard enriches (idempotently) a model listed for enrichment", async () => {

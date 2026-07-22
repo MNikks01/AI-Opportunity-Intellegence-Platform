@@ -66,11 +66,13 @@ export function buildAnalysisInput(
   gate: ReturnType<typeof classifyByRules>,
   body: string,
 ): SignalAnalysisInput {
-  // Prefer the model's region; fall back to the gate hint, then the source's default, then OTHER.
+  // Region priority: a source's explicit region tag is authoritative — a Japan/China/Korea-focused feed
+  // is regional coverage regardless of which global company a given story name-drops, and the model
+  // otherwise over-assigns US/OTHER (leaving the map US-only). For untagged/global feeds (sourceRegion
+  // null), use the model's assessment, then the rules-gate hint, then OTHER.
   const region =
-    content.region !== "OTHER"
-      ? content.region
-      : (gate.regionHint ?? signal.sourceRegion ?? "OTHER");
+    signal.sourceRegion ??
+    (content.region !== "OTHER" ? content.region : (gate.regionHint ?? "OTHER"));
 
   return {
     signalId: signal.id,

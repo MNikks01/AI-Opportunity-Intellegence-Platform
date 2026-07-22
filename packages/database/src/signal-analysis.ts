@@ -161,3 +161,17 @@ export async function upsertSignalAnalysis(input: SignalAnalysisInput): Promise<
 export async function countAnalyzedSignals(): Promise<number> {
   return prisma.signalAnalysis.count();
 }
+
+/**
+ * Realign each analysis's region to its source's region tag, for region-tagged sources (regional feeds).
+ * Cheap and idempotent — no LLM — so historical rows analyzed before the source-region-authoritative
+ * rule land in the right region bucket on the map. Returns the number of rows updated.
+ */
+export async function retagAnalysisRegionsToSource(): Promise<number> {
+  return prisma.$executeRaw`
+    UPDATE "SignalAnalysis" a
+    SET region = s.region
+    FROM "Signal" sig
+    JOIN "Source" s ON s.id = sig."sourceId"
+    WHERE a."signalId" = sig.id AND s.region IS NOT NULL AND a.region <> s.region`;
+}
