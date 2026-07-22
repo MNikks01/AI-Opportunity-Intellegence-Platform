@@ -277,12 +277,16 @@ export const RSS_FEEDS: RssFeed[] = [
     aiFilter: true,
     region: "EUROPE",
   },
+  // Japan via Google News RSS (news.google.com/rss) — Google's OFFICIAL syndication endpoint, built for
+  // feed readers, so it serves the GitHub-Actions runner where publisher feeds (The Bridge, Japan Times,
+  // Nikkei) 403 the datacenter IP. The query is AI+Japan-scoped, so aiFilter is off (the query is the
+  // filter) and every item is Japan-tagged. We store only headline metadata + a link back to the source.
   {
-    id: "the-bridge-jp",
-    name: "The Bridge (Japan)",
-    category: "vc",
-    url: "https://thebridge.jp/en/feed",
-    aiFilter: true,
+    id: "gnews-japan-ai",
+    name: "Google News · Japan AI",
+    category: "news",
+    url: "https://news.google.com/rss/search?q=(AI%20OR%20%22artificial%20intelligence%22)%20Japan%20when:14d&hl=en-US&gl=US&ceid=US:en",
+    aiFilter: false,
     region: "JAPAN",
   },
   // Korea + Singapore (English, verified live through the connector 2026-07-22). Broad publishers →
