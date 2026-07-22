@@ -1,5 +1,13 @@
 # @aioi/scheduler
 
+## 0.9.2
+
+### Patch Changes
+
+- Updated dependencies [bb04178]
+- Updated dependencies [7ab29c9]
+  - @aioi/ingestion-service@0.11.0
+
 ## 0.9.1
 
 ### Patch Changes
