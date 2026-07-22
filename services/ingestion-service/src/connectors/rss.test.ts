@@ -91,9 +91,9 @@ describe("rss connector", () => {
     expect(ids.has("meta-engineering")).toBe(true);
   });
 
-  it("covers non-US regions (China, India, Europe, Japan) so the map isn't US-only", () => {
+  it("covers the primary + secondary tech regions so the map isn't US-only", () => {
     const regions = new Set(RSS_FEEDS.map((f) => f.region).filter(Boolean));
-    for (const r of ["CHINA", "INDIA", "EUROPE", "JAPAN"] as const) {
+    for (const r of ["CHINA", "INDIA", "EUROPE", "JAPAN", "SOUTH_KOREA", "SINGAPORE"] as const) {
       expect(regions.has(r)).toBe(true);
     }
   });
