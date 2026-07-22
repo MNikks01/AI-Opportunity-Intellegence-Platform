@@ -99,6 +99,7 @@ export {
   findAnalysisByContentHash,
   upsertSignalAnalysis,
   countAnalyzedSignals,
+  retagAnalysisRegionsToSource,
   type SignalForAnalysis,
   type CachedAnalysis,
   type SignalAnalysisInput,

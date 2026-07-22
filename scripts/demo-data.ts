@@ -43,6 +43,7 @@ import {
   evaluateEntityAlertsAllOrgs,
   getOrgIntegration,
   recordFailedIngestionRun,
+  retagAnalysisRegionsToSource,
 } from "../packages/database/src/index";
 
 /**
@@ -83,6 +84,9 @@ async function main() {
   // Per-article analysis (M4) — this is what fills the AI/tech News feed, region map, and category
   // filters (SignalAnalysis rows). Cost-capped; the relevance gate + content-hash cache limit spend.
   console.log("analyzing signals…", await analyzeSignals({ limit: 200, budget: 60 }));
+  // Realign historical analyses to their source's region tag (cheap, no LLM) so regional feeds
+  // (Japan/Korea/etc.) land in the right bucket on the map even if analyzed before the retag rule.
+  console.log("retagging regions…", await retagAnalysisRegionsToSource());
   // Model-card enrichment (M9) — license/params/runtime detail for the model tracker, from Hugging Face.
   console.log("model cards…", await enrichModelCards(50));
   console.log(
