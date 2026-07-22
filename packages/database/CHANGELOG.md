@@ -1,5 +1,22 @@
 # @aioi/database
 
+## 0.27.2
+
+### Patch Changes
+
+- 4ccb69a: Fix regional coverage (Japan and other region-tagged feeds showing 0 on the map). A source's explicit
+  region tag is now authoritative in `buildAnalysisInput` — a Japan/Korea/China-focused feed is regional
+  coverage regardless of which global company a given story name-drops, where before the model over-assigned
+  US/OTHER and the source tag never won. Adds `retagAnalysisRegionsToSource` (cheap, no LLM) to realign
+  historical analyses to their source region, wired into the refresh pipeline so existing rows re-bucket on
+  the next run. Untagged/global feeds still use the model's region.
+- d62fbc2: Fix empty category taxonomy in production. The refresh pipeline (`scripts/demo-data.ts`) never seeded the
+  Category table, so `/api/v1/categories` returned `[]`, news items had no category tags, and the feed's
+  category filter was non-functional. The pipeline now calls `seedCategories()` (idempotent) before
+  analysis, and `backfillSignalCategoriesFromPayload()` links categories for signals analyzed before the
+  taxonomy existed (from their stored analysis payload). Verified: 18 categories seeded, signal category
+  links created.
+
 ## 0.27.1
 
 ### Patch Changes
