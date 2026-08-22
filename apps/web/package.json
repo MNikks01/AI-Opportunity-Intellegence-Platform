@@ -19,17 +19,17 @@
     "@aioi/shared": "workspace:*",
     "@aioi/ui": "workspace:*",
     "@aioi/validation": "workspace:*",
-    "@clerk/nextjs": "^7.5.17",
-    "next": "^16.2.10",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "stripe": "^22.3.1"
+    "@clerk/nextjs": "^7.7.8",
+    "next": "^16.3.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "stripe": "^22.5.0"
   },
   "devDependencies": {
     "@aioi/eslint-config": "workspace:*",
     "@aioi/tsconfig": "workspace:*",
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "typescript": "^6.0.3"
   }
 }
