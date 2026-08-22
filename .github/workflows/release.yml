@@ -40,7 +40,7 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
       - name: Create Version Packages PR
-        uses: changesets/action@v1
+        uses: changesets/action@v2
         with:
           version: pnpm version-packages
           commit: "chore(release): version packages"
