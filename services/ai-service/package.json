@@ -22,7 +22,7 @@
     "@aioi/logger": "workspace:*",
     "@aioi/shared": "workspace:*",
     "@aioi/validation": "workspace:*",
-    "zod": "^4.4.3"
+    "zod": "^4.6.5"
   },
   "devDependencies": {
     "@aioi/eslint-config": "workspace:*",
